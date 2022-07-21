@@ -1,9 +1,9 @@
 import { formatTimeToStr } from '@/utils/date'
 import { getDict } from '@/utils/dictionary'
 
-export const formatBoolean = (bool) => {
+export const formatBoolean = (bool, yesTitle = 'Yes', noTitle = 'No') => {
   if (bool !== null) {
-    return bool ? '是' : '否'
+    return bool ? yesTitle : noTitle
   } else {
     return ''
   }
