@@ -30,7 +30,6 @@
         row-key="ID"
         @selection-change="handleSelectionChange"
       >
-        <template #empty>Không có dữ liệu</template>
         <el-table-column type="selection" width="55" />
         <el-table-column align="left" label="Tên thể loại" prop="name" width="300" />
         <el-table-column align="left" label="Mã thể loại" prop="code" width="120" />

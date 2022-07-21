@@ -17,7 +17,6 @@
         row-key="ID"
         @selection-change="handleSelectionChange"
       >
-        <template #empty>Không có dữ liệu</template>
         <el-table-column type="selection" width="55" />
         <el-table-column align="left" label="Tên" prop="name" width="250" />
         <el-table-column align="left" label="Đường dẫn" prop="url" width="300" />

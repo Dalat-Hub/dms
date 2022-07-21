@@ -30,7 +30,6 @@
         row-key="ID"
         @selection-change="handleSelectionChange"
       >
-        <template #empty>Không có dữ liệu</template>
         <el-table-column type="selection" width="55" />
         <el-table-column align="left" label="Số hiệu" prop="signText" width="300" />
         <el-table-column align="left" label="Ngày ban hành" width="250">

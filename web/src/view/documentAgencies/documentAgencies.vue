@@ -36,7 +36,6 @@
         row-key="ID"
         @selection-change="handleSelectionChange"
       >
-        <template #empty>Chưa có phòng ban nào</template>
         <el-table-column type="selection" width="55" />
         <el-table-column align="left" label="Tên phòng ban" prop="name" width="300" />
         <el-table-column align="left" label="Mã phòng" prop="code" width="120" />

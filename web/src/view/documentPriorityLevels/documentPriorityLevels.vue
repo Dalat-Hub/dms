@@ -30,7 +30,6 @@
         row-key="ID"
         @selection-change="handleSelectionChange"
       >
-        <template #empty>Không có dữ liệu</template>
         <el-table-column type="selection" width="55" />
         <el-table-column align="left" label="Mức cấp độ" prop="level" width="250" />
         <el-table-column align="left" label="Tên cấp độ" prop="name" width="250" />
