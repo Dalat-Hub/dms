@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="gva-form-box">
-      <el-form ref="elFormRef" :model="formData" label-position="right" :rules="rule" label-width="80px">
+      <el-form ref="elFormRef" :model="formData" label-position="right" :rules="rule" label-width="120px">
         <el-form-item label="name字段:" prop="name">
           <el-input v-model="formData.name" :clearable="true" placeholder="请输入" />
         </el-form-item>
@@ -51,7 +51,7 @@ const formData = ref({
   count: 0,
   level: '',
 })
-// 验证规则
+// Validation rules
 const rule = reactive({
 })
 
@@ -91,13 +91,13 @@ const save = async() => {
         if (res.code === 0) {
           ElMessage({
             type: 'success',
-            message: '创建/更改成功'
+            message: 'Thực hiện thao tác thành công'
           })
         }
       })
 }
 
-// 返回按钮
+// Back button
 const back = () => {
   router.go(-1)
 }
