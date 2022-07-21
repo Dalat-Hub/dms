@@ -8,17 +8,17 @@ export const formatBoolean = (bool) => {
     return ''
   }
 }
-export const formatDate = (time) => {
+export const formatDate = (time, format = 'dd-MM-yyyy hh:mm:ss') => {
   if (time !== null && time !== '') {
     var date = new Date(time)
-    return formatTimeToStr(date, 'yyyy-MM-dd hh:mm:ss')
+    return formatTimeToStr(date, format)
   } else {
     return ''
   }
 }
 
 export const filterDict = (value, options) => {
-  const rowLabel = options && options.filter(item => item.value === value)
+  const rowLabel = options && options.filter((item) => item.value === value)
   return rowLabel && rowLabel[0] && rowLabel[0].label
 }
 
