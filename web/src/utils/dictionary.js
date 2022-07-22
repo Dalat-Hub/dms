@@ -1,5 +1,5 @@
 import { useDictionaryStore } from '@/pinia/modules/dictionary'
-//  获取字典方法 使用示例 getDict('sex').then(res)  或者 async函数下 const res = await getDict('sex')
+// Get dictionary method using example getDict('sex').then(res) or const res = await getDict('sex') under async function
 export const getDict = async(type) => {
   const dictionaryStore = useDictionaryStore()
   await dictionaryStore.getDictionary(type)
