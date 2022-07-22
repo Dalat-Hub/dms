@@ -39,9 +39,11 @@
         <el-table-column type="selection" width="55" />
         <el-table-column align="left" label="Tên phòng ban" prop="name" width="300" />
         <el-table-column align="left" label="Mã phòng" prop="code" width="120" />
+        <el-table-column align="left" label="Cấp" width="250">
+          <template #default="scope">{{ agencyLevels.find(f => f.value == scope.row.level)?.label }}</template>
+        </el-table-column>
         <el-table-column align="left" label="Số văn bản" prop="count" width="120" />
-        <el-table-column align="left" label="Cấp" prop="level" width="120" />
-        <el-table-column align="left" label="Thời gian tạo" width="250">
+        <el-table-column align="left" label="Thời gian tạo" width="180">
           <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
         </el-table-column>
         <el-table-column align="left" label="Hành động">
@@ -80,7 +82,7 @@
         </el-form-item>
         <el-form-item label="Cấp độ:" prop="level">
           <el-select v-model="formData.level" placeholder="Chọn cấp độ" :clearable="true">
-            <el-option v-for="item in agencyLevels" :key="item.key" :label="item.label" :value="item.key" />
+            <el-option v-for="item in agencyLevels" :key="item.value" :label="item.label" :value="item.value" />
           </el-select>
         </el-form-item>
       </el-form>
@@ -114,6 +116,7 @@ import {
 import { getDictFunc, formatDate, formatBoolean, filterDict } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref, reactive } from 'vue'
+import { getDict } from '@/utils/dictionary'
 
 // Auto-generated dictionary (possibly empty) and fields
 const formData = ref({
@@ -135,16 +138,7 @@ const total = ref(0)
 const pageSize = ref(10)
 const tableData = ref([])
 const searchInfo = ref({})
-const agencyLevels = ref([
-  {
-    key: 'university',
-    label: 'Đại học Đà Lạt'
-  },
-  {
-    key: 'other',
-    label: 'Khác'
-  }
-])
+const agencyLevels = ref([])
 
 // Reset
 const onReset = () => {
@@ -181,7 +175,13 @@ const getTableData = async() => {
   }
 }
 
+const getAgencyLevels = async() => {
+  const levels = await getDict('agencyLevels')
+  agencyLevels.value = levels
+}
+
 getTableData()
+getAgencyLevels()
 
 // ============== end of form control section ===============
 
