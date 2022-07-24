@@ -12,7 +12,39 @@ export const createDocuments = (data) => {
   return service({
     url: '/documents/createDocuments',
     method: 'post',
-    data
+    data,
+  })
+}
+
+// @Tags Documents
+// @Summary create new fully document
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body model.Documents true "create new fully document"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
+// @Router /documents/createFullDocuments [post]
+export const createFullDocument = (data) => {
+  return service({
+    url: '/documents/createFullDocuments',
+    method: 'post',
+    data,
+  })
+}
+
+// @Tags Documents
+// @Summary create new draft document
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body model.Documents true "create new draft document"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
+// @Router /documents/createDraftDocuments [post]
+export const createDraftDocument = (data) => {
+  return service({
+    url: '/documents/createDraftDocuments',
+    method: 'post',
+    data,
   })
 }
 
@@ -28,7 +60,7 @@ export const deleteDocuments = (data) => {
   return service({
     url: '/documents/deleteDocuments',
     method: 'delete',
-    data
+    data,
   })
 }
 
@@ -44,7 +76,7 @@ export const deleteDocumentsByIds = (data) => {
   return service({
     url: '/documents/deleteDocumentsByIds',
     method: 'delete',
-    data
+    data,
   })
 }
 
@@ -60,7 +92,7 @@ export const updateDocuments = (data) => {
   return service({
     url: '/documents/updateDocuments',
     method: 'put',
-    data
+    data,
   })
 }
 
@@ -76,7 +108,7 @@ export const findDocuments = (params) => {
   return service({
     url: '/documents/findDocuments',
     method: 'get',
-    params
+    params,
   })
 }
 
@@ -92,6 +124,6 @@ export const getDocumentsList = (params) => {
   return service({
     url: '/documents/getDocumentsList',
     method: 'get',
-    params
+    params,
   })
 }
