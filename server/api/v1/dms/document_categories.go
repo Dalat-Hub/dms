@@ -35,11 +35,11 @@ func (documentCategoriesApi *DocumentCategoriesApi) CreateDocumentCategories(c *
 		response.FailWithMessage("provide valid category", c)
 	}
 
-	if err := documentCategoriesService.CreateDocumentCategories(documentCategories); err != nil {
+	if err := documentCategoriesService.CreateDocumentCategories(&documentCategories); err != nil {
 		global.GVA_LOG.Error("fail to create new category", zap.Error(err))
 		response.FailWithMessage("fail to create new category", c)
 	} else {
-		response.OkWithMessage("create new category successfully", c)
+		response.OkWithData(gin.H{"category": documentCategories}, c)
 	}
 }
 

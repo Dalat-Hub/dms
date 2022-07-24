@@ -11,7 +11,7 @@ type DocumentCategoriesService struct {
 }
 
 // CreateDocumentCategories create new category
-func (documentCategoriesService *DocumentCategoriesService) CreateDocumentCategories(documentCategories dms.DocumentCategories) (err error) {
+func (documentCategoriesService *DocumentCategoriesService) CreateDocumentCategories(documentCategories *dms.DocumentCategories) (err error) {
 	err = global.GVA_DB.Create(&documentCategories).Error
 	return err
 }
