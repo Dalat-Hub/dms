@@ -35,11 +35,11 @@ func (documentFieldsApi *DocumentFieldsApi) CreateDocumentFields(c *gin.Context)
 		response.FailWithMessage("provide valid data", c)
 	}
 
-	if err := documentFieldsService.CreateDocumentFields(documentFields); err != nil {
+	if err := documentFieldsService.CreateDocumentFields(&documentFields); err != nil {
 		global.GVA_LOG.Error("fail to create new field", zap.Error(err))
 		response.FailWithMessage("fail to create new field", c)
 	} else {
-		response.OkWithMessage("success", c)
+		response.OkWithData(gin.H{"field": documentFields}, c)
 	}
 }
 

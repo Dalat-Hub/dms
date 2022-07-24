@@ -11,7 +11,7 @@ type DocumentFieldsService struct {
 }
 
 // CreateDocumentFields create new field
-func (documentFieldsService *DocumentFieldsService) CreateDocumentFields(documentFields dms.DocumentFields) (err error) {
+func (documentFieldsService *DocumentFieldsService) CreateDocumentFields(documentFields *dms.DocumentFields) (err error) {
 	err = global.GVA_DB.Create(&documentFields).Error
 	return err
 }
