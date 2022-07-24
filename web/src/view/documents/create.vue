@@ -506,12 +506,14 @@ export default {
 
 <script setup>
 import { ref } from 'vue'
+import { ElMessage } from 'element-plus'
+
 import { useUserStore } from '@/pinia/modules/user'
 import { getDict } from '../../utils/dictionary'
-import { getDocumentAgenciesList } from '../../api/documentAgencies'
-import { getDocumentCategoriesList } from '../../api/documentCategories'
-import { getDocumentFieldsList } from '../../api/documentFields'
-import { getDocumentsList } from '../../api/documents'
+import { createDocumentAgencies, getDocumentAgenciesList } from '../../api/documentAgencies'
+import { createDocumentCategories, getDocumentCategoriesList } from '../../api/documentCategories'
+import { createDocumentFields, getDocumentFieldsList } from '../../api/documentFields'
+import { createDraftDocument, createFullDocument, getDocumentsList } from '../../api/documents'
 import { getUserList } from '../../api/user'
 
 const userStore = useUserStore()
@@ -574,7 +576,7 @@ const fieldsOptions = ref([])
 const categoryOptions = ref([])
 const agencyLevelOptions = ref([])
 const documentFileList = ref([])
-const path = ref([])
+const path = import.meta.env.VITE_BASE_API
 
 // ================= Prepare data section =================
 
@@ -697,20 +699,76 @@ const closeDocumentDialog = () => {
 
 // ================= End of reactive section =================
 
-const enterAgencyDialog = () => {
-  console.log(agencyFormData.value)
+// ================= Business section =================
+
+const enterAgencyDialog = async() => {
+  const res = await createDocumentAgencies(agencyFormData.value)
+
+  if (res.code === 0) {
+    ElMessage({
+      type: 'success',
+      message: 'Tạo phòng ban thành công'
+    })
+
+    agencyFormData.value.code = ''
+    agencyFormData.value.name = ''
+    agencyFormData.value.level = null
+
+    agencyOptions.value = [...agencyOptions.value, res.data.agency]
+    formData.value.agency = res.data.agency.ID
+
+    closeAgencyDialog()
+  } else {
+    ElMessage({
+      type: 'error',
+      message: 'Có lỗi diễn ra: ' + res.message
+    })
+  }
 }
 
-const enterCategoryDialog = () => {
-  console.log(categoryFormData.value)
+const enterCategoryDialog = async() => {
+  const res = await createDocumentCategories(categoryFormData.value)
+
+  if (res.code === 0) {
+    ElMessage({
+      type: 'success',
+      message: 'Tạo thể loại thành công'
+    })
+
+    categoryFormData.value.code = ''
+    categoryFormData.value.name = ''
+
+    closeCategoryDialog()
+  } else {
+    ElMessage({
+      type: 'error',
+      message: 'Có lỗi diễn ra: ' + res.message
+    })
+  }
 }
 
-const enterFieldDialog = () => {
-  console.log(fieldFormData.value)
+const enterFieldDialog = async() => {
+  const res = await createDocumentFields(fieldFormData.value)
+
+  if (res.code === 0) {
+    ElMessage({
+      type: 'success',
+      message: 'Tạo lĩnh vực thành công'
+    })
+
+    fieldFormData.value.name = ''
+
+    closeFieldDialog()
+  } else {
+    ElMessage({
+      type: 'error',
+      message: 'Có lỗi diễn ra: ' + res.message
+    })
+  }
 }
 
-const enterDocumentDialog = () => {
-  console.log(documentFormData.value)
+const enterDocumentDialog = async() => {
+  const response = await createDraftDocument(documentFormData.value)
 }
 
 const onBeforeUpload = () => {
@@ -721,20 +779,109 @@ const onSelectNewFile = () => {
 
 }
 
-const onUploadError = () => {
-
+const onUploadError = (error) => {
+  ElMessage({
+    type: 'error',
+    message: 'Lỗi xảy ra trong quá trình tải lên tập tin! ' + error,
+  })
 }
 
 const onRemoveFile = () => {
 
 }
 
-const onUploadSuccess = () => {
+const onUploadSuccess = (response, uploadFile, uploadFiles) => {
+  const data = response.data
 
+  submitForm({
+    name: data.file.name || '',
+    key: data.file.key || '',
+    url: data.file.url || '',
+    tag: data.file.tag || '',
+    size: uploadFile.size || '',
+    order: 0,
+    path: data.file.url || '',
+  })
 }
 
-const submitForm = () => {
+const submitForm = async(fileInfo) => {
+  const signNumber = formData.value.signNumber < 10 ? `0${formData.value.signNumber}` : formData.value.signNumber.toString()
 
+  const documentData = {
+    title: formData.value.title,
+    expert: formData.value.expert,
+    content: formData.value.content,
+    dateIssued: formData.value.date_issued,
+    effectDate: formData.value.date_effected,
+    stillInEffect: true,
+    expirationDate: formData.value.date_expiration,
+    signNumber: parseInt(formData.value.signNumber),
+    signYear: parseInt(formData.value.signYear),
+    signCategory: formData.value.categoryReadonly,
+    signAgency: formData.value.agencyReadonly,
+    signText: `${signNumber}/${formData.value.signYear}/${formData.value.categoryReadonly}-${formData.value.agencyReadonly}`,
+    categoryId: formData.value.category,
+    agencyId: formData.value.agency,
+    createdBy: userStore.userInfo.ID || formData.value.createdBy,
+    beResponsibleBy: formData.value.beResponsibleBy,
+    status: formData.value.status,
+    priorityId: formData.value.priorityLevel,
+    type: 'document',
+    parent_id: 0,
+    current_id: 0,
+    fields: [],
+    signers: [],
+    documentBaseOns: [],
+    documentReferences: [],
+    documentUsersRelated: [],
+    documentAgenciesRelated: [],
+    fileInfo: null
+  }
+
+  documentData.fields = formData.value.fields
+  documentData.signers = formData.value.signers
+  documentData.documentBaseOns = formData.value.baseDocuments
+  documentData.documentReferences = formData.value.relatedDocuments
+  documentData.documentUsersRelated = formData.value.relatedUsers
+  documentData.documentAgenciesRelated = formData.value.relatedAgencies
+
+  if (fileInfo) {
+    documentData.fileInfo = {
+      name: fileInfo?.name || '',
+      key: fileInfo?.key || '',
+      url: fileInfo?.url || '',
+      tag: fileInfo?.tag || '',
+      size: fileInfo?.size || 0,
+      order: 0,
+      path: fileInfo?.url || '',
+    }
+  }
+
+  console.log(documentData)
+
+  const documentResponse = await createFullDocument(documentData)
+
+  let isSuccess = true
+  let errorMessage = ''
+
+  if (documentResponse.code !== 0) {
+    isSuccess = false
+    errorMessage = documentResponse.msg
+  }
+
+  if (isSuccess) {
+    ElMessage({
+      type: 'success',
+      message: 'Tạo văn bản thành công',
+    })
+  } else {
+    ElMessage({
+      type: 'error',
+      message: errorMessage,
+    })
+  }
 }
+
+// ================= End of business section =================
 
 </script>
