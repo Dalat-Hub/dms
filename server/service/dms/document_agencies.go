@@ -11,7 +11,7 @@ type DocumentAgenciesService struct {
 }
 
 // CreateDocumentAgencies create agency
-func (documentAgenciesService *DocumentAgenciesService) CreateDocumentAgencies(documentAgencies dms.DocumentAgencies) (err error) {
+func (documentAgenciesService *DocumentAgenciesService) CreateDocumentAgencies(documentAgencies *dms.DocumentAgencies) (err error) {
 	err = global.GVA_DB.Create(&documentAgencies).Error
 	return err
 }

@@ -35,11 +35,11 @@ func (documentAgenciesApi *DocumentAgenciesApi) CreateDocumentAgencies(c *gin.Co
 		response.FailWithMessage("fail to create new agency", c)
 	}
 
-	if err = documentAgenciesService.CreateDocumentAgencies(documentAgencies); err != nil {
+	if err = documentAgenciesService.CreateDocumentAgencies(&documentAgencies); err != nil {
 		global.GVA_LOG.Error("fail to create new agency!", zap.Error(err))
 		response.FailWithMessage("fail to create new agency", c)
 	} else {
-		response.OkWithMessage("create new agency successfully", c)
+		response.OkWithData(gin.H{"agency": documentAgencies}, c)
 	}
 }
 
