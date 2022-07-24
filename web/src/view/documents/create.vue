@@ -716,6 +716,7 @@ const enterAgencyDialog = async() => {
 
     agencyOptions.value = [...agencyOptions.value, res.data.agency]
     formData.value.agency = res.data.agency.ID
+    formData.value.agencyReadonly = res.data.agency.code
 
     closeAgencyDialog()
   } else {
@@ -737,6 +738,10 @@ const enterCategoryDialog = async() => {
 
     categoryFormData.value.code = ''
     categoryFormData.value.name = ''
+
+    categoryOptions.value = [...categoryOptions.value, res.data.category]
+    formData.value.category = res.data.category.ID
+    formData.value.categoryReadonly = res.data.category.code
 
     closeCategoryDialog()
   } else {
