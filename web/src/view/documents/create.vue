@@ -38,7 +38,7 @@
                       </el-col>
                       <el-col class="el-col-6 el-col-lg-4">
                         <el-form-item label="">
-                          <el-button size="large" style="width: 100%" type="success"> Thêm Nhanh</el-button>
+                          <el-button size="large" style="width: 100%" type="success" @click="openAgencyDialog"> Thêm Nhanh</el-button>
                         </el-form-item>
                       </el-col>
                     </el-row>
@@ -408,6 +408,28 @@
 
     </el-form>
 
+    <el-dialog v-model="agencyDialogFormVisible" :before-close="closeAgencyDialog" title="Thêm phòng ban nhanh">
+      <el-form ref="elFormRef" :model="agencyFormData" label-position="right" label-width="120px">
+        <el-form-item label="Tên phòng ban:">
+          <el-input v-model="agencyFormData.name" :clearable="true" placeholder="Tên phòng ban" />
+        </el-form-item>
+        <el-form-item label="Mã phòng ban:">
+          <el-input v-model="agencyFormData.code" :clearable="true" placeholder="Mã phòng ban" />
+        </el-form-item>
+        <el-form-item label="Cấp độ:">
+          <el-select v-model="agencyFormData.level" placeholder="Chọn cấp độ" :clearable="true">
+            <el-option v-for="item in agencyLevelOptions" :key="item.value" :label="item.label" :value="item.value" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button size="small" @click="closeAgencyDialog">Đóng</el-button>
+          <el-button size="small" type="primary" @click="enterAgencyDialog">Xác nhận</el-button>
+        </div>
+      </template>
+    </el-dialog>
+
     <el-dialog
       v-model="quickDocumentDialogFormVisible"
       :before-close="closeQuickDocumentDialogForm"
@@ -489,6 +511,13 @@ const formData = ref({
   signers: [],
 })
 
+const agencyDialogFormVisible = ref(false)
+const agencyFormData = ref({
+  name: '',
+  code: '',
+  level: null
+})
+
 const quickDocumentFormData = ref({
   title: '',
   relatedUsers: []
@@ -501,6 +530,7 @@ const usersOptions = ref([])
 const documentsOptions = ref([])
 const fieldsOptions = ref([])
 const categoryOptions = ref([])
+const agencyLevelOptions = ref([])
 const documentFileList = ref([])
 const quickDocumentDialogFormVisible = ref(false)
 const path = ref([])
@@ -522,6 +552,11 @@ const loadAgencyOptions = async() => {
   if (table.code === 0) {
     agencyOptions.value = table.data.list
   }
+}
+
+const loadAgencyLevelOptions = async() => {
+  const data = await getDict('agencyLevels')
+  agencyLevelOptions.value = data
 }
 
 const loadCategoryOptions = async() => {
@@ -554,6 +589,7 @@ const loadUserOptions = async() => {
 
 loadStatusOptions()
 loadAgencyOptions()
+loadAgencyLevelOptions()
 loadCategoryOptions()
 loadFieldOptions()
 loadPriorityOptions()
@@ -586,7 +622,19 @@ const handleOnIssuedDateChange = (date) => {
   formData.value.date_effected = new Date(yy, mm, dd)
 }
 
+const openAgencyDialog = () => {
+  agencyDialogFormVisible.value = true
+}
+
+const closeAgencyDialog = () => {
+  agencyDialogFormVisible.value = false
+}
+
 // ================= End of reactive section =================
+
+const enterAgencyDialog = () => {
+  console.log(agencyFormData.value)
+}
 
 const openQuickDocumentDialogForm = () => {
 
