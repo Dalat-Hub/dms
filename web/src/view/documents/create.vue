@@ -212,7 +212,7 @@
                             size="large"
                             style="width: 100%"
                             type="success"
-                            @click="openQuickDocumentDialogForm"
+                            @click="openDocumentDialogForm"
                           > Thêm Nhanh
                           </el-button>
                         </el-form-item>
@@ -245,7 +245,7 @@
                             size="large"
                             style="width: 100%;"
                             type="success"
-                            @click="openQuickDocumentDialogForm"
+                            @click="openDocumentDialogForm"
                           > Thêm Nhanh
                           </el-button>
                         </el-form-item>
@@ -462,17 +462,17 @@
     </el-dialog>
 
     <el-dialog
-      v-model="quickDocumentDialogFormVisible"
-      :before-close="closeQuickDocumentDialogForm"
+      v-model="documentDialogFormVisible"
+      :before-close="closeDocumentDialog"
       title="Thêm nhanh văn bản"
     >
-      <el-form :model="quickDocumentFormData" label-position="right" label-width="80px">
+      <el-form :model="documentFormData" label-position="right" label-width="120px">
         <el-form-item label="Tiêu đề">
-          <el-input v-model="quickDocumentFormData.title" clearable placeholder="Tiêu đề văn bản" />
+          <el-input v-model="documentFormData.title" clearable placeholder="Tiêu đề văn bản" />
         </el-form-item>
-        <el-form-item label="Liên quan" prop="relatedUsers">
+        <el-form-item label="Liên quan">
           <el-select
-            v-model="quickDocumentFormData.relatedUsers"
+            v-model="documentFormData.relatedUsers"
             :style="{ width: '100%' }"
             clearable
             filterable
@@ -482,7 +482,6 @@
             <el-option
               v-for="item in usersOptions"
               :key="item.ID"
-              :disabled="item.disabled"
               :label="item.nickName"
               :value="item.ID"
             />
@@ -491,8 +490,8 @@
       </el-form>
       <template #footer>
         <div class="dialog-footer">
-          <el-button size="small" @click="closeQuickDocumentDialogForm">Đóng</el-button>
-          <el-button size="small" type="primary" @click="createNewDraftDocument">Thêm nhanh</el-button>
+          <el-button size="small" @click="closeDocumentDialog">Đóng</el-button>
+          <el-button size="small" type="primary" @click="enterDocumentDialog">Thêm nhanh</el-button>
         </div>
       </template>
     </el-dialog>
@@ -560,7 +559,8 @@ const fieldFormData = ref({
   name: ''
 })
 
-const quickDocumentFormData = ref({
+const documentDialogFormVisible = ref(false)
+const documentFormData = ref({
   title: '',
   relatedUsers: []
 })
@@ -574,7 +574,6 @@ const fieldsOptions = ref([])
 const categoryOptions = ref([])
 const agencyLevelOptions = ref([])
 const documentFileList = ref([])
-const quickDocumentDialogFormVisible = ref(false)
 const path = ref([])
 
 // ================= Prepare data section =================
@@ -688,6 +687,14 @@ const closeFieldDialog = () => {
   fieldDialogFormVisible.value = false
 }
 
+const openDocumentDialogForm = () => {
+  documentDialogFormVisible.value = true
+}
+
+const closeDocumentDialog = () => {
+  documentDialogFormVisible.value = false
+}
+
 // ================= End of reactive section =================
 
 const enterAgencyDialog = () => {
@@ -702,8 +709,8 @@ const enterFieldDialog = () => {
   console.log(fieldFormData.value)
 }
 
-const openQuickDocumentDialogForm = () => {
-
+const enterDocumentDialog = () => {
+  console.log(documentFormData.value)
 }
 
 const onBeforeUpload = () => {
@@ -730,11 +737,4 @@ const submitForm = () => {
 
 }
 
-const closeQuickDocumentDialogForm = () => {
-
-}
-
-const createNewDraftDocument = () => {
-
-}
 </script>
