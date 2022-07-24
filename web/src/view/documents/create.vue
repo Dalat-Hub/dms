@@ -763,6 +763,9 @@ const enterFieldDialog = async() => {
 
     fieldFormData.value.name = ''
 
+    fieldsOptions.value = [...fieldsOptions.value, res.data.field]
+    formData.value.fields = [...formData.value.fields, res.data.field.ID]
+
     closeFieldDialog()
   } else {
     ElMessage({
