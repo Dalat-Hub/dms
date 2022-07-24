@@ -65,7 +65,7 @@
                       </el-col>
                       <el-col class="el-col-6 el-col-lg-4">
                         <el-form-item label="">
-                          <el-button size="large" style="width: 100%" type="success"> Thêm Nhanh</el-button>
+                          <el-button size="large" style="width: 100%" type="success" @click="openCategoryDialog"> Thêm Nhanh</el-button>
                         </el-form-item>
                       </el-col>
                     </el-row>
@@ -155,7 +155,7 @@
                       </el-col>
                       <el-col class="el-col-6 el-col-lg-4">
                         <el-form-item label="">
-                          <el-button size="large" style="width: 100%" type="success"> Thêm Nhanh</el-button>
+                          <el-button size="large" style="width: 100%" type="success" @click="openFieldDialog"> Thêm Nhanh</el-button>
                         </el-form-item>
                       </el-col>
                     </el-row>
@@ -430,6 +430,37 @@
       </template>
     </el-dialog>
 
+    <el-dialog v-model="categoryDialogFormVisible" :before-close="closeCategoryDialog" title="Thêm thể loại nhanh">
+      <el-form ref="elFormRef" :model="categoryFormData" label-position="right" label-width="120px">
+        <el-form-item label="Tên thể loại:" prop="name">
+          <el-input v-model="categoryFormData.name" :clearable="true" placeholder="Nhập tên thể loại" />
+        </el-form-item>
+        <el-form-item label="Mã thể loại:" prop="code">
+          <el-input v-model="categoryFormData.code" :clearable="true" placeholder="Nhập mã thể loại" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button size="small" @click="closeCategoryDialog">Đóng hộp thoại</el-button>
+          <el-button size="small" type="primary" @click="enterCategoryDialog">Xác nhận</el-button>
+        </div>
+      </template>
+    </el-dialog>
+
+    <el-dialog v-model="fieldDialogFormVisible" :before-close="closeFieldDialog" title="Thêm nhanh lĩnh vực">
+      <el-form ref="elFormRef" :model="fieldFormData" label-position="right" label-width="120px">
+        <el-form-item label="Tên lĩnh vực:">
+          <el-input v-model="fieldFormData.name" :clearable="true" placeholder="Nhập tên lĩnh vực" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button size="small" @click="closeFieldDialog">Đóng hộp thoại</el-button>
+          <el-button size="small" type="primary" @click="enterFieldDialog">Xác nhận</el-button>
+        </div>
+      </template>
+    </el-dialog>
+
     <el-dialog
       v-model="quickDocumentDialogFormVisible"
       :before-close="closeQuickDocumentDialogForm"
@@ -516,6 +547,17 @@ const agencyFormData = ref({
   name: '',
   code: '',
   level: null
+})
+
+const categoryDialogFormVisible = ref(false)
+const categoryFormData = ref({
+  name: '',
+  code: ''
+})
+
+const fieldDialogFormVisible = ref(false)
+const fieldFormData = ref({
+  name: ''
 })
 
 const quickDocumentFormData = ref({
@@ -630,10 +672,34 @@ const closeAgencyDialog = () => {
   agencyDialogFormVisible.value = false
 }
 
+const openCategoryDialog = () => {
+  categoryDialogFormVisible.value = true
+}
+
+const closeCategoryDialog = () => {
+  categoryDialogFormVisible.value = false
+}
+
+const openFieldDialog = () => {
+  fieldDialogFormVisible.value = true
+}
+
+const closeFieldDialog = () => {
+  fieldDialogFormVisible.value = false
+}
+
 // ================= End of reactive section =================
 
 const enterAgencyDialog = () => {
   console.log(agencyFormData.value)
+}
+
+const enterCategoryDialog = () => {
+  console.log(categoryFormData.value)
+}
+
+const enterFieldDialog = () => {
+  console.log(fieldFormData.value)
 }
 
 const openQuickDocumentDialogForm = () => {
