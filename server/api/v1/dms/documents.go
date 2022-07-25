@@ -70,6 +70,33 @@ func (documentsApi *DocumentsApi) CreateDraftDocument(c *gin.Context) {
 	}
 }
 
+// CreateFullDocument create new full document
+// @Tags Documents
+// @Summary create new full document
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body dmsReq.FullDocument true "create new full document"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
+// @Router /documents/createDocuments [post]
+func (documentsApi *DocumentsApi) CreateFullDocument(c *gin.Context) {
+	var full dmsReq.FullDocument
+	var err error
+
+	err = c.ShouldBindJSON(&full)
+	if err != nil {
+		global.GVA_LOG.Error("provide valid document", zap.Error(err))
+		response.FailWithMessage("provide valid document", c)
+	}
+
+	if doc, err := documentsService.CreateFullDocument(full); err != nil {
+		global.GVA_LOG.Error("fail to create new full document", zap.Error(err))
+		response.FailWithMessage("fail to create new full document", c)
+	} else {
+		response.OkWithData(gin.H{"document": doc}, c)
+	}
+}
+
 // DeleteDocuments delete document by ID
 // @Tags Documents
 // @Summary delete document by ID

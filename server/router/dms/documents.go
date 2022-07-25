@@ -17,6 +17,7 @@ func (s *DocumentsRouter) InitDocumentsRouter(Router *gin.RouterGroup) {
 	{
 		documentsRouter.POST("createDocuments", documentsApi.CreateDocuments)
 		documentsRouter.POST("createDraftDocuments", documentsApi.CreateDraftDocument)
+		documentsRouter.POST("createFullDocuments", documentsApi.CreateFullDocument)
 		documentsRouter.DELETE("deleteDocuments", documentsApi.DeleteDocuments)
 		documentsRouter.DELETE("deleteDocumentsByIds", documentsApi.DeleteDocumentsByIds)
 		documentsRouter.PUT("updateDocuments", documentsApi.UpdateDocuments)
