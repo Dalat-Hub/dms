@@ -212,7 +212,7 @@
                             size="large"
                             style="width: 100%"
                             type="success"
-                            @click="openDocumentDialogForm"
+                            @click="() => openDocumentDialogForm('base')"
                           > Thêm Nhanh
                           </el-button>
                         </el-form-item>
@@ -245,7 +245,7 @@
                             size="large"
                             style="width: 100%;"
                             type="success"
-                            @click="openDocumentDialogForm"
+                            @click="() => openDocumentDialogForm('relation')"
                           > Thêm Nhanh
                           </el-button>
                         </el-form-item>
@@ -395,7 +395,7 @@
                     </el-form-item>
 
                     <el-form-item size="large">
-                      <el-button type="primary" @click="submitForm">Tạo văn bản mới</el-button>
+                      <el-button type="primary" @click="() => submitForm(null)">Tạo văn bản mới</el-button>
                     </el-form-item>
 
                   </div>
@@ -562,6 +562,7 @@ const fieldFormData = ref({
 })
 
 const documentDialogFormVisible = ref(false)
+const documentFormType = ref('')
 const documentFormData = ref({
   title: '',
   relatedUsers: []
@@ -689,7 +690,8 @@ const closeFieldDialog = () => {
   fieldDialogFormVisible.value = false
 }
 
-const openDocumentDialogForm = () => {
+const openDocumentDialogForm = (type) => {
+  documentFormType.value = type
   documentDialogFormVisible.value = true
 }
 
@@ -777,6 +779,25 @@ const enterFieldDialog = async() => {
 
 const enterDocumentDialog = async() => {
   const response = await createDraftDocument(documentFormData.value)
+
+  if (response.code === 0) {
+    ElMessage({
+      type: 'success',
+      message: 'Thêm nhanh văn bản thành công'
+    })
+
+    documentFormData.value.title = ''
+    documentFormData.value.relatedUsers = []
+
+    documentsOptions.value = [...documentsOptions.value, response.data.document]
+    if (documentFormType.value === 'relation') {
+      formData.value.relatedDocuments = [...formData.value.relatedDocuments, response.data.document.ID]
+    } else if (documentFormType.value === 'base') {
+      formData.value.baseDocuments = [...formData.value.baseDocuments, response.data.document.ID]
+    }
+
+    closeDocumentDialog()
+  }
 }
 
 const onBeforeUpload = () => {
