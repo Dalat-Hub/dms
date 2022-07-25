@@ -16,6 +16,7 @@ func (s *DocumentsRouter) InitDocumentsRouter(Router *gin.RouterGroup) {
 	var documentsApi = v1.ApiGroupApp.DmsApiGroup.DocumentsApi
 	{
 		documentsRouter.POST("createDocuments", documentsApi.CreateDocuments)
+		documentsRouter.POST("createDraftDocuments", documentsApi.CreateDraftDocument)
 		documentsRouter.DELETE("deleteDocuments", documentsApi.DeleteDocuments)
 		documentsRouter.DELETE("deleteDocumentsByIds", documentsApi.DeleteDocumentsByIds)
 		documentsRouter.PUT("updateDocuments", documentsApi.UpdateDocuments)

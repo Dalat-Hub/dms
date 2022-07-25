@@ -35,11 +35,38 @@ func (documentsApi *DocumentsApi) CreateDocuments(c *gin.Context) {
 		response.FailWithMessage("provide valid document", c)
 	}
 
-	if err := documentsService.CreateDocuments(documents); err != nil {
+	if err = documentsService.CreateDocuments(documents); err != nil {
 		global.GVA_LOG.Error("fail to create new document", zap.Error(err))
 		response.FailWithMessage("fail to create new document", c)
 	} else {
 		response.OkWithMessage("success", c)
+	}
+}
+
+// CreateDraftDocument create new document
+// @Tags Documents
+// @Summary create new draft document
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body dmsReq.DraftDocument true "create new draft document"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
+// @Router /documents/createDocuments [post]
+func (documentsApi *DocumentsApi) CreateDraftDocument(c *gin.Context) {
+	var draft dmsReq.DraftDocument
+	var err error
+
+	err = c.ShouldBindJSON(&draft)
+	if err != nil {
+		global.GVA_LOG.Error("provide valid document", zap.Error(err))
+		response.FailWithMessage("provide valid document", c)
+	}
+
+	if doc, err := documentsService.CreateDraftDocument(draft); err != nil {
+		global.GVA_LOG.Error("fail to create new draft document", zap.Error(err))
+		response.FailWithMessage("fail to create new draft document", c)
+	} else {
+		response.OkWithData(gin.H{"document": doc}, c)
 	}
 }
 

@@ -8,6 +8,7 @@ import (
 type Documents struct {
 	global.GVA_MODEL
 	Title           string       `json:"title" form:"title" gorm:"column:title;"`
+	ShortTitle      string       `json:"shortTitle" form:"shortTitle" gorm:"column:short_title;"`
 	Expert          string       `json:"expert" form:"expert" gorm:"column:expert;"`
 	Content         string       `json:"content" form:"content" gorm:"column:content;"`
 	DateIssued      sql.NullTime `json:"dateIssued" form:"dateIssued" gorm:"column:date_issued;"`
@@ -25,13 +26,23 @@ type Documents struct {
 	BeResponsibleBy uint         `json:"beResponsibleBy" form:"beResponsibleBy" gorm:"column:be_responsible_by;size:19;"`
 	ViewCount       uint         `json:"viewCount" form:"viewCount" gorm:"column:view_count;size:19;"`
 	DownloadCount   uint         `json:"downloadCount" form:"downloadCount" gorm:"column:download_count;size:19;"`
-	Status          string       `json:"status" form:"status" gorm:"column:status;size:255;"`
-	Type            string       `json:"type" form:"type" gorm:"column:type;size:255;"`
-	PriorityId      uint         `json:"priorityId" form:"priorityId" gorm:"column:priority_id;size:19;"`
+	Status          int          `json:"status" form:"status" gorm:"column:status;"`
+	Type            int          `json:"type" form:"type" gorm:"column:type;"`
+	Priority        int          `json:"priority" form:"priority" gorm:"column:priority_id;"`
 	ParentId        uint         `json:"parentId" form:"parentId" gorm:"column:parent_id;size:10;"`
 	CurrentId       uint         `json:"currentId" form:"currentId" gorm:"column:current_id;size:10;"`
 	Path            string       `json:"path" form:"path" gorm:"column:path;"`
 }
+
+var (
+	TYPE_DOCUMENT    int = 1
+	TYPE_REVISION    int = 2
+	STATUS_DRAFT     int = 1
+	STATUS_PUBLISHED int = 2
+	STATUS_INACTIVE  int = 3
+	STATUS_TRASH     int = 4
+	PRIORITY_NORMAL  int = 1
+)
 
 func (Documents) TableName() string {
 	return "documents"
