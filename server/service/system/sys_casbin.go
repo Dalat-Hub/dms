@@ -15,7 +15,7 @@ import (
 
 //@author: [piexlmax](https://github.com/piexlmax)
 //@function: UpdateCasbin
-//@description: 更新casbin权限
+//@description: update casbin permissions
 //@param: authorityId string, casbinInfos []request.CasbinInfo
 //@return: error
 
@@ -33,14 +33,14 @@ func (casbinService *CasbinService) UpdateCasbin(AuthorityID uint, casbinInfos [
 	e := casbinService.Casbin()
 	success, _ := e.AddPolicies(rules)
 	if !success {
-		return errors.New("存在相同api,添加失败,请联系管理员")
+		return errors.New("the same api exits, the additional fails, please contact the administrator")
 	}
 	return nil
 }
 
 //@author: [piexlmax](https://github.com/piexlmax)
 //@function: UpdateCasbinApi
-//@description: API更新随动
+//@description: api updates follow
 //@param: oldPath string, newPath string, oldMethod string, newMethod string
 //@return: error
 
@@ -54,7 +54,7 @@ func (casbinService *CasbinService) UpdateCasbinApi(oldPath string, newPath stri
 
 //@author: [piexlmax](https://github.com/piexlmax)
 //@function: GetPolicyPathByAuthorityId
-//@description: 获取权限列表
+//@description: get permission list
 //@param: authorityId string
 //@return: pathMaps []request.CasbinInfo
 
@@ -73,7 +73,7 @@ func (casbinService *CasbinService) GetPolicyPathByAuthorityId(AuthorityID uint)
 
 //@author: [piexlmax](https://github.com/piexlmax)
 //@function: ClearCasbin
-//@description: 清除匹配的权限
+//@description: clear matching permissions
 //@param: v int, p ...string
 //@return: bool
 
@@ -85,7 +85,7 @@ func (casbinService *CasbinService) ClearCasbin(v int, p ...string) bool {
 
 //@author: [piexlmax](https://github.com/piexlmax)
 //@function: Casbin
-//@description: 持久化到数据库  引入自定义规则
+//@description: persist to database
 //@return: *casbin.Enforcer
 
 var (
@@ -114,7 +114,7 @@ func (casbinService *CasbinService) Casbin() *casbin.SyncedEnforcer {
 		`
 		m, err := model.NewModelFromString(text)
 		if err != nil {
-			zap.L().Error("字符串加载模型失败!", zap.Error(err))
+			zap.L().Error("load casbin rule fail!", zap.Error(err))
 			return
 		}
 		syncedEnforcer, _ = casbin.NewSyncedEnforcer(m, a)

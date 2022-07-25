@@ -5,9 +5,12 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/dms"
 	dmsReq "github.com/flipped-aurora/gin-vue-admin/server/model/dms/request"
+	sysMod "github.com/flipped-aurora/gin-vue-admin/server/model/system"
+	"github.com/flipped-aurora/gin-vue-admin/server/service/system"
 	uuid "github.com/satori/go.uuid"
 	"gopkg.in/guregu/null.v4"
 	"gorm.io/gorm"
+	"strconv"
 	"time"
 )
 
@@ -107,6 +110,11 @@ func (documentsService *DocumentsService) CreateFullDocument(full dmsReq.FullDoc
 	}
 
 	shortTitle := category.Name + " " + full.SignText
+
+	maxAuthorityId, authErr := system.AuthorityServiceApp.GetMaxId()
+	if authErr != nil {
+		return nil, authErr
+	}
 
 	err = global.GVA_DB.Transaction(func(tx *gorm.DB) error {
 		// create new document
@@ -277,6 +285,75 @@ func (documentsService *DocumentsService) CreateFullDocument(full dmsReq.FullDoc
 				return err
 			}
 		}
+
+		// Authorzing
+		// view - edit - delete - download
+		authorities := make([]sysMod.SysAuthority, 0)
+		documentIdAsString := strconv.Itoa(int(document.ID))
+
+		parentId := maxAuthorityId + 1
+		viewId := maxAuthorityId + 2
+		editId := maxAuthorityId + 3
+		deleteId := maxAuthorityId + 4
+		downloadId := maxAuthorityId + 5
+
+		authorities = append(authorities, sysMod.SysAuthority{
+			CreatedAt:     time.Time{},
+			UpdatedAt:     time.Time{},
+			DeletedAt:     nil,
+			AuthorityId:   parentId,
+			AuthorityName: "document-" + documentIdAsString,
+			ParentId:      0,
+			DefaultRouter: "",
+		})
+
+		authorities = append(authorities, sysMod.SysAuthority{
+			CreatedAt:     time.Time{},
+			UpdatedAt:     time.Time{},
+			DeletedAt:     nil,
+			AuthorityId:   viewId,
+			AuthorityName: "view-" + documentIdAsString,
+			ParentId:      parentId,
+			DefaultRouter: "",
+		})
+
+		authorities = append(authorities, sysMod.SysAuthority{
+			CreatedAt:     time.Time{},
+			UpdatedAt:     time.Time{},
+			DeletedAt:     nil,
+			AuthorityId:   editId,
+			AuthorityName: "edit-" + documentIdAsString,
+			ParentId:      parentId,
+			DefaultRouter: "",
+		})
+
+		authorities = append(authorities, sysMod.SysAuthority{
+			CreatedAt:     time.Time{},
+			UpdatedAt:     time.Time{},
+			DeletedAt:     nil,
+			AuthorityId:   deleteId,
+			AuthorityName: "delete-" + documentIdAsString,
+			ParentId:      parentId,
+			DefaultRouter: "",
+		})
+
+		authorities = append(authorities, sysMod.SysAuthority{
+			CreatedAt:     time.Time{},
+			UpdatedAt:     time.Time{},
+			DeletedAt:     nil,
+			AuthorityId:   downloadId,
+			AuthorityName: "download-" + documentIdAsString,
+			ParentId:      parentId,
+			DefaultRouter: "",
+		})
+
+		err = tx.Model(&sysMod.SysAuthority{}).Create(&authorities).Error
+		if err != nil {
+			return err
+		}
+
+		// Update casbin rule
+		viewUrl = "/api/v1/documents"
 
 		return nil
 	})
