@@ -395,7 +395,7 @@
                     </el-form-item>
 
                     <el-form-item size="large">
-                      <el-button type="primary" @click="() => submitForm(null)">Tạo văn bản mới</el-button>
+                      <el-button v-show="enableSubmitButton" type="primary" @click="submitForm">Tạo văn bản mới</el-button>
                     </el-form-item>
 
                   </div>
@@ -500,13 +500,14 @@
 
 <script>
 export default {
-  name: 'DocumentCreate'
+  name: 'DocumentCreate',
 }
 </script>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
+import { useRouter } from 'vue-router'
 
 import { useUserStore } from '@/pinia/modules/user'
 import { getDict } from '../../utils/dictionary'
@@ -516,6 +517,7 @@ import { createDocumentFields, getDocumentFieldsList } from '../../api/documentF
 import { createDraftDocument, createFullDocument, getDocumentsList } from '../../api/documents'
 import { getUserList } from '../../api/user'
 
+const router = useRouter()
 const userStore = useUserStore()
 
 const formData = ref({
@@ -578,6 +580,17 @@ const categoryOptions = ref([])
 const agencyLevelOptions = ref([])
 const documentFileList = ref([])
 const path = import.meta.env.VITE_BASE_API
+const enableSubmitButton = ref(true)
+const hasFileAttached = ref(false)
+const documentFileUpload = ref(null)
+
+// ================= Init ref =============================
+
+onMounted(() => {
+  // console.log(documentFileUpload.value)
+})
+
+// ================= End of init ref ======================
 
 // ================= Prepare data section =================
 
@@ -800,15 +813,15 @@ const enterDocumentDialog = async() => {
   }
 }
 
-const onBeforeUpload = () => {
-
-}
+const onBeforeUpload = () => { }
 
 const onSelectNewFile = () => {
-
+  hasFileAttached.value = true
 }
 
 const onUploadError = (error) => {
+  hasFileAttached.value = false
+
   ElMessage({
     type: 'error',
     message: 'Lỗi xảy ra trong quá trình tải lên tập tin! ' + error,
@@ -816,13 +829,13 @@ const onUploadError = (error) => {
 }
 
 const onRemoveFile = () => {
-
+  enableSubmitButton.value = true
 }
 
-const onUploadSuccess = (response, uploadFile, uploadFiles) => {
+const onUploadSuccess = async(response, uploadFile, uploadFiles) => {
   const data = response.data
 
-  submitForm({
+  await createNewDocument({
     name: data.file.name || '',
     key: data.file.key || '',
     url: data.file.url || '',
@@ -833,7 +846,17 @@ const onUploadSuccess = (response, uploadFile, uploadFiles) => {
   })
 }
 
-const submitForm = async(fileInfo) => {
+const submitForm = () => {
+  enableSubmitButton.value = false
+
+  if (hasFileAttached.value) {
+    documentFileUpload.value.submit()
+  } else {
+    createNewDocument(null)
+  }
+}
+
+const createNewDocument = async(fileInfo) => {
   const signNumber = formData.value.signNumber < 10 ? `0${formData.value.signNumber}` : formData.value.signNumber.toString()
 
   const documentData = {
@@ -890,6 +913,12 @@ const submitForm = async(fileInfo) => {
       type: 'success',
       message: 'Tạo văn bản thành công',
     })
+
+    setTimeout(() => {
+      router.push({
+        name: 'documents-all'
+      })
+    }, 5000)
   }
 }
 
