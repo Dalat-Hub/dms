@@ -855,9 +855,6 @@ const submitForm = async(fileInfo) => {
     beResponsibleBy: formData.value.beResponsibleBy,
     status: formData.value.status,
     priorityId: formData.value.priorityLevel,
-    type: 'document',
-    parent_id: 0,
-    current_id: 0,
     fields: [],
     signers: [],
     documentBaseOns: [],
@@ -886,27 +883,12 @@ const submitForm = async(fileInfo) => {
     }
   }
 
-  console.log(documentData)
-
   const documentResponse = await createFullDocument(documentData)
 
-  let isSuccess = true
-  let errorMessage = ''
-
-  if (documentResponse.code !== 0) {
-    isSuccess = false
-    errorMessage = documentResponse.msg
-  }
-
-  if (isSuccess) {
+  if (documentResponse.code === 0) {
     ElMessage({
       type: 'success',
       message: 'Tạo văn bản thành công',
-    })
-  } else {
-    ElMessage({
-      type: 'error',
-      message: errorMessage,
     })
   }
 }
