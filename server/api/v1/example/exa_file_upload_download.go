@@ -25,17 +25,17 @@ func (b *FileUploadAndDownloadApi) UploadFile(c *gin.Context) {
 	noSave := c.DefaultQuery("noSave", "0")
 	_, header, err := c.Request.FormFile("file")
 	if err != nil {
-		global.GVA_LOG.Error("接收文件失败!", zap.Error(err))
-		response.FailWithMessage("接收文件失败", c)
+		global.GVA_LOG.Error("fail to receive file!", zap.Error(err))
+		response.FailWithMessage("fail to receive file!", c)
 		return
 	}
 	file, err = fileUploadAndDownloadService.UploadFile(header, noSave) // 文件上传后拿到文件路径
 	if err != nil {
-		global.GVA_LOG.Error("修改数据库链接失败!", zap.Error(err))
-		response.FailWithMessage("修改数据库链接失败", c)
+		global.GVA_LOG.Error("fail to modify database link", zap.Error(err))
+		response.FailWithMessage("fail to modify database link", c)
 		return
 	}
-	response.OkWithDetailed(exampleRes.ExaFileResponse{File: file}, "上传成功", c)
+	response.OkWithDetailed(exampleRes.ExaFileResponse{File: file}, "upload successfully", c)
 }
 
 // EditFileName 编辑文件名或者备注
