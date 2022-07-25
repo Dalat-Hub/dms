@@ -17,22 +17,6 @@ export const createDocuments = (data) => {
 }
 
 // @Tags Documents
-// @Summary create new fully document
-// @Security ApiKeyAuth
-// @accept application/json
-// @Produce application/json
-// @Param data body model.Documents true "create new fully document"
-// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
-// @Router /documents/createFullDocuments [post]
-export const createFullDocument = (data) => {
-  return service({
-    url: '/documents/createFullDocuments',
-    method: 'post',
-    data,
-  })
-}
-
-// @Tags Documents
 // @Summary create new draft document
 // @Security ApiKeyAuth
 // @accept application/json
@@ -43,6 +27,22 @@ export const createFullDocument = (data) => {
 export const createDraftDocument = (data) => {
   return service({
     url: '/documents/createDraftDocuments',
+    method: 'post',
+    data,
+  })
+}
+
+// @Tags Documents
+// @Summary create new full document
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body model.Documents true "create new full document"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
+// @Router /documents/createFullDocuments [post]
+export const createFullDocument = (data) => {
+  return service({
+    url: '/documents/createFullDocuments',
     method: 'post',
     data,
   })
