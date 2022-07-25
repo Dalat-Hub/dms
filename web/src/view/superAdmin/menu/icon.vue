@@ -5,7 +5,7 @@
         <component :is="metaData.icon" />
       </el-icon>
     </span>
-    <el-select v-model="metaData.icon" style="width:100%" clearable filterable class="gva-select" placeholder="请选择">
+    <el-select v-model="metaData.icon" style="width:100%" clearable filterable class="gva-select" placeholder="Choose icon">
       <el-option
         v-for="item in options"
         :key="item.key"

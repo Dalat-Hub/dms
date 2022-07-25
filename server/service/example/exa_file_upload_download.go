@@ -17,7 +17,7 @@ import (
 //@param: file model.ExaFileUploadAndDownload
 //@return: error
 
-func (e *FileUploadAndDownloadService) Upload(file example.ExaFileUploadAndDownload) error {
+func (e *FileUploadAndDownloadService) Upload(file *example.ExaFileUploadAndDownload) error {
 	return global.GVA_DB.Create(&file).Error
 }
 
@@ -102,7 +102,7 @@ func (e *FileUploadAndDownloadService) UploadFile(header *multipart.FileHeader, 
 			Tag:  s[len(s)-1],
 			Key:  key,
 		}
-		return f, e.Upload(f)
+		return f, e.Upload(&f)
 	}
 	return
 }
