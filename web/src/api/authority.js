@@ -8,6 +8,14 @@ export const getAuthorityList = (data) => {
   })
 }
 
+export const getAuthorityInfo = (data) => {
+  return service({
+    url: '/authority/getAuthorityInfo',
+    method: 'post',
+    data
+  })
+}
+
 // @Summary 删除角色
 // @Security ApiKeyAuth
 // @accept application/json
