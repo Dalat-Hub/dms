@@ -44,8 +44,9 @@
         <el-table-column align="left" label="Ngày tạo" width="250">
           <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
         </el-table-column>
-        <el-table-column fixed="right" label="Hành động" width="120">
+        <el-table-column fixed="right" label="Hành động" width="200">
           <template #default="scope">
+            <el-button type="primary" link icon="edit" size="small" class="table-button" @click="showDocumentDetail(scope.row)">Xem</el-button>
             <el-button type="primary" link icon="edit" size="small" class="table-button" @click="updateDocumentsFunc(scope.row)">Sửa</el-button>
             <el-button type="primary" link icon="delete" size="small" @click="deleteRow(scope.row)">Xoá</el-button>
           </template>
@@ -139,6 +140,9 @@ import {
 import { getDictFunc, formatDate, formatBoolean, filterDict } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref, reactive } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 // Auto-generated dictionary (may be empty) and fields
 const formData = ref({
@@ -245,6 +249,15 @@ const deleteRow = (row) => {
     type: 'warning'
   }).then(() => {
     deleteDocumentsFunc(row)
+  })
+}
+
+const showDocumentDetail = (document) => {
+  router.push({
+    name: 'documents-detail',
+    params: {
+      document_id: document.ID
+    }
   })
 }
 

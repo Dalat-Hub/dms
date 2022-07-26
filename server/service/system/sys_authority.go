@@ -148,6 +148,7 @@ func (authorityService *AuthorityService) GetAuthorityInfoList(info request.Page
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 	db := global.GVA_DB.Model(&system.SysAuthority{})
+
 	err = db.Where("parent_id = ?", "0").Count(&total).Error
 	var authority []system.SysAuthority
 	err = db.Limit(limit).Offset(offset).Preload("DataAuthorityId").Where("parent_id = ?", "0").Find(&authority).Error
@@ -167,6 +168,15 @@ func (authorityService *AuthorityService) GetAuthorityInfoList(info request.Page
 
 func (authorityService *AuthorityService) GetAuthorityInfo(auth system.SysAuthority) (sa system.SysAuthority, err error) {
 	err = global.GVA_DB.Preload("DataAuthorityId").Where("authority_id = ?", auth.AuthorityId).First(&sa).Error
+	if err != nil {
+		return sa, err
+	}
+
+	err = authorityService.findChildrenAuthority(&sa)
+	if err != nil {
+		return sa, err
+	}
+
 	return sa, err
 }
 
