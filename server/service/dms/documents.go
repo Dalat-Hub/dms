@@ -278,6 +278,142 @@ func (documentsService *DocumentsService) CreateFullDocument(full dmsReq.FullDoc
 			}
 		}
 
+		// authorizing
+		authorities := make([]dms.DocumentRules, 0)
+
+		authorities = append(authorities, dms.DocumentRules{
+			GVA_MODEL:  global.GVA_MODEL{},
+			DocumentId: document.ID,
+			Permission: dms.PERMISSION_OWNER,
+			SubjectId:  document.CreatedBy,
+			Type:       dms.RULE_TYPE_USER,
+		})
+
+		if full.ReqRuleInfo.View == dms.RULE_VIEW_ALL {
+			authorities = append(authorities, dms.DocumentRules{
+				GVA_MODEL:  global.GVA_MODEL{},
+				DocumentId: document.ID,
+				Permission: dms.PERMISSION_VIEW,
+				SubjectId:  101,
+				Type:       dms.RULE_TYPE_GROUP,
+			})
+		} else if full.ReqRuleInfo.View == dms.RULE_VIEW_LIMIT {
+			if len(full.ReqRuleInfo.ViewUsers) > 0 {
+				for _, userId := range full.ReqRuleInfo.ViewUsers {
+					authorities = append(authorities, dms.DocumentRules{
+						GVA_MODEL:  global.GVA_MODEL{},
+						DocumentId: document.ID,
+						Permission: dms.PERMISSION_VIEW,
+						SubjectId:  userId,
+						Type:       dms.RULE_TYPE_USER,
+					})
+				}
+			}
+
+			if len(full.ReqRuleInfo.ViewRoles) > 0 {
+				for _, roleId := range full.ReqRuleInfo.ViewRoles {
+					authorities = append(authorities, dms.DocumentRules{
+						GVA_MODEL:  global.GVA_MODEL{},
+						DocumentId: document.ID,
+						Permission: dms.PERMISSION_VIEW,
+						SubjectId:  roleId,
+						Type:       dms.RULE_TYPE_GROUP,
+					})
+				}
+			}
+		}
+
+		if full.ReqRuleInfo.Download == dms.RULE_DOWNLOAD_ALL {
+			authorities = append(authorities, dms.DocumentRules{
+				GVA_MODEL:  global.GVA_MODEL{},
+				DocumentId: document.ID,
+				Permission: dms.PERMISSION_DOWNLOAD,
+				SubjectId:  102,
+				Type:       dms.RULE_TYPE_GROUP,
+			})
+		} else if full.ReqRuleInfo.Download == dms.RULE_DOWNLOAD_LIMIT {
+			if len(full.ReqRuleInfo.DownloadUsers) > 0 {
+				for _, userId := range full.ReqRuleInfo.DownloadUsers {
+					authorities = append(authorities, dms.DocumentRules{
+						GVA_MODEL:  global.GVA_MODEL{},
+						DocumentId: document.ID,
+						Permission: dms.PERMISSION_DOWNLOAD,
+						SubjectId:  userId,
+						Type:       dms.RULE_TYPE_USER,
+					})
+				}
+			}
+
+			if len(full.ReqRuleInfo.DownloadRoles) > 0 {
+				for _, roleId := range full.ReqRuleInfo.DownloadRoles {
+					authorities = append(authorities, dms.DocumentRules{
+						GVA_MODEL:  global.GVA_MODEL{},
+						DocumentId: document.ID,
+						Permission: dms.PERMISSION_DOWNLOAD,
+						SubjectId:  roleId,
+						Type:       dms.RULE_TYPE_GROUP,
+					})
+				}
+			}
+		}
+
+		if full.ReqRuleInfo.Edit == dms.RULE_EDIT_LIMIT {
+			if len(full.ReqRuleInfo.EditUsers) > 0 {
+				for _, userId := range full.ReqRuleInfo.EditUsers {
+					authorities = append(authorities, dms.DocumentRules{
+						GVA_MODEL:  global.GVA_MODEL{},
+						DocumentId: document.ID,
+						Permission: dms.PERMISSION_EDIT,
+						SubjectId:  userId,
+						Type:       dms.RULE_TYPE_USER,
+					})
+				}
+			}
+
+			if len(full.ReqRuleInfo.EditRoles) > 0 {
+				for _, roleId := range full.ReqRuleInfo.EditRoles {
+					authorities = append(authorities, dms.DocumentRules{
+						GVA_MODEL:  global.GVA_MODEL{},
+						DocumentId: document.ID,
+						Permission: dms.PERMISSION_EDIT,
+						SubjectId:  roleId,
+						Type:       dms.RULE_TYPE_GROUP,
+					})
+				}
+			}
+		}
+
+		if full.ReqRuleInfo.Owner == dms.RULE_OWNER_LIMIT {
+			if len(full.ReqRuleInfo.OwnerUsers) > 0 {
+				for _, userId := range full.ReqRuleInfo.OwnerUsers {
+					authorities = append(authorities, dms.DocumentRules{
+						GVA_MODEL:  global.GVA_MODEL{},
+						DocumentId: document.ID,
+						Permission: dms.PERMISSION_OWNER,
+						SubjectId:  userId,
+						Type:       dms.RULE_TYPE_USER,
+					})
+				}
+			}
+
+			if len(full.ReqRuleInfo.OwnerRoles) > 0 {
+				for _, roleId := range full.ReqRuleInfo.OwnerRoles {
+					authorities = append(authorities, dms.DocumentRules{
+						GVA_MODEL:  global.GVA_MODEL{},
+						DocumentId: document.ID,
+						Permission: dms.PERMISSION_OWNER,
+						SubjectId:  roleId,
+						Type:       dms.RULE_TYPE_GROUP,
+					})
+				}
+			}
+		}
+
+		err = tx.Model(&dms.DocumentRules{}).Create(&authorities).Error
+		if err != nil {
+			return err
+		}
+
 		return nil
 	})
 
