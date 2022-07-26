@@ -47,7 +47,7 @@
         <el-table-column fixed="right" label="Hành động" width="200">
           <template #default="scope">
             <el-button type="primary" link icon="edit" size="small" class="table-button" @click="showDocumentDetail(scope.row)">Xem</el-button>
-            <el-button type="primary" link icon="edit" size="small" class="table-button" @click="updateDocumentsFunc(scope.row)">Sửa</el-button>
+            <el-button type="primary" link icon="edit" size="small" class="table-button" @click="showDocumentUpdate(scope.row)">Sửa</el-button>
             <el-button type="primary" link icon="delete" size="small" @click="deleteRow(scope.row)">Xoá</el-button>
           </template>
         </el-table-column>
@@ -257,6 +257,15 @@ const showDocumentDetail = (document) => {
     name: 'documents-detail',
     params: {
       document_id: document.ID
+    }
+  })
+}
+
+const showDocumentUpdate = (document) => {
+  router.push({
+    name: 'documents-update',
+    params: {
+      id: document.ID
     }
   })
 }
