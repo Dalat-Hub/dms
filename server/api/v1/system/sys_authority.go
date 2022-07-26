@@ -141,6 +141,24 @@ func (a *AuthorityApi) GetAuthorityList(c *gin.Context) {
 	}
 }
 
+func (a *AuthorityApi) GetAuthorityInfo(c *gin.Context) {
+	var auth system.SysAuthority
+	var err error
+
+	err = c.ShouldBindJSON(&auth)
+	if err != nil {
+		global.GVA_LOG.Error("provide valid data", zap.Error(err))
+		response.FailWithMessage("provide valid data"+err.Error(), c)
+	}
+
+	if res, err := authorityService.GetAuthorityInfo(auth); err != nil {
+		global.GVA_LOG.Error("fail to get authority", zap.Error(err))
+		response.FailWithMessage("fail to get authority"+err.Error(), c)
+	} else {
+		response.OkWithData(gin.H{"authority": res}, c)
+	}
+}
+
 // @Tags Authority
 // @Summary 设置角色资源权限
 // @Security ApiKeyAuth
