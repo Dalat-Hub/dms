@@ -7,6 +7,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/dms"
 	dmsReq "github.com/flipped-aurora/gin-vue-admin/server/model/dms/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/service"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -195,6 +196,13 @@ func (documentsApi *DocumentsApi) FindDocuments(c *gin.Context) {
 	if err != nil {
 		global.GVA_LOG.Error("provide valid ID", zap.Error(err))
 		response.FailWithMessage("provide valid ID", c)
+	}
+
+	user := utils.GetUserInfo(c)
+	if err = documentRulesService.CheckPermission(user.ID, user.UUID, documents.ID, dms.PERMISSION_VIEW); err != nil {
+		global.GVA_LOG.Error("forbiden", zap.Error(err))
+		response.FailWithMessage("forbiden", c)
+		return
 	}
 
 	if redocuments, err := documentsService.GetDocuments(documents.ID); err != nil {

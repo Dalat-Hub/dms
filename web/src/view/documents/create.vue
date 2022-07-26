@@ -295,6 +295,173 @@
               <div class="gva-card-box">
                 <div class="el-card is-always-shadow gva-card quick-entrance">
                   <div class="el-card__body">
+                    <el-form-item label="Xem văn bản">
+                      <el-radio-group v-model="documentRule.view">
+                        <el-radio label="all" size="large">Tất cả mọi người</el-radio>
+                        <el-radio label="limit" size="large">Hạn chế</el-radio>
+                      </el-radio-group>
+                    </el-form-item>
+                    <el-form-item v-if="documentRule.view === 'limit'" label="Cá nhân xem văn bản">
+                      <el-select
+                        v-model="documentRule.viewUsers"
+                        :style="{ width: '100%' }"
+                        clearable
+                        filterable
+                        multiple
+                        placeholder="Chọn 1 hoặc nhiều cá nhân xem văn bản"
+                      >
+                        <el-option
+                          v-for="item in usersOptions"
+                          :key="item.ID"
+                          :label="item.nickName"
+                          :value="item.ID"
+                        />
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item v-if="documentRule.view === 'limit'" label="Nhóm xem văn bản">
+                      <el-select
+                        v-model="documentRule.viewRoles"
+                        :style="{ width: '100%' }"
+                        clearable
+                        filterable
+                        multiple
+                        placeholder="Chọn 1 hoặc nhiều nhóm xem văn bản"
+                      >
+                        <el-option
+                          v-for="item in roleOptions"
+                          :key="item.authorityId"
+                          :label="item.authorityName"
+                          :value="item.authorityId"
+                        />
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item label="Tải tập tin đính kèm">
+                      <el-radio-group v-model="documentRule.download">
+                        <el-radio label="all" size="large">Tất cả mọi người</el-radio>
+                        <el-radio label="limit" size="large">Hạn chế</el-radio>
+                      </el-radio-group>
+                    </el-form-item>
+                    <el-form-item v-if="documentRule.download === 'limit'" label="Cá nhân tải tập tin">
+                      <el-select
+                        v-model="documentRule.downloadUsers"
+                        :style="{ width: '100%' }"
+                        clearable
+                        filterable
+                        multiple
+                        placeholder="Chọn 1 hoặc nhiều cá nhân tải tập tin"
+                      >
+                        <el-option
+                          v-for="item in usersOptions"
+                          :key="item.ID"
+                          :label="item.nickName"
+                          :value="item.ID"
+                        />
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item v-if="documentRule.download === 'limit'" label="Nhóm tải tập tin">
+                      <el-select
+                        v-model="documentRule.downloadRoles"
+                        :style="{ width: '100%' }"
+                        clearable
+                        filterable
+                        multiple
+                        placeholder="Chọn 1 hoặc nhiều nhóm tải tập tin"
+                      >
+                        <el-option
+                          v-for="item in roleOptions"
+                          :key="item.authorityId"
+                          :label="item.authorityName"
+                          :value="item.authorityId"
+                        />
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item label="Chỉnh sủa">
+                      <el-radio-group v-model="documentRule.edit">
+                        <el-radio label="only" size="large">Chỉ tôi</el-radio>
+                        <el-radio label="limit" size="large">Hạn chế</el-radio>
+                      </el-radio-group>
+                    </el-form-item>
+                    <el-form-item v-if="documentRule.edit === 'limit'" label="Cá nhân sửa tập tin">
+                      <el-select
+                        v-model="documentRule.editUsers"
+                        :style="{ width: '100%' }"
+                        clearable
+                        filterable
+                        multiple
+                        placeholder="Chọn 1 hoặc nhiều cá nhân sửa tập tin"
+                      >
+                        <el-option
+                          v-for="item in usersOptions"
+                          :key="item.ID"
+                          :label="item.nickName"
+                          :value="item.ID"
+                        />
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item v-if="documentRule.edit === 'limit'" label="Nhóm sửa tập tin">
+                      <el-select
+                        v-model="documentRule.editRoles"
+                        :style="{ width: '100%' }"
+                        clearable
+                        filterable
+                        multiple
+                        placeholder="Chọn 1 hoặc nhiều nhóm sửa tập tin"
+                      >
+                        <el-option
+                          v-for="item in roleOptions"
+                          :key="item.authorityId"
+                          :label="item.authorityName"
+                          :value="item.authorityId"
+                        />
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item label="Sở hữu">
+                      <el-radio-group v-model="documentRule.owner">
+                        <el-radio label="only" size="large">Chỉ tôi</el-radio>
+                        <el-radio label="limit" size="large">Hạn chế</el-radio>
+                      </el-radio-group>
+                    </el-form-item>
+                    <el-form-item v-if="documentRule.owner === 'limit'" label="Cá nhân sở hữu tập tin">
+                      <el-select
+                        v-model="documentRule.ownerUsers"
+                        :style="{ width: '100%' }"
+                        clearable
+                        filterable
+                        multiple
+                        placeholder="Chọn 1 hoặc nhiều cá nhân sở hữu tập tin"
+                      >
+                        <el-option
+                          v-for="item in usersOptions"
+                          :key="item.ID"
+                          :label="item.nickName"
+                          :value="item.ID"
+                        />
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item v-if="documentRule.edit === 'limit'" label="Nhóm sở hữu tập tin">
+                      <el-select
+                        v-model="documentRule.ownerRoles"
+                        :style="{ width: '100%' }"
+                        clearable
+                        filterable
+                        multiple
+                        placeholder="Chọn 1 hoặc nhiều nhóm sở hữu tập tin"
+                      >
+                        <el-option
+                          v-for="item in roleOptions"
+                          :key="item.authorityId"
+                          :label="item.authorityName"
+                          :value="item.authorityId"
+                        />
+                      </el-select>
+                    </el-form-item>
+                  </div>
+                </div>
+              </div>
+
+              <div class="gva-card-box" style="margin-top: 1rem;">
+                <div class="el-card is-always-shadow gva-card quick-entrance">
+                  <div class="el-card__body">
                     <el-form-item label="Tải lên danh sách các tập tin đính kèm">
                       <el-upload
                         ref="documentFileUpload"
@@ -516,6 +683,7 @@ import { createDocumentCategories, getDocumentCategoriesList } from '../../api/d
 import { createDocumentFields, getDocumentFieldsList } from '../../api/documentFields'
 import { createDraftDocument, createFullDocument, getDocumentsList } from '../../api/documents'
 import { getUserList } from '../../api/user'
+import { getAuthorityInfo } from '../../api/authority'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -578,11 +746,27 @@ const documentsOptions = ref([])
 const fieldsOptions = ref([])
 const categoryOptions = ref([])
 const agencyLevelOptions = ref([])
+const roleOptions = ref([])
 const documentFileList = ref([])
 const path = import.meta.env.VITE_BASE_API
 const enableSubmitButton = ref(true)
 const hasFileAttached = ref(false)
 const documentFileUpload = ref(null)
+
+const documentRule = ref({
+  view: 'all',
+  download: 'all',
+  edit: 'only',
+  owner: 'only',
+  viewUsers: [],
+  viewRoles: [],
+  downloadUsers: [],
+  downloadRoles: [],
+  editUsers: [],
+  editRoles: [],
+  ownerUsers: [],
+  ownerRoles: []
+})
 
 // ================= Init ref =============================
 
@@ -644,6 +828,14 @@ const loadUserOptions = async() => {
   }
 }
 
+const loadRoleOptions = async() => {
+  const table = await getAuthorityInfo({ authorityId: 100 })
+
+  if (table.code === 0) {
+    roleOptions.value = table.data.authority.children
+  }
+}
+
 loadStatusOptions()
 loadAgencyOptions()
 loadAgencyLevelOptions()
@@ -652,6 +844,7 @@ loadFieldOptions()
 loadPriorityOptions()
 loadDocumentOptions()
 loadUserOptions()
+loadRoleOptions()
 
 // ================= End of preparing data section =================
 
@@ -884,7 +1077,8 @@ const createNewDocument = async(fileInfo) => {
     documentReferences: [],
     documentUsersRelated: [],
     documentAgenciesRelated: [],
-    fileInfo: null
+    fileInfo: null,
+    ruleInfo: documentRule.value
   }
 
   documentData.fields = formData.value.fields
