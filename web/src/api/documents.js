@@ -143,3 +143,19 @@ export const getDocumentFiles = (params) => {
     params,
   })
 }
+
+// @Tags Documents
+// @Summary make duplicated version of the given document
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data query request.GetByID true "make duplicated version of the given document"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
+// @Router /documents/makeDuplication [post]
+export const makeDuplication = (params) => {
+  return service({
+    url: '/documents/makeDuplication',
+    method: 'post',
+    params,
+  })
+}

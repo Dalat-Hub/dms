@@ -44,10 +44,11 @@
         <el-table-column align="left" label="Ngày tạo" width="250">
           <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
         </el-table-column>
-        <el-table-column fixed="right" label="Hành động" width="200">
+        <el-table-column fixed="right" label="Hành động" width="300">
           <template #default="scope">
             <el-button type="primary" link icon="edit" size="small" class="table-button" @click="showDocumentDetail(scope.row)">Xem</el-button>
             <el-button type="primary" link icon="edit" size="small" class="table-button" @click="showDocumentUpdate(scope.row)">Sửa</el-button>
+            <el-button type="primary" link icon="edit" size="small" class="table-button" @click="duplicateDocument(scope.row)">Nhân bản</el-button>
             <el-button type="primary" link icon="delete" size="small" @click="deleteRow(scope.row)">Xoá</el-button>
           </template>
         </el-table-column>
@@ -133,7 +134,8 @@ import {
   deleteDocumentsByIds,
   updateDocuments,
   findDocuments,
-  getDocumentsList
+  getDocumentsList,
+  makeDuplication
 } from '@/api/documents'
 
 // Full introduction of formatting tools, please keep as needed
@@ -393,6 +395,19 @@ const enterDialog = async() => {
          getTableData()
        }
      })
+}
+
+const duplicateDocument = async(document) => {
+  const response = await makeDuplication({ id: document.ID })
+
+  if (response.code === 0) {
+    getTableData()
+
+    ElMessage({
+      type: 'success',
+      message: 'Nhân bản tài liệu thành công'
+    })
+  }
 }
 </script>
 

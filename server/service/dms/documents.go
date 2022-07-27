@@ -574,6 +574,195 @@ func (documentsService *DocumentsService) GetDocumentFiles(info request.GetById,
 	return files, canDownload, nil
 }
 
+// Duplicate create new copy of the document
+func (documentsService *DocumentsService) Duplicate(documentId uint, loginUserId uint) (revision *dms.Documents, err error) {
+	// 1. get old document
+	var oldDocument dms.Documents
+	var newDocument dms.Documents
+
+	err = global.GVA_DB.Model(&dms.Documents{}).First(&oldDocument, "id = ?", documentId).Error
+	if err != nil {
+		return nil, err
+	}
+
+	newDocument = dms.Documents{
+		GVA_MODEL:        global.GVA_MODEL{},
+		Title:            oldDocument.Title,
+		ShortTitle:       oldDocument.ShortTitle,
+		Expert:           oldDocument.Expert,
+		Content:          oldDocument.Content,
+		DateIssued:       oldDocument.DateIssued,
+		StillInEffect:    oldDocument.StillInEffect,
+		EffectDate:       oldDocument.EffectDate,
+		ExpirationDate:   oldDocument.ExpirationDate,
+		SignNumber:       oldDocument.SignNumber,
+		SignYear:         oldDocument.SignYear,
+		SignCategory:     oldDocument.SignCategory,
+		SignAgency:       oldDocument.SignAgency,
+		SignText:         oldDocument.SignText + "-" + uuid.NewV4().String(),
+		CategoryId:       oldDocument.CategoryId,
+		AgencyId:         oldDocument.AgencyId,
+		CreatedBy:        loginUserId,
+		UpdatedBy:        0,
+		BeResponsibleBy:  loginUserId,
+		ViewCount:        0,
+		DownloadCount:    0,
+		Status:           oldDocument.Status,
+		Type:             oldDocument.Type,
+		Priority:         oldDocument.Priority,
+		ParentId:         0,
+		CurrentId:        0,
+		Path:             "",
+		PublicToView:     oldDocument.PublicToView,
+		PublicToDownload: oldDocument.PublicToDownload,
+	}
+
+	// 2. get list of field references
+	oldFieldReferences := make([]*dms.DocumentFieldReferences, 0)
+
+	err = global.GVA_DB.Model(&dms.DocumentFieldReferences{}).Where("document_id = ?", documentId).Find(&oldFieldReferences).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// 3. get list of document relations
+	oldDocumentRelations := make([]*dms.DocumentRelationReferences, 0)
+
+	err = global.GVA_DB.Model(&dms.DocumentRelationReferences{}).Where("document_id = ?", documentId).Find(&oldDocumentRelations).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// 4. get list of authorities
+	oldAuthorities := make([]*dms.DocumentRules, 0)
+
+	err = global.GVA_DB.Model(&dms.DocumentRules{}).Where("document_id = ?", documentId).Find(&oldAuthorities).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// 5. get list of signers
+	oldSigners := make([]*dms.DocumentSignerReferences, 0)
+
+	err = global.GVA_DB.Model(&dms.DocumentSignerReferences{}).Where("document_id = ?", documentId).Find(&oldSigners).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// 6. get list of attached users
+	oldUsers := make([]*dms.DocumentUsers, 0)
+
+	err = global.GVA_DB.Model(&dms.DocumentUsers{}).Where("document_id = ?", documentId).Find(&oldUsers).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// 7. get list of attached files
+	oldFiles := make([]*dms.DocumentFiles, 0)
+
+	err = global.GVA_DB.Model(&dms.DocumentFiles{}).Where("document_id = ?", documentId).Find(&oldFiles).Error
+	if err != nil {
+		return nil, err
+	}
+
+	err = global.GVA_DB.Transaction(func(tx *gorm.DB) error {
+
+		// 1. duplicate document
+		err = tx.Model(&dms.Documents{}).Create(&newDocument).Error
+		if err != nil {
+			return err
+		}
+
+		// 2. duplicate list of field references
+		for _, v := range oldFieldReferences {
+			v.DocumentId = newDocument.ID
+			v.ID = 0
+			v.CreatedAt = time.Now()
+			v.UpdatedAt = time.Now()
+		}
+
+		err = tx.Model(&dms.DocumentFieldReferences{}).Create(&oldFieldReferences).Error
+		if err != nil {
+			return err
+		}
+
+		// 3. duplicate list of document relations
+		for _, v := range oldDocumentRelations {
+			v.DocumentId = newDocument.ID
+			v.ID = 0
+			v.CreatedAt = time.Now()
+			v.UpdatedAt = time.Now()
+		}
+
+		err = tx.Model(&dms.DocumentRelationReferences{}).Create(&oldDocumentRelations).Error
+		if err != nil {
+			return err
+		}
+
+		// 4. duplicate list of authorities
+		for _, v := range oldAuthorities {
+			v.DocumentId = newDocument.ID
+			v.ID = 0
+			v.CreatedAt = time.Now()
+			v.UpdatedAt = time.Now()
+		}
+
+		err = tx.Model(&dms.DocumentRules{}).Create(&oldAuthorities).Error
+		if err != nil {
+			return err
+		}
+
+		// 5. duplicate list of signers
+		for _, v := range oldSigners {
+			v.DocumentId = newDocument.ID
+			v.ID = 0
+			v.CreatedAt = time.Now()
+			v.UpdatedAt = time.Now()
+		}
+
+		err = tx.Model(&dms.DocumentSignerReferences{}).Create(&oldSigners).Error
+		if err != nil {
+			return err
+		}
+
+		// 6. duplicate list of attached users
+		for _, v := range oldUsers {
+			v.DocumentId = newDocument.ID
+			v.ID = 0
+			v.CreatedAt = time.Now()
+			v.UpdatedAt = time.Now()
+		}
+
+		err = tx.Model(&dms.DocumentUsers{}).Create(&oldUsers).Error
+		if err != nil {
+			return err
+		}
+
+		// 7. duplicate list of attached files
+		for _, v := range oldFiles {
+			v.DocumentId = newDocument.ID
+			v.ID = 0
+			v.CreatedAt = time.Now()
+			v.UpdatedAt = time.Now()
+		}
+
+		err = tx.Model(&dms.DocumentFiles{}).Create(&oldFiles).Error
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &newDocument, nil
+}
+
+// ===================== INTERNAL METHODS SECTION ========================
+
 func (documentsService *DocumentsService) attachBaseDocuments(document *dms.Documents) (err error) {
 	var refs []dms.DocumentRelationReferences
 	db := global.GVA_DB.Model(&dms.DocumentRelationReferences{})
@@ -800,3 +989,5 @@ func (documentsService *DocumentsService) attachAuthority(document *dms.Document
 
 	return nil
 }
+
+// ===================== END OF INTERNAL METHODS SECTION ========================

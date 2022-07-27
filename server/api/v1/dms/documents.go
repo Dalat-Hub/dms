@@ -278,3 +278,32 @@ func (documentsApi *DocumentsApi) GetFileList(c *gin.Context) {
 		response.OkWithData(gin.H{"files": files, "canDownload": cDownload}, c)
 	}
 }
+
+// MakeDuplication create new duplicated version of the given document
+// @Tags Documents
+// @Summary create new duplicated version of the given document
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data query request.GetByID true "create new duplicated version of the given document"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
+// @Router /documents/makeDuplication [post]
+func (documentsApi *DocumentsApi) MakeDuplication(c *gin.Context) {
+	var info request.GetById
+	var err error
+
+	err = c.ShouldBindQuery(&info)
+	if err != nil {
+		global.GVA_LOG.Error("provide valid search params", zap.Error(err))
+		response.FailWithMessage("provide valid search params", c)
+	}
+
+	user := utils.GetUserInfo(c)
+
+	if backup, err := documentsService.Duplicate(uint(info.ID), user.ID); err != nil {
+		global.GVA_LOG.Error("fail to create duplication", zap.Error(err))
+		response.FailWithMessage("fail to create duplication", c)
+	} else {
+		response.OkWithData(gin.H{"duplication": backup}, c)
+	}
+}
