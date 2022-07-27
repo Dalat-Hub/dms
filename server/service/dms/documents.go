@@ -716,7 +716,7 @@ func (documentsService *DocumentsService) Duplicate(documentId uint, loginUserId
 		SignYear:         oldDocument.SignYear,
 		SignCategory:     oldDocument.SignCategory,
 		SignAgency:       oldDocument.SignAgency,
-		SignText:         oldDocument.SignText + "-" + uuid.NewV4().String(),
+		SignText:         oldDocument.SignText + "@" + uuid.NewV4().String(),
 		CategoryId:       oldDocument.CategoryId,
 		AgencyId:         oldDocument.AgencyId,
 		CreatedBy:        loginUserId,
