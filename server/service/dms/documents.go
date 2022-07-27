@@ -5,6 +5,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/dms"
 	dmsReq "github.com/flipped-aurora/gin-vue-admin/server/model/dms/request"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/dms/request/documents"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/dms/response"
 	sysModel "github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	uuid "github.com/satori/go.uuid"
@@ -440,6 +441,117 @@ func (documentsService *DocumentsService) UpdateDocuments(documents dms.Document
 	return err
 }
 
+// UpdateBasicDocumentInformation update basic document information
+func (documentsService *DocumentsService) UpdateBasicDocumentInformation(basic documents.UpdateBasic) (err error) {
+	var oldDocument dms.Documents
+	err = global.GVA_DB.Model(&dms.Documents{}).First(&oldDocument, "id = ?", basic.ID).Error
+	if err != nil {
+		return err
+	}
+
+	_, err = documentsService.Duplicate(oldDocument.ID, basic.UpdatedBy, dms.TYPE_REVISION)
+	if err != nil {
+		return err
+	}
+
+	categoryService := new(DocumentCategoriesService)
+	agencyService := new(DocumentAgenciesService)
+
+	category, catErr := categoryService.GetDocumentCategories(basic.CategoryId)
+	if catErr != nil {
+		return catErr
+	}
+
+	_, agencyErr := agencyService.GetDocumentAgencies(basic.AgencyId)
+	if agencyErr != nil {
+		return agencyErr
+	}
+
+	shortTitle := category.Name + " " + basic.SignText
+
+	oldDocument.Title = basic.Title
+	oldDocument.Expert = basic.Expert
+	oldDocument.ShortTitle = shortTitle
+	oldDocument.Content = basic.Content
+	oldDocument.DateIssued = basic.DateIssued
+	oldDocument.EffectDate = basic.EffectDate
+	oldDocument.ExpirationDate = basic.ExpirationDate
+	oldDocument.SignNumber = basic.SignNumber
+	oldDocument.SignYear = basic.SignYear
+	oldDocument.SignCategory = basic.SignCategory
+	oldDocument.SignAgency = basic.SignAgency
+	oldDocument.SignText = basic.SignText
+	oldDocument.CategoryId = basic.CategoryId
+	oldDocument.AgencyId = basic.AgencyId
+	oldDocument.Priority = basic.Priority
+	oldDocument.Status = basic.Status
+	oldDocument.UpdatedBy = basic.UpdatedBy
+	oldDocument.BeResponsibleBy = basic.BeResponsibleBy
+
+	newFieldReferences := make([]dms.DocumentFieldReferences, 0)
+	newSignerReferences := make([]dms.DocumentSignerReferences, 0)
+
+	for _, fieldId := range basic.Fields {
+		newFieldReferences = append(newFieldReferences, dms.DocumentFieldReferences{
+			GVA_MODEL:  global.GVA_MODEL{},
+			FieldId:    fieldId,
+			DocumentId: oldDocument.ID,
+		})
+	}
+
+	for _, userId := range basic.Signers {
+		newSignerReferences = append(newSignerReferences, dms.DocumentSignerReferences{
+			GVA_MODEL:  global.GVA_MODEL{},
+			DocumentId: oldDocument.ID,
+			UserId:     userId,
+		})
+	}
+
+	err = global.GVA_DB.Transaction(func(tx *gorm.DB) error {
+		// update document
+		err = tx.Model(&dms.Documents{}).Where("id = ?", oldDocument.ID).Save(&oldDocument).Error
+		if err != nil {
+			return err
+		}
+
+		// clear old fields
+		err = tx.Model(&dms.DocumentFieldReferences{}).
+			Unscoped().
+			Where("document_id = ?", oldDocument.ID).
+			Delete(&dms.DocumentFieldReferences{}).
+			Error
+		if err != nil {
+			return err
+		}
+
+		// clear old signers
+		err = tx.Model(&dms.DocumentSignerReferences{}).
+			Unscoped().
+			Where("document_id = ?", oldDocument.ID).
+			Delete(&dms.DocumentSignerReferences{}).
+			Error
+		if err != nil {
+			return err
+		}
+
+		// create new fields
+		err = tx.Model(&dms.DocumentFieldReferences{}).Create(&newFieldReferences).Error
+		if err != nil {
+			return err
+		}
+
+		// create new signers
+		err = tx.Model(&dms.DocumentSignerReferences{}).Create(&newSignerReferences).Error
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	return err
+}
+
 // GetDocuments get document by Id
 func (documentsService *DocumentsService) GetDocuments(doc dmsReq.DocumentsSearch, userId uint, userUUID uuid.UUID) (documents *dms.Documents, err error) {
 	db := global.GVA_DB.Model(&dms.Documents{})
@@ -575,7 +687,7 @@ func (documentsService *DocumentsService) GetDocumentFiles(info request.GetById,
 }
 
 // Duplicate create new copy of the document
-func (documentsService *DocumentsService) Duplicate(documentId uint, loginUserId uint) (revision *dms.Documents, err error) {
+func (documentsService *DocumentsService) Duplicate(documentId uint, loginUserId uint, docType int) (revision *dms.Documents, err error) {
 	// 1. get old document
 	var oldDocument dms.Documents
 	var newDocument dms.Documents
@@ -583,6 +695,11 @@ func (documentsService *DocumentsService) Duplicate(documentId uint, loginUserId
 	err = global.GVA_DB.Model(&dms.Documents{}).First(&oldDocument, "id = ?", documentId).Error
 	if err != nil {
 		return nil, err
+	}
+
+	documentType := dms.TYPE_DOCUMENT
+	if docType == dms.TYPE_REVISION {
+		documentType = dms.TYPE_REVISION
 	}
 
 	newDocument = dms.Documents{
@@ -608,7 +725,7 @@ func (documentsService *DocumentsService) Duplicate(documentId uint, loginUserId
 		ViewCount:        0,
 		DownloadCount:    0,
 		Status:           oldDocument.Status,
-		Type:             oldDocument.Type,
+		Type:             documentType,
 		Priority:         oldDocument.Priority,
 		ParentId:         0,
 		CurrentId:        0,
@@ -700,16 +817,18 @@ func (documentsService *DocumentsService) Duplicate(documentId uint, loginUserId
 		}
 
 		// 4. duplicate list of authorities
-		for _, v := range oldAuthorities {
-			v.DocumentId = newDocument.ID
-			v.ID = 0
-			v.CreatedAt = time.Now()
-			v.UpdatedAt = time.Now()
-		}
+		if newDocument.Type == dms.TYPE_DOCUMENT {
+			for _, v := range oldAuthorities {
+				v.DocumentId = newDocument.ID
+				v.ID = 0
+				v.CreatedAt = time.Now()
+				v.UpdatedAt = time.Now()
+			}
 
-		err = tx.Model(&dms.DocumentRules{}).Create(&oldAuthorities).Error
-		if err != nil {
-			return err
+			err = tx.Model(&dms.DocumentRules{}).Create(&oldAuthorities).Error
+			if err != nil {
+				return err
+			}
 		}
 
 		// 5. duplicate list of signers
@@ -726,16 +845,18 @@ func (documentsService *DocumentsService) Duplicate(documentId uint, loginUserId
 		}
 
 		// 6. duplicate list of attached users
-		for _, v := range oldUsers {
-			v.DocumentId = newDocument.ID
-			v.ID = 0
-			v.CreatedAt = time.Now()
-			v.UpdatedAt = time.Now()
-		}
+		if newDocument.Type == dms.TYPE_DOCUMENT {
+			for _, v := range oldUsers {
+				v.DocumentId = newDocument.ID
+				v.ID = 0
+				v.CreatedAt = time.Now()
+				v.UpdatedAt = time.Now()
+			}
 
-		err = tx.Model(&dms.DocumentUsers{}).Create(&oldUsers).Error
-		if err != nil {
-			return err
+			err = tx.Model(&dms.DocumentUsers{}).Create(&oldUsers).Error
+			if err != nil {
+				return err
+			}
 		}
 
 		// 7. duplicate list of attached files

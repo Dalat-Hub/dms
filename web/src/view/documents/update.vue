@@ -87,7 +87,7 @@
                       <el-col class="el-col-18 el-col-lg-20">
                         <el-form-item label="Cơ quan ban hành văn bản">
                           <el-select
-                            v-model="formBasicData.agency"
+                            v-model="formBasicData.agencyId"
                             :style="{ width: '100%' }"
                             clearable
                             filterable
@@ -113,7 +113,7 @@
                       <el-col class="el-col-18 el-col-lg-20">
                         <el-form-item label="Thể loại văn bản">
                           <el-select
-                            v-model="formBasicData.category"
+                            v-model="formBasicData.categoryId"
                             :style="{ width: '100%' }"
                             clearable
                             filterable
@@ -741,13 +741,14 @@ export default {
 <script setup>
 import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { ElMessage } from 'element-plus'
 
 import { useUserStore } from '@/pinia/modules/user'
 import { getDict } from '../../utils/dictionary'
 import { createDocumentAgencies, getDocumentAgenciesList } from '../../api/documentAgencies'
 import { createDocumentCategories, getDocumentCategoriesList } from '../../api/documentCategories'
 import { createDocumentFields, getDocumentFieldsList } from '../../api/documentFields'
-import { findDocuments, createDraftDocument, getDocumentFiles, getDocumentsList } from '../../api/documents'
+import { findDocuments, createDraftDocument, getDocumentFiles, getDocumentsList, updateBasicDocuments } from '../../api/documents'
 import { getUserList } from '../../api/user'
 import { getAuthorityInfo } from '../../api/authority'
 import { formatDate } from '../../utils/format'
@@ -761,8 +762,8 @@ const documentFileUpload = ref(null)
 
 const formBasicData = ref({
   title: '',
-  agency: null,
-  category: null,
+  agencyId: null,
+  categoryId: null,
   date_issued: null,
   date_effected: null,
   date_expiration: null,
@@ -896,8 +897,8 @@ const getDocument = async() => {
     formBasicData.value = {
       ...formBasicData.value,
       title: d.title,
-      agency: d.agencyId,
-      category: d.categoryId,
+      agencyId: d.agencyId,
+      categoryId: d.categoryId,
       date_issued: d.dateIssued && new Date(d.dateIssued),
       date_effected: d.effectDate && new Date(d.effectDate),
       date_expiration: d.dateExpiration && new Date(d.dateExpiration),
@@ -905,8 +906,8 @@ const getDocument = async() => {
       signYear: d.signYear,
       categoryReadonly: d.signCategory,
       agencyReadonly: d.signAgency,
-      fields: [...d.fields.map(f => f.ID)],
-      signers: [...d.signers.map(f => f.ID)],
+      fields: [...d.fields.map(f => f.ID * 1)],
+      signers: [...d.signers.map(f => f.ID * 1)],
       expert: d.expert,
       content: d.content,
       status: d.status,
@@ -915,10 +916,10 @@ const getDocument = async() => {
 
     formRelatedData.value = {
       ...formRelatedData.value,
-      baseDocuments: d.basedDocuments.map(f => f.ID),
-      relatedDocuments: d.relatedDocuments.map(f => f.ID),
-      relatedUsers: d.relatedUsers.map(f => f.ID),
-      relatedAgencies: d.relatedAgencies.map(f => f.ID)
+      baseDocuments: d.basedDocuments.map(f => f.ID * 1),
+      relatedDocuments: d.relatedDocuments.map(f => f.ID * 1),
+      relatedUsers: d.relatedUsers.map(f => f.ID * 1),
+      relatedAgencies: d.relatedAgencies.map(f => f.ID * 1)
     }
 
     createdUserName.value = d.createdUser.nickName
@@ -929,14 +930,14 @@ const getDocument = async() => {
       formAuthorityData.value = {
         ...formAuthorityData.value,
         hasValue: true,
-        viewUsers: d.authority.viewLimitUsers.map(f => f.ID),
-        viewRoles: d.authority.viewLimitRoles.map(f => f.authorityId),
-        downloadUsers: d.authority.downloadLimitUsers.map(f => f.ID),
-        downloadRoles: d.authority.downloadLimitRoles.map(f => f.authorityId),
-        editUsers: d.authority.updateLimitUsers.map(f => f.ID),
-        editRoles: d.authority.updateLimitRoles.map(f => f.authorityId),
-        ownerUsers: d.authority.ownerLimitUsers.map(f => f.ID),
-        ownerRoles: d.authority.ownerLimitRoles.map(f => f.authorityId)
+        viewUsers: d.authority.viewLimitUsers.map(f => f.ID * 1),
+        viewRoles: d.authority.viewLimitRoles.map(f => f.authorityId * 1),
+        downloadUsers: d.authority.downloadLimitUsers.map(f => f.ID * 1),
+        downloadRoles: d.authority.downloadLimitRoles.map(f => f.authorityId * 1),
+        editUsers: d.authority.updateLimitUsers.map(f => f.ID * 1),
+        editRoles: d.authority.updateLimitRoles.map(f => f.authorityId * 1),
+        ownerUsers: d.authority.ownerLimitUsers.map(f => f.ID * 1),
+        ownerRoles: d.authority.ownerLimitRoles.map(f => f.authorityId * 1)
       }
 
       if (d.authority.publicToView) {
@@ -1063,13 +1064,13 @@ loadAttachedFiles()
 
 const handleOnAgencyChange = (selected) => {
   if (selected) {
-    formData.value.agencyReadonly = agencyOptions.value.find(f => f.ID === selected)?.code
+    formBasicData.value.agencyReadonly = agencyOptions.value.find(f => f.ID === selected)?.code
   }
 }
 
 const handleOnCategoryChange = (selected) => {
   if (selected) {
-    formData.value.categoryReadonly = categoryOptions.value.find(f => f.ID === selected)?.code
+    formBasicData.value.categoryReadonly = categoryOptions.value.find(f => f.ID === selected)?.code
   }
 }
 
@@ -1080,7 +1081,7 @@ const handleOnIssuedDateChange = (date) => {
   const mm = dateObj.getMonth()
   const yy = dateObj.getFullYear()
 
-  formData.value.date_effected = new Date(yy, mm, dd)
+  formBasicData.value.date_effected = new Date(yy, mm, dd)
 }
 
 const openAgencyDialog = () => {
@@ -1120,8 +1121,38 @@ const closeDocumentDialog = () => {
 
 // ================= Business section =================
 
-const updateBasicDocument = () => {
+const updateBasicDocument = async() => {
+  const signNumber = formBasicData.value.signNumber < 10 ? `0${formBasicData.value.signNumber}` : formBasicData.value.signNumber.toString()
 
+  const data = await updateBasicDocuments({
+    id: searchInfo.value.ID,
+    priority: formBasicData.value.priorityLevel,
+    status: formBasicData.value.status,
+    updatedBy: formOwnerData.value.updatedBy,
+    beResponsibleBy: formOwnerData.value.beResponsibleBy,
+    signers: formBasicData.value.signers,
+    fields: formBasicData.value.fields,
+    agencyId: formBasicData.value.agencyId,
+    categoryId: formBasicData.value.categoryId,
+    signText: `${signNumber}/${formBasicData.value.signYear}/${formBasicData.value.categoryReadonly}-${formBasicData.value.agencyReadonly}`,
+    signNumber: parseInt(formBasicData.value.signNumber),
+    signYear: parseInt(formBasicData.value.signYear),
+    signCategory: formBasicData.value.categoryReadonly,
+    signAgency: formBasicData.value.agencyReadonly,
+    expirationDate: formBasicData.value.date_expiration,
+    effectDate: formBasicData.value.date_effected,
+    dateIssued: formBasicData.value.date_issued,
+    content: formBasicData.value.content,
+    expert: formBasicData.value.expert,
+    title: formBasicData.value.title
+  })
+
+  if (data.code === 0) {
+    ElMessage({
+      type: 'success',
+      message: 'Cập nhật thông tin cơ bản thành công'
+    })
+  }
 }
 
 const updateDocumentRelation = () => {

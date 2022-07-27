@@ -6,6 +6,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/dms"
 	dmsReq "github.com/flipped-aurora/gin-vue-admin/server/model/dms/request"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/dms/request/documents"
 	"github.com/flipped-aurora/gin-vue-admin/server/service"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/gin-gonic/gin"
@@ -179,6 +180,34 @@ func (documentsApi *DocumentsApi) UpdateDocuments(c *gin.Context) {
 	}
 }
 
+// UpdateBasicDocumentInformation update basic document information
+// @Tags Documents
+// @Summary update basic document information
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body dms.Documents true "update basic document information"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
+// @Router /documents/updateBasicDocumentInformation [put]
+func (documentsApi *DocumentsApi) UpdateBasicDocumentInformation(c *gin.Context) {
+	var basic documents.UpdateBasic
+	var err error
+
+	err = c.ShouldBindJSON(&basic)
+	if err != nil {
+		global.GVA_LOG.Error("provide valid updated document", zap.Error(err))
+		response.FailWithMessage("provide valid updated document", c)
+		return
+	}
+
+	if err = documentsService.UpdateBasicDocumentInformation(basic); err != nil {
+		global.GVA_LOG.Error("fail to update document", zap.Error(err))
+		response.FailWithMessage("fail to update document", c)
+	} else {
+		response.OkWithMessage("success", c)
+	}
+}
+
 // FindDocuments find document by ID
 // @Tags Documents
 // @Summary find document by ID
@@ -300,7 +329,7 @@ func (documentsApi *DocumentsApi) MakeDuplication(c *gin.Context) {
 
 	user := utils.GetUserInfo(c)
 
-	if backup, err := documentsService.Duplicate(uint(info.ID), user.ID); err != nil {
+	if backup, err := documentsService.Duplicate(uint(info.ID), user.ID, dms.TYPE_DOCUMENT); err != nil {
 		global.GVA_LOG.Error("fail to create duplication", zap.Error(err))
 		response.FailWithMessage("fail to create duplication", c)
 	} else {

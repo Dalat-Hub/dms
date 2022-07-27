@@ -97,6 +97,22 @@ export const updateDocuments = (data) => {
 }
 
 // @Tags Documents
+// @Summary update basic document information
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body documents.UpdateBasic true "update basic document information"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
+// @Router /documents/updateBasicDocuments [put]
+export const updateBasicDocuments = (data) => {
+  return service({
+    url: '/documents/updateBasicDocuments',
+    method: 'put',
+    data,
+  })
+}
+
+// @Tags Documents
 // @Summary get document by ID
 // @Security ApiKeyAuth
 // @accept application/json

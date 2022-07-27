@@ -21,6 +21,7 @@ func (s *DocumentsRouter) InitDocumentsRouter(Router *gin.RouterGroup) {
 		documentsRouter.DELETE("deleteDocuments", documentsApi.DeleteDocuments)
 		documentsRouter.DELETE("deleteDocumentsByIds", documentsApi.DeleteDocumentsByIds)
 		documentsRouter.PUT("updateDocuments", documentsApi.UpdateDocuments)
+		documentsRouter.PUT("updateBasicDocuments", documentsApi.UpdateBasicDocumentInformation)
 		documentsRouter.POST("makeDuplication", documentsApi.MakeDuplication)
 	}
 	{
