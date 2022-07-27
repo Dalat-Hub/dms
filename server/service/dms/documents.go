@@ -5,6 +5,8 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/dms"
 	dmsReq "github.com/flipped-aurora/gin-vue-admin/server/model/dms/request"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/dms/response"
+	sysModel "github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	uuid "github.com/satori/go.uuid"
 	"gopkg.in/guregu/null.v4"
 	"gorm.io/gorm"
@@ -439,9 +441,92 @@ func (documentsService *DocumentsService) UpdateDocuments(documents dms.Document
 }
 
 // GetDocuments get document by Id
-func (documentsService *DocumentsService) GetDocuments(id uint) (documents dms.Documents, err error) {
-	err = global.GVA_DB.Where("id = ?", id).First(&documents).Error
-	return
+func (documentsService *DocumentsService) GetDocuments(doc dmsReq.DocumentsSearch, userId uint, userUUID uuid.UUID) (documents *dms.Documents, err error) {
+	db := global.GVA_DB.Model(&dms.Documents{})
+	var document dms.Documents
+
+	if doc.PreloadAgency == 1 {
+		db = db.Preload("Agency")
+	}
+
+	if doc.PreloadCategory == 1 {
+		db = db.Preload("Category")
+	}
+
+	if doc.PreloadFields == 1 {
+		db = db.Preload("Fields")
+	}
+
+	if doc.PreloadSigners == 1 {
+		db = db.Preload("Signers")
+	}
+
+	err = db.First(&document, "id = ?", doc.ID).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	if doc.PreloadBasedDocs == 1 {
+		err = documentsService.attachBaseDocuments(&document)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if doc.PreloadRelatedDocs == 1 {
+		err = documentsService.attachReferencesDocuments(&document)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if doc.PreloadRelatedUsers == 1 {
+		err = documentsService.attachRelatedUsers(&document)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if doc.PreloadRelatedAgencies == 1 {
+		err = documentsService.attachRelatedAgencies(&document)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if doc.PreloadCreatedBy == 1 {
+		err = documentsService.attachCreatedUser(&document)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if doc.PreloadUpdatedBy == 1 {
+		err = documentsService.attachUpdatedUser(&document)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if doc.PreloadBeResponsibleBy == 1 {
+		err = documentsService.attachResponsibleUser(&document)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if doc.PreloadAuthority == 1 {
+		service := new(DocumentRulesService)
+		if err := service.CheckPermission(userId, userUUID, document.ID, dms.PERMISSION_OWNER); err == nil {
+			err = documentsService.attachAuthority(&document)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	return &document, nil
 }
 
 // GetDocumentsInfoList get list of documents
@@ -460,4 +545,231 @@ func (documentsService *DocumentsService) GetDocumentsInfoList(info dmsReq.Docum
 
 	err = db.Limit(limit).Offset(offset).Find(&documentss).Error
 	return documentss, total, err
+}
+
+func (documentsService *DocumentsService) attachBaseDocuments(document *dms.Documents) (err error) {
+	var refs []dms.DocumentRelationReferences
+	db := global.GVA_DB.Model(&dms.DocumentRelationReferences{})
+
+	err = db.Select("dest_id").Where("document_id = ? AND relation_type = ?", document.ID, "base").Find(&refs).Error
+	if err != nil {
+		return nil
+	}
+
+	var documentIds []uint
+	for _, v := range refs {
+		documentIds = append(documentIds, v.DestId)
+	}
+
+	db = global.GVA_DB.Model(&dms.Documents{})
+
+	err = db.Find(&document.BasedDocuments, documentIds).Error
+	if err != nil {
+		return nil
+	}
+
+	return nil
+}
+
+func (documentsService *DocumentsService) attachReferencesDocuments(document *dms.Documents) (err error) {
+	var refs []dms.DocumentRelationReferences
+	db := global.GVA_DB.Model(&dms.DocumentRelationReferences{})
+
+	err = db.Select("dest_id").Where("document_id = ? AND relation_type = ?", document.ID, "relation").Find(&refs).Error
+	if err != nil {
+		return nil
+	}
+
+	var documentIds []uint
+	for _, v := range refs {
+		documentIds = append(documentIds, v.DestId)
+	}
+
+	db = global.GVA_DB.Model(&dms.Documents{})
+
+	err = db.Find(&document.RelatedDocuments, documentIds).Error
+	if err != nil {
+		return nil
+	}
+
+	return nil
+}
+
+func (documentsService *DocumentsService) attachRelatedUsers(document *dms.Documents) (err error) {
+	var refs []dms.DocumentRelationReferences
+	db := global.GVA_DB.Model(&dms.DocumentRelationReferences{})
+
+	err = db.Select("dest_id").Where("document_id = ? AND relation_type = ?", document.ID, "user").Find(&refs).Error
+	if err != nil {
+		return nil
+	}
+
+	var documentIds []uint
+	for _, v := range refs {
+		documentIds = append(documentIds, v.DestId)
+	}
+
+	db = global.GVA_DB.Model(&sysModel.SysUser{})
+
+	err = db.Find(&document.RelatedUsers, documentIds).Error
+	if err != nil {
+		return nil
+	}
+
+	return nil
+}
+
+func (documentsService *DocumentsService) attachRelatedAgencies(document *dms.Documents) (err error) {
+	var refs []dms.DocumentRelationReferences
+	db := global.GVA_DB.Model(&dms.DocumentRelationReferences{})
+
+	err = db.Select("dest_id").Where("document_id = ? AND relation_type = ?", document.ID, "agency").Find(&refs).Error
+	if err != nil {
+		return nil
+	}
+
+	var documentIds []uint
+	for _, v := range refs {
+		documentIds = append(documentIds, v.DestId)
+	}
+
+	db = global.GVA_DB.Model(&dms.DocumentAgencies{})
+
+	err = db.Find(&document.RelatedAgencies, documentIds).Error
+	if err != nil {
+		return nil
+	}
+
+	return nil
+}
+
+func (documentsService *DocumentsService) attachCreatedUser(document *dms.Documents) (err error) {
+	db := global.GVA_DB.Model(&sysModel.SysUser{})
+	var user sysModel.SysUser
+
+	err = db.First(&user, "id = ?", document.CreatedBy).Error
+	if err != nil {
+		return err
+	}
+
+	document.CreatedUser = &user
+
+	return nil
+}
+
+func (documentsService *DocumentsService) attachUpdatedUser(document *dms.Documents) (err error) {
+	db := global.GVA_DB.Model(&sysModel.SysUser{})
+	var user sysModel.SysUser
+
+	err = db.First(&user, "id = ?", document.UpdatedBy).Error
+	if err != nil {
+		return err
+	}
+
+	document.UpdatedUser = &user
+
+	return nil
+}
+
+func (documentsService *DocumentsService) attachResponsibleUser(document *dms.Documents) (err error) {
+	db := global.GVA_DB.Model(&sysModel.SysUser{})
+	var user sysModel.SysUser
+
+	err = db.First(&user, "id = ?", document.BeResponsibleBy).Error
+	if err != nil {
+		return err
+	}
+
+	document.ResponsibleUser = &user
+
+	return nil
+}
+
+func (documentsService *DocumentsService) attachAuthority(document *dms.Documents) (err error) {
+	documentRuleDb := global.GVA_DB.Model(&dms.DocumentRules{})
+
+	var documentRules []dms.DocumentRules
+
+	err = documentRuleDb.Where("document_id = ?", document.ID).Find(&documentRules).Error
+	if err != nil {
+		return err
+	}
+
+	documentAuthority := new(response.DocumentAuthority)
+	documentAuthority.PublicToView = document.PublicToView
+	documentAuthority.PublicToDownload = document.PublicToDownload
+
+	viewLimitUsers := make([]sysModel.SysUser, 0)
+	viewLimitRoles := make([]sysModel.SysAuthority, 0)
+	downloadLimitUsers := make([]sysModel.SysUser, 0)
+	downloadLimitRoles := make([]sysModel.SysAuthority, 0)
+	updateLimitUsers := make([]sysModel.SysUser, 0)
+	updateLimitRoles := make([]sysModel.SysAuthority, 0)
+	ownerLimitUsers := make([]sysModel.SysUser, 0)
+	ownerLimitRoles := make([]sysModel.SysAuthority, 0)
+
+	for _, d := range documentRules {
+		if d.Type == dms.RULE_TYPE_USER {
+			var user sysModel.SysUser
+			err = global.GVA_DB.Model(&sysModel.SysUser{}).First(&user, "id = ?", d.SubjectId).Error
+			if err != nil {
+				return err
+			}
+
+			if d.Permission == dms.PERMISSION_VIEW {
+				viewLimitUsers = append(viewLimitUsers, user)
+			} else if d.Permission == dms.PERMISSION_DOWNLOAD {
+				downloadLimitUsers = append(downloadLimitUsers, user)
+			} else if d.Permission == dms.PERMISSION_EDIT {
+				updateLimitUsers = append(updateLimitUsers, user)
+			} else if d.Permission == dms.PERMISSION_OWNER {
+				ownerLimitUsers = append(ownerLimitUsers, user)
+			}
+		} else if d.Type == dms.RULE_TYPE_GROUP {
+			var role sysModel.SysAuthority
+			err = global.GVA_DB.Model(sysModel.SysAuthority{}).First(&role, "authority_id = ?", d.SubjectId).Error
+			if err != nil {
+				return err
+			}
+
+			if d.Permission == dms.PERMISSION_VIEW {
+				viewLimitRoles = append(viewLimitRoles, role)
+			} else if d.Permission == dms.PERMISSION_DOWNLOAD {
+				downloadLimitRoles = append(downloadLimitRoles, role)
+			} else if d.Permission == dms.PERMISSION_EDIT {
+				updateLimitRoles = append(updateLimitRoles, role)
+			} else if d.Permission == dms.PERMISSION_OWNER {
+				ownerLimitRoles = append(ownerLimitRoles, role)
+			}
+		}
+	}
+
+	documentAuthority.ViewLimitUsers = viewLimitUsers
+	documentAuthority.ViewLimitRoles = viewLimitRoles
+	documentAuthority.DownloadLimitUsers = downloadLimitUsers
+	documentAuthority.DownloadLimitRoles = downloadLimitRoles
+	documentAuthority.UpdateLimitUsers = updateLimitUsers
+	documentAuthority.UpdateLimitRoles = updateLimitRoles
+	documentAuthority.OwnerLimitUsers = ownerLimitUsers
+	documentAuthority.OwnerLimitRoles = ownerLimitRoles
+
+	if len(viewLimitUsers)+len(viewLimitRoles) == 0 {
+		documentAuthority.OnlyAdminCanView = true
+	}
+
+	if len(downloadLimitUsers)+len(downloadLimitRoles) == 0 {
+		documentAuthority.OnlyAdminCanDownload = true
+	}
+
+	if len(updateLimitUsers)+len(updateLimitRoles) == 0 {
+		documentAuthority.OnlyMeCanUpdate = true
+	}
+
+	if len(ownerLimitUsers)+len(ownerLimitRoles) == 1 {
+		documentAuthority.OnlyMeBeOwner = true
+	}
+
+	document.Authority = documentAuthority
+
+	return nil
 }

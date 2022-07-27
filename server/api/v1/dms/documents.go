@@ -189,7 +189,7 @@ func (documentsApi *DocumentsApi) UpdateDocuments(c *gin.Context) {
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
 // @Router /documents/findDocuments [get]
 func (documentsApi *DocumentsApi) FindDocuments(c *gin.Context) {
-	var documents dms.Documents
+	var documents dmsReq.DocumentsSearch
 	var err error
 
 	err = c.ShouldBindQuery(&documents)
@@ -205,11 +205,11 @@ func (documentsApi *DocumentsApi) FindDocuments(c *gin.Context) {
 		return
 	}
 
-	if redocuments, err := documentsService.GetDocuments(documents.ID); err != nil {
+	if redocuments, err := documentsService.GetDocuments(documents, user.ID, user.UUID); err != nil {
 		global.GVA_LOG.Error("fail to find document", zap.Error(err))
 		response.FailWithMessage("fail to find document", c)
 	} else {
-		response.OkWithData(gin.H{"redocuments": redocuments}, c)
+		response.OkWithData(gin.H{"document": redocuments}, c)
 	}
 }
 
