@@ -8,4 +8,5 @@ import (
 type DocumentsSearch struct {
 	dms.Documents
 	request.PageInfo
+	PreloadDocument
 }
