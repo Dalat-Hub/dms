@@ -547,6 +547,33 @@ func (documentsService *DocumentsService) GetDocumentsInfoList(info dmsReq.Docum
 	return documentss, total, err
 }
 
+// GetDocumentFiles get list of attached files
+func (documentsService *DocumentsService) GetDocumentFiles(info request.GetById, download bool) (list interface{}, canDownload bool, err error) {
+	var document dms.Documents
+	err = global.GVA_DB.Model(&dms.Documents{}).First(&document, "id = ?", info.ID).Error
+	if err != nil {
+		return nil, false, nil
+	}
+
+	canDownload = false
+	if download {
+		canDownload = true
+	} else {
+		if document.PublicToDownload {
+			canDownload = true
+		}
+	}
+
+	files := make([]dms.DocumentFiles, 0)
+
+	err = global.GVA_DB.Model(&dms.DocumentFiles{}).Where("document_id = ?", document.ID).Find(&files).Error
+	if err != nil {
+		return nil, false, err
+	}
+
+	return files, canDownload, nil
+}
+
 func (documentsService *DocumentsService) attachBaseDocuments(document *dms.Documents) (err error) {
 	var refs []dms.DocumentRelationReferences
 	db := global.GVA_DB.Model(&dms.DocumentRelationReferences{})

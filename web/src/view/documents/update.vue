@@ -597,6 +597,40 @@
               </div>
             </div>
 
+            <div class="gva-card-box" style="margin: 1rem 0">
+              <div class="el-card is-always-shadow gva-card quick-entrance">
+                <div class="el-card__body">
+                  <div class="el-card__heading">
+                    <h3>Tập tin đính kèm</h3>
+                  </div>
+                  <el-form ref="elForm" :model="formFileData" label-position="top" label-width="150px">
+                    <el-form-item :label="formFileData.title">
+                      <el-upload
+                        ref="documentFileUpload"
+                        :action="`${path}/fileUploadAndDownload/upload`"
+                        :auto-upload="false"
+                        :before-upload="onBeforeUpload"
+                        :file-list="documentFileList"
+                        :headers="{ 'x-token': userStore.token }"
+                        :limit="1"
+                        :on-change="onSelectNewFile"
+                        :on-error="onUploadError"
+                        :on-remove="onRemoveFile"
+                        :on-success="onUploadSuccess"
+                        :show-file-list="true"
+                      >
+                        <el-button icon="el-icon-upload" size="small" type="primary">{{ formFileData.buttonTitle }}</el-button>
+                      </el-upload>
+                    </el-form-item>
+                    <el-form-item size="large">
+                      <el-button v-if="formFileData.userChooseFile" type="primary" @click="uploadFile">Tải tập tin đã chọn lên hệ thống</el-button>
+                    </el-form-item>
+                    <iframe v-if="formFileData.files.length > 0" :src="formFileData.src" style="width: 100%; height: 700px" />
+                  </el-form>
+                </div>
+              </div>
+            </div>
+
           </el-col>
           <el-col :lg="7" :sm="24">
             <div class="gva-card-box">2</div>
@@ -713,7 +747,7 @@ import { getDict } from '../../utils/dictionary'
 import { createDocumentAgencies, getDocumentAgenciesList } from '../../api/documentAgencies'
 import { createDocumentCategories, getDocumentCategoriesList } from '../../api/documentCategories'
 import { createDocumentFields, getDocumentFieldsList } from '../../api/documentFields'
-import { findDocuments, createDraftDocument, createFullDocument, getDocumentsList } from '../../api/documents'
+import { findDocuments, createDraftDocument, getDocumentFiles, getDocumentsList } from '../../api/documents'
 import { getUserList } from '../../api/user'
 import { getAuthorityInfo } from '../../api/authority'
 import { formatDate } from '../../utils/format'
@@ -722,6 +756,8 @@ const route = useRoute()
 const userStore = useUserStore()
 
 // ====================== init ref ========================
+
+const documentFileUpload = ref(null)
 
 const formBasicData = ref({
   title: '',
@@ -770,6 +806,15 @@ const formAuthorityData = ref({
   ownerRoles: []
 })
 
+const formFileData = ref({
+  title: '',
+  buttonTitle: '',
+  canDownload: false,
+  src: '',
+  files: [],
+  userChooseFile: false
+})
+
 const document = ref(null)
 const createdUserName = ref('')
 const createdTime = ref('')
@@ -783,6 +828,9 @@ const fieldsOptions = ref([])
 const categoryOptions = ref([])
 const agencyLevelOptions = ref([])
 const roleOptions = ref([])
+const documentFileList = ref([])
+
+const path = import.meta.env.VITE_BASE_API
 
 const searchInfo = ref({
   ID: Number(route.params.id)
@@ -914,6 +962,31 @@ const getDocument = async() => {
   }
 }
 
+const loadAttachedFiles = async() => {
+  const data = await getDocumentFiles({ id: searchInfo.value.ID })
+
+  if (data.code === 0) {
+    formFileData.value.files = [...data.data.files]
+    formFileData.value.canDownload = data.data.canDownload
+
+    let pdfSource = ''
+    if (formFileData.value.files.length > 0) {
+      formFileData.value.title = 'Cập nhật tập tin đính kèm'
+      formFileData.value.buttonTitle = 'Chọn tập tin cập nhật'
+      pdfSource = `${path}/${data.data.files[0].url}`
+    } else {
+      formFileData.value.title = 'Bổ sung tập tin đính kèm'
+      formFileData.value.buttonTitle = 'Chọn tập tin bổ sung'
+    }
+
+    if (!data.data.canDownload) {
+      pdfSource = pdfSource + '#toolbar=0'
+    }
+
+    formFileData.value.src = pdfSource
+  }
+}
+
 const loadStatusOptions = async() => {
   const data = await getDict('documentStatuses')
   statusOptions.value = data
@@ -982,6 +1055,7 @@ loadUserOptions()
 loadRoleOptions()
 loadPriorityOptions()
 loadStatusOptions()
+loadAttachedFiles()
 
 // ========== end of prepare data section ==================
 
@@ -1153,6 +1227,30 @@ const enterDocumentDialog = async() => {
 
     closeDocumentDialog()
   }
+}
+
+const onBeforeUpload = () => { }
+
+const onSelectNewFile = () => {
+  formFileData.value.userChooseFile = true
+}
+
+const onUploadError = (err) => {
+  ElMessage({
+    type: 'error',
+    message: 'Lỗi xảy ra trong quá trình tải lên tập tin! ' + err,
+  })
+}
+
+const onRemoveFile = () => {
+  formFileData.value.userChooseFile = false
+}
+
+const onUploadSuccess = async(response, uploadFile, uploadFiles) => {
+}
+
+const uploadFile = () => {
+  documentFileUpload.value.submit()
 }
 
 // ================= End of business section =================

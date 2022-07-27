@@ -244,3 +244,37 @@ func (documentsApi *DocumentsApi) GetDocumentsList(c *gin.Context) {
 		}, "success", c)
 	}
 }
+
+// GetFileList get list of files attached to the document
+// @Tags Documents
+// @Summary get list of files attached to the document
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data query dmsReq.DocumentsSearch true "get list of files attached to the document"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
+// @Router /documents/getFileList [get]
+func (documentsApi *DocumentsApi) GetFileList(c *gin.Context) {
+	var searchInfo request.GetById
+	var err error
+
+	err = c.ShouldBindQuery(&searchInfo)
+	if err != nil {
+		global.GVA_LOG.Error("provide valid search params", zap.Error(err))
+		response.FailWithMessage("provide valid search params", c)
+	}
+
+	canDownloadFile := true
+	user := utils.GetUserInfo(c)
+
+	if err = documentRulesService.CheckPermission(user.ID, user.UUID, uint(searchInfo.ID), dms.PERMISSION_DOWNLOAD); err != nil {
+		canDownloadFile = false
+	}
+
+	if files, cDownload, err := documentsService.GetDocumentFiles(searchInfo, canDownloadFile); err != nil {
+		global.GVA_LOG.Error("fail to get list of documents", zap.Error(err))
+		response.FailWithMessage("fail to get list of documents", c)
+	} else {
+		response.OkWithData(gin.H{"files": files, "canDownload": cDownload}, c)
+	}
+}

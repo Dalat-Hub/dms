@@ -127,3 +127,19 @@ export const getDocumentsList = (params) => {
     params,
   })
 }
+
+// @Tags Documents
+// @Summary get list of attached files
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data query request.GetByID true "get list of attached files"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
+// @Router /documents/getDocumentsList [get]
+export const getDocumentFiles = (params) => {
+  return service({
+    url: '/documents/getDocumentFiles',
+    method: 'get',
+    params,
+  })
+}
