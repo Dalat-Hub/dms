@@ -28,5 +28,6 @@ func (s *DocumentsRouter) InitDocumentsRouter(Router *gin.RouterGroup) {
 		documentsRouterWithoutRecord.GET("findDocuments", documentsApi.FindDocuments)
 		documentsRouterWithoutRecord.GET("getDocumentsList", documentsApi.GetDocumentsList)
 		documentsRouterWithoutRecord.GET("getDocumentFiles", documentsApi.GetFileList)
+		documentsRouterWithoutRecord.GET("getDocumentRevisions", documentsApi.GetDocumentRevisions)
 	}
 }

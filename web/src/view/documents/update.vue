@@ -13,20 +13,12 @@
                   <el-form ref="elForm" :model="formOwnerData" label-position="top" label-width="150px">
                     <el-form-item label="Văn bản được tạo bởi">
                       <el-col :span="11">
-                        <el-input
-                          v-model="createdUserName"
-                          :style="{ width: '100%' }"
-                          readonly
-                        />
+                        <el-input v-model="createdUserName" :style="{ width: '100%' }" readonly />
                       </el-col>
                       <el-col class="text-center" :span="2" style="width: 100%; text-align: center;">-</el-col>
 
                       <el-col :span="11">
-                        <el-input
-                          v-model="createdTime"
-                          :style="{ width: '100%' }"
-                          readonly
-                        />
+                        <el-input v-model="createdTime" :style="{ width: '100%' }" readonly />
                       </el-col>
 
                     </el-form-item>
@@ -105,7 +97,8 @@
                       </el-col>
                       <el-col class="el-col-6 el-col-lg-4">
                         <el-form-item label="">
-                          <el-button size="large" style="width: 100%" type="success" @click="openAgencyDialog"> Thêm Nhanh</el-button>
+                          <el-button size="large" style="width: 100%" type="success" @click="openAgencyDialog"> Thêm
+                            Nhanh</el-button>
                         </el-form-item>
                       </el-col>
                     </el-row>
@@ -132,7 +125,8 @@
                       </el-col>
                       <el-col class="el-col-6 el-col-lg-4">
                         <el-form-item label="">
-                          <el-button size="large" style="width: 100%" type="success" @click="openCategoryDialog"> Thêm Nhanh</el-button>
+                          <el-button size="large" style="width: 100%" type="success" @click="openCategoryDialog"> Thêm
+                            Nhanh</el-button>
                         </el-form-item>
                       </el-col>
                     </el-row>
@@ -222,7 +216,8 @@
                       </el-col>
                       <el-col class="el-col-6 el-col-lg-4">
                         <el-form-item label="">
-                          <el-button size="large" style="width: 100%" type="success" @click="openFieldDialog"> Thêm Nhanh</el-button>
+                          <el-button size="large" style="width: 100%" type="success" @click="openFieldDialog"> Thêm
+                            Nhanh</el-button>
                         </el-form-item>
                       </el-col>
                     </el-row>
@@ -383,12 +378,7 @@
                         multiple
                         placeholder="Chọn phòng ban liên quan"
                       >
-                        <el-option
-                          v-for="item in agencyOptions"
-                          :key="item.ID"
-                          :label="item.name"
-                          :value="item.ID"
-                        />
+                        <el-option v-for="item in agencyOptions" :key="item.ID" :label="item.name" :value="item.ID" />
                       </el-select>
                     </el-form-item>
                     <el-form-item label="Người dùng liên quan">
@@ -589,7 +579,8 @@
 
                     <el-form-item size="large">
                       <el-button type="info" @click="updateDocumentAuthority">Khôi phục như lúc đầu</el-button>
-                      <el-button type="primary" @click="updateDocumentAuthority">Cập nhật thông tin phân quyền</el-button>
+                      <el-button type="primary" @click="updateDocumentAuthority">Cập nhật thông tin phân quyền
+                      </el-button>
                     </el-form-item>
 
                   </el-form>
@@ -619,13 +610,19 @@
                         :on-success="onUploadSuccess"
                         :show-file-list="true"
                       >
-                        <el-button icon="el-icon-upload" size="small" type="primary">{{ formFileData.buttonTitle }}</el-button>
+                        <el-button icon="el-icon-upload" size="small" type="primary">{{ formFileData.buttonTitle }}
+                        </el-button>
                       </el-upload>
                     </el-form-item>
                     <el-form-item size="large">
-                      <el-button v-if="formFileData.userChooseFile" type="primary" @click="uploadFile">Tải tập tin đã chọn lên hệ thống</el-button>
+                      <el-button v-if="formFileData.userChooseFile" type="primary" @click="uploadFile">Tải tập tin đã
+                        chọn lên hệ thống</el-button>
                     </el-form-item>
-                    <iframe v-if="formFileData.files.length > 0" :src="formFileData.src" style="width: 100%; height: 700px" />
+                    <iframe
+                      v-if="formFileData.files.length > 0"
+                      :src="formFileData.src"
+                      style="width: 100%; height: 700px"
+                    />
                   </el-form>
                 </div>
               </div>
@@ -633,9 +630,40 @@
 
           </el-col>
           <el-col :lg="7" :sm="24">
-            <div class="gva-card-box">2</div>
+            <el-space :fill="true" wrap style="width: 100%">
+              <el-card v-for="d in revisions" :key="d.ID" class="box-card">
+                <template #header>
+                  <div class="card-header">
+                    <el-space :size="10" spacer="|">
+                      <el-button class="button" @click="openRevisionDetailPage(d.ID)">Xem chi tiết</el-button>
+                      <el-button class="button">Khôi phục</el-button>
+                    </el-space>
+                  </div>
+                </template>
 
-            <div class="gva-card-box" style="margin-top: 1rem;">3</div>
+                <div v-if="d.baseId === 0">
+                  <div class="text item">Bản gốc</div>
+                  <br>
+                  <div class="text item">{{ d.shortTitle }}</div>
+                  <br>
+                  <div class="text item">Được tạo bởi: {{ d.createdUser.nickName }}</div>
+                  <br>
+                  <div class="text item">Vào lúc: {{ formatDate(d.CreatedAt) }}</div>
+                </div>
+                <div v-else>
+                  <div class="text item">{{ d.shortTitle }}</div>
+                  <br>
+                  <div class="text item">Chỉnh sửa bởi: {{ d.updatedUser.nickName }}</div>
+                  <br>
+                  <div class="text item">Vào lúc: {{ formatDate(d.CreatedAt) }}</div>
+                  <br>
+                  <div class="text item">Được cập nhật từ: --</div>
+                  <br>
+                  <div class="text item">Truy vết: --</div>
+                </div>
+
+              </el-card>
+            </el-space>
           </el-col>
         </el-row>
       </el-col>
@@ -694,11 +722,7 @@
       </template>
     </el-dialog>
 
-    <el-dialog
-      v-model="documentDialogFormVisible"
-      :before-close="closeDocumentDialog"
-      title="Thêm nhanh văn bản"
-    >
+    <el-dialog v-model="documentDialogFormVisible" :before-close="closeDocumentDialog" title="Thêm nhanh văn bản">
       <el-form :model="documentFormData" label-position="right" label-width="120px">
         <el-form-item label="Tiêu đề">
           <el-input v-model="documentFormData.title" clearable placeholder="Tiêu đề văn bản" />
@@ -712,12 +736,7 @@
             multiple
             placeholder="Chọn người dùng liên quan"
           >
-            <el-option
-              v-for="item in usersOptions"
-              :key="item.ID"
-              :label="item.nickName"
-              :value="item.ID"
-            />
+            <el-option v-for="item in usersOptions" :key="item.ID" :label="item.nickName" :value="item.ID" />
           </el-select>
         </el-form-item>
       </el-form>
@@ -748,7 +767,7 @@ import { getDict } from '../../utils/dictionary'
 import { createDocumentAgencies, getDocumentAgenciesList } from '../../api/documentAgencies'
 import { createDocumentCategories, getDocumentCategoriesList } from '../../api/documentCategories'
 import { createDocumentFields, getDocumentFieldsList } from '../../api/documentFields'
-import { findDocuments, createDraftDocument, getDocumentFiles, getDocumentsList, updateBasicDocuments } from '../../api/documents'
+import { findDocuments, createDraftDocument, getDocumentFiles, getDocumentsList, updateBasicDocuments, getDocumentRevisions } from '../../api/documents'
 import { getUserList } from '../../api/user'
 import { getAuthorityInfo } from '../../api/authority'
 import { formatDate } from '../../utils/format'
@@ -830,6 +849,7 @@ const categoryOptions = ref([])
 const agencyLevelOptions = ref([])
 const roleOptions = ref([])
 const documentFileList = ref([])
+const revisions = ref([])
 
 const path = import.meta.env.VITE_BASE_API
 
@@ -1046,6 +1066,14 @@ const loadRoleOptions = async() => {
   }
 }
 
+const loadRevisions = async() => {
+  const data = await getDocumentRevisions({ id: searchInfo.value.ID })
+
+  if (data.code === 0) {
+    revisions.value = [...data.data.revisions]
+  }
+}
+
 getDocument()
 loadAgencyOptions()
 loadAgencyLevelOptions()
@@ -1057,6 +1085,7 @@ loadRoleOptions()
 loadPriorityOptions()
 loadStatusOptions()
 loadAttachedFiles()
+loadRevisions()
 
 // ========== end of prepare data section ==================
 

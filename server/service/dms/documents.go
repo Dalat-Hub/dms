@@ -659,6 +659,34 @@ func (documentsService *DocumentsService) GetDocumentsInfoList(info dmsReq.Docum
 	return documentss, total, err
 }
 
+// GetDocumentRevisions get list of revisions of the given documents
+func (documentsService *DocumentsService) GetDocumentRevisions(documentId uint) (list interface{}, err error) {
+	revisions := make([]*dms.Documents, 0)
+
+	err = global.GVA_DB.Model(&dms.Documents{}).
+		Where("type = ? AND base_id = ?", dms.TYPE_REVISION, documentId).
+		Find(&revisions).
+		Error
+
+	for _, v := range revisions {
+		err = documentsService.attachCreatedUser(v)
+		if err != nil {
+			return nil, err
+		}
+
+		err = documentsService.attachUpdatedUser(v)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return revisions, nil
+}
+
 // GetDocumentFiles get list of attached files
 func (documentsService *DocumentsService) GetDocumentFiles(info request.GetById, download bool) (list interface{}, canDownload bool, err error) {
 	var document dms.Documents

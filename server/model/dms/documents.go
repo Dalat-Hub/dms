@@ -32,6 +32,7 @@ type Documents struct {
 	Status           int       `json:"status" form:"status" gorm:"column:status;"`
 	Type             int       `json:"type" form:"type" gorm:"column:type;"`
 	Priority         int       `json:"priority" form:"priority" gorm:"column:priority;"`
+	BaseId           uint      `json:"baseId" form:"baseId" gorm:"column:base_id;size:10;"`
 	ParentId         uint      `json:"parentId" form:"parentId" gorm:"column:parent_id;size:10;"`
 	CurrentId        uint      `json:"currentId" form:"currentId" gorm:"column:current_id;size:10;"`
 	Path             string    `json:"path" form:"path" gorm:"column:path;"`

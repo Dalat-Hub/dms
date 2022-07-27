@@ -6,7 +6,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/response"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/dms"
 	dmsReq "github.com/flipped-aurora/gin-vue-admin/server/model/dms/request"
-	"github.com/flipped-aurora/gin-vue-admin/server/model/dms/request/documents"
+	reqDocuments "github.com/flipped-aurora/gin-vue-admin/server/model/dms/request/documents"
 	"github.com/flipped-aurora/gin-vue-admin/server/service"
 	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/gin-gonic/gin"
@@ -190,7 +190,7 @@ func (documentsApi *DocumentsApi) UpdateDocuments(c *gin.Context) {
 // @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
 // @Router /documents/updateBasicDocumentInformation [put]
 func (documentsApi *DocumentsApi) UpdateBasicDocumentInformation(c *gin.Context) {
-	var basic documents.UpdateBasic
+	var basic reqDocuments.UpdateBasic
 	var err error
 
 	err = c.ShouldBindJSON(&basic)
@@ -271,6 +271,33 @@ func (documentsApi *DocumentsApi) GetDocumentsList(c *gin.Context) {
 			Page:     pageInfo.Page,
 			PageSize: pageInfo.PageSize,
 		}, "success", c)
+	}
+}
+
+// GetDocumentRevisions get list of revision of the given document
+// @Tags Documents
+// @Summary get list of revision of the given document
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data query request.GetByID true "get list of revision of the given document"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
+// @Router /documents/getDocumentRevisions [get]
+func (documentsApi *DocumentsApi) GetDocumentRevisions(c *gin.Context) {
+	var info request.GetById
+	var err error
+
+	err = c.ShouldBindQuery(&info)
+	if err != nil {
+		global.GVA_LOG.Error("provide valid search params", zap.Error(err))
+		response.FailWithMessage("provide valid search params", c)
+	}
+
+	if list, err := documentsService.GetDocumentRevisions(uint(info.ID)); err != nil {
+		global.GVA_LOG.Error("fail to get list of revisions", zap.Error(err))
+		response.FailWithMessage("fail to get list of revisions", c)
+	} else {
+		response.OkWithData(gin.H{"revisions": list}, c)
 	}
 }
 

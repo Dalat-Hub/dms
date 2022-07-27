@@ -145,6 +145,22 @@ export const getDocumentsList = (params) => {
 }
 
 // @Tags Documents
+// @Summary get list of revisions
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data query request.GetByID true "get list of revisions"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
+// @Router /documents/getDocumentRevisions [get]
+export const getDocumentRevisions = (params) => {
+  return service({
+    url: '/documents/getDocumentRevisions',
+    method: 'get',
+    params,
+  })
+}
+
+// @Tags Documents
 // @Summary get list of attached files
 // @Security ApiKeyAuth
 // @accept application/json
