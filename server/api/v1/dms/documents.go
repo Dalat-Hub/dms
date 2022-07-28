@@ -64,7 +64,9 @@ func (documentsApi *DocumentsApi) CreateDraftDocument(c *gin.Context) {
 		response.FailWithMessage("provide valid document", c)
 	}
 
-	if doc, err := documentsService.CreateDraftDocument(draft); err != nil {
+	user := utils.GetUserInfo(c)
+
+	if doc, err := documentsService.CreateDraftDocument(draft, user.ID); err != nil {
 		global.GVA_LOG.Error("fail to create new draft document", zap.Error(err))
 		response.FailWithMessage("fail to create new draft document", c)
 	} else {
