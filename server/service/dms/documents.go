@@ -795,6 +795,27 @@ func (documentsService *DocumentsService) Duplicate(documentId uint, loginUserId
 		documentType = dms.TYPE_REVISION
 	}
 
+	var parentId uint = 0
+	var newPath = ""
+	var newBelongTo uint = 0
+	var newViewCount uint = 0
+	var newDownloadCount uint = 0
+	var newUpdatedBy uint = 0
+	var newCreatedBy = loginUserId
+	var newResponsibleBy = loginUserId
+
+	if docType != dms.TYPE_DOCUMENT {
+		newViewCount = oldDocument.ViewCount
+		newDownloadCount = oldDocument.DownloadCount
+		newUpdatedBy = oldDocument.UpdatedBy
+		newCreatedBy = oldDocument.CreatedBy
+		newResponsibleBy = oldDocument.BeResponsibleBy
+
+		newPath = oldDocument.Path
+		parentId = oldDocument.ParentId
+		newBelongTo = oldDocument.ID
+	}
+
 	newDocument = dms.Documents{
 		GVA_MODEL:        global.GVA_MODEL{},
 		Title:            oldDocument.Title,
@@ -812,17 +833,18 @@ func (documentsService *DocumentsService) Duplicate(documentId uint, loginUserId
 		SignText:         oldDocument.SignText + "@" + uuid.NewV4().String(),
 		CategoryId:       oldDocument.CategoryId,
 		AgencyId:         oldDocument.AgencyId,
-		CreatedBy:        loginUserId,
-		UpdatedBy:        0,
-		BeResponsibleBy:  loginUserId,
-		ViewCount:        0,
-		DownloadCount:    0,
+		CreatedBy:        newCreatedBy,
+		UpdatedBy:        newUpdatedBy,
+		BeResponsibleBy:  newResponsibleBy,
+		ViewCount:        newViewCount,
+		DownloadCount:    newDownloadCount,
 		Status:           oldDocument.Status,
 		Type:             documentType,
 		Priority:         oldDocument.Priority,
-		ParentId:         0,
+		ParentId:         parentId,
+		BelongTo:         newBelongTo,
 		CurrentId:        0,
-		Path:             "",
+		Path:             newPath,
 		PublicToView:     oldDocument.PublicToView,
 		PublicToDownload: oldDocument.PublicToDownload,
 	}
@@ -884,85 +906,97 @@ func (documentsService *DocumentsService) Duplicate(documentId uint, loginUserId
 		}
 
 		// 2. duplicate list of field references
-		for _, v := range oldFieldReferences {
-			v.DocumentId = newDocument.ID
-			v.ID = 0
-			v.CreatedAt = time.Now()
-			v.UpdatedAt = time.Now()
-		}
-
-		err = tx.Model(&dms.DocumentFieldReferences{}).Create(&oldFieldReferences).Error
-		if err != nil {
-			return err
-		}
-
-		// 3. duplicate list of document relations
-		for _, v := range oldDocumentRelations {
-			v.DocumentId = newDocument.ID
-			v.ID = 0
-			v.CreatedAt = time.Now()
-			v.UpdatedAt = time.Now()
-		}
-
-		err = tx.Model(&dms.DocumentRelationReferences{}).Create(&oldDocumentRelations).Error
-		if err != nil {
-			return err
-		}
-
-		// 4. duplicate list of authorities
-		if newDocument.Type == dms.TYPE_DOCUMENT {
-			for _, v := range oldAuthorities {
+		if len(oldFieldReferences) > 0 {
+			for _, v := range oldFieldReferences {
 				v.DocumentId = newDocument.ID
 				v.ID = 0
 				v.CreatedAt = time.Now()
 				v.UpdatedAt = time.Now()
 			}
 
-			err = tx.Model(&dms.DocumentRules{}).Create(&oldAuthorities).Error
+			err = tx.Model(&dms.DocumentFieldReferences{}).Create(&oldFieldReferences).Error
 			if err != nil {
 				return err
+			}
+		}
+
+		// 3. duplicate list of document relations
+		if len(oldDocumentRelations) > 0 {
+			for _, v := range oldDocumentRelations {
+				v.DocumentId = newDocument.ID
+				v.ID = 0
+				v.CreatedAt = time.Now()
+				v.UpdatedAt = time.Now()
+			}
+
+			err = tx.Model(&dms.DocumentRelationReferences{}).Create(&oldDocumentRelations).Error
+			if err != nil {
+				return err
+			}
+		}
+
+		// 4. duplicate list of authorities
+		if len(oldAuthorities) > 0 {
+			if newDocument.Type == dms.TYPE_DOCUMENT {
+				for _, v := range oldAuthorities {
+					v.DocumentId = newDocument.ID
+					v.ID = 0
+					v.CreatedAt = time.Now()
+					v.UpdatedAt = time.Now()
+				}
+
+				err = tx.Model(&dms.DocumentRules{}).Create(&oldAuthorities).Error
+				if err != nil {
+					return err
+				}
 			}
 		}
 
 		// 5. duplicate list of signers
-		for _, v := range oldSigners {
-			v.DocumentId = newDocument.ID
-			v.ID = 0
-			v.CreatedAt = time.Now()
-			v.UpdatedAt = time.Now()
-		}
-
-		err = tx.Model(&dms.DocumentSignerReferences{}).Create(&oldSigners).Error
-		if err != nil {
-			return err
-		}
-
-		// 6. duplicate list of attached users
-		if newDocument.Type == dms.TYPE_DOCUMENT {
-			for _, v := range oldUsers {
+		if len(oldSigners) > 0 {
+			for _, v := range oldSigners {
 				v.DocumentId = newDocument.ID
 				v.ID = 0
 				v.CreatedAt = time.Now()
 				v.UpdatedAt = time.Now()
 			}
 
-			err = tx.Model(&dms.DocumentUsers{}).Create(&oldUsers).Error
+			err = tx.Model(&dms.DocumentSignerReferences{}).Create(&oldSigners).Error
 			if err != nil {
 				return err
 			}
 		}
 
-		// 7. duplicate list of attached files
-		for _, v := range oldFiles {
-			v.DocumentId = newDocument.ID
-			v.ID = 0
-			v.CreatedAt = time.Now()
-			v.UpdatedAt = time.Now()
+		// 6. duplicate list of attached users
+		if len(oldUsers) > 0 {
+			if newDocument.Type == dms.TYPE_DOCUMENT {
+				for _, v := range oldUsers {
+					v.DocumentId = newDocument.ID
+					v.ID = 0
+					v.CreatedAt = time.Now()
+					v.UpdatedAt = time.Now()
+				}
+
+				err = tx.Model(&dms.DocumentUsers{}).Create(&oldUsers).Error
+				if err != nil {
+					return err
+				}
+			}
 		}
 
-		err = tx.Model(&dms.DocumentFiles{}).Create(&oldFiles).Error
-		if err != nil {
-			return err
+		// 7. duplicate list of attached files
+		if len(oldFiles) > 0 {
+			for _, v := range oldFiles {
+				v.DocumentId = newDocument.ID
+				v.ID = 0
+				v.CreatedAt = time.Now()
+				v.UpdatedAt = time.Now()
+			}
+
+			err = tx.Model(&dms.DocumentFiles{}).Create(&oldFiles).Error
+			if err != nil {
+				return err
+			}
 		}
 
 		return nil
