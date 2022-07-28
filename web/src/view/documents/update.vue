@@ -1,6 +1,11 @@
 <template>
   <div>
     <el-row justify="center">
+      <warning-bar
+        v-if="document && document.type != 1"
+        :title="`Bạn đang xem phiên bản sao lưu của tài liệu: ${document && document.shortTitle}`"
+      />
+
       <el-col :lg="22">
         <el-row :gutter="10">
           <el-col :lg="17" :sm="24">
@@ -642,24 +647,17 @@
                 </template>
 
                 <div v-if="d.baseId === 0">
-                  <div class="text item">Bản gốc</div>
-                  <br>
-                  <div class="text item">{{ d.shortTitle }}</div>
-                  <br>
-                  <div class="text item">Được tạo bởi: {{ d.createdUser.nickName }}</div>
-                  <br>
-                  <div class="text item">Vào lúc: {{ formatDate(d.CreatedAt) }}</div>
+                  <div style="margin-bottom: 10px" class="text item">Bản gốc</div>
+                  <div style="margin-bottom: 10px" class="text item">{{ d.shortTitle }}</div>
+                  <div style="margin-bottom: 10px" class="text item">Được tạo bởi: {{ d.createdUser?.nickName || '' }}</div>
+                  <div style="margin-bottom: 10px" class="text item">Vào lúc: {{ formatDate(d.CreatedAt) }}</div>
                 </div>
                 <div v-else>
-                  <div class="text item">{{ d.shortTitle }}</div>
-                  <br>
-                  <div class="text item">Chỉnh sửa bởi: {{ d.updatedUser.nickName }}</div>
-                  <br>
-                  <div class="text item">Vào lúc: {{ formatDate(d.CreatedAt) }}</div>
-                  <br>
-                  <div class="text item">Được cập nhật từ: --</div>
-                  <br>
-                  <div class="text item">Truy vết: --</div>
+                  <div style="margin-bottom: 10px" class="text item">{{ d.shortTitle }}</div>
+                  <div v-if="d.updatedUser && d.updatedUser.nickName" style="margin-bottom: 10px" class="text item">Chỉnh sửa bởi: {{ d.updatedUser.nickName }}</div>
+                  <div style="margin-bottom: 10px" class="text item">Vào lúc: {{ formatDate(d.CreatedAt) }}</div>
+                  <div style="margin-bottom: 10px" class="text item">Được cập nhật từ: --</div>
+                  <div style="margin-bottom: 10px" class="text item">Truy vết: --</div>
                 </div>
 
               </el-card>
@@ -759,8 +757,10 @@ export default {
 
 <script setup>
 import { ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+
+import WarningBar from '@/components/warningBar/warningBar.vue'
 
 import { useUserStore } from '@/pinia/modules/user'
 import { getDict } from '../../utils/dictionary'
@@ -773,6 +773,7 @@ import { getAuthorityInfo } from '../../api/authority'
 import { formatDate } from '../../utils/format'
 
 const route = useRoute()
+const router = useRouter()
 const userStore = useUserStore()
 
 // ====================== init ref ========================
@@ -1091,6 +1092,15 @@ loadRevisions()
 
 // ================= Reactive section =================
 
+const openRevisionDetailPage = (documentId) => {
+  router.push({
+    name: 'documents-update',
+    params: {
+      id: documentId
+    }
+  })
+}
+
 const handleOnAgencyChange = (selected) => {
   if (selected) {
     formBasicData.value.agencyReadonly = agencyOptions.value.find(f => f.ID === selected)?.code
@@ -1177,6 +1187,8 @@ const updateBasicDocument = async() => {
   })
 
   if (data.code === 0) {
+    loadRevisions()
+
     ElMessage({
       type: 'success',
       message: 'Cập nhật thông tin cơ bản thành công'
