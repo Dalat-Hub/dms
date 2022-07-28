@@ -229,8 +229,8 @@ func (documentsApi *DocumentsApi) FindDocuments(c *gin.Context) {
 
 	user := utils.GetUserInfo(c)
 	if err = documentRulesService.CheckPermission(user.ID, user.UUID, documents.ID, dms.PERMISSION_VIEW); err != nil {
-		global.GVA_LOG.Error("forbiden", zap.Error(err))
-		response.FailWithMessage("forbiden", c)
+		global.GVA_LOG.Error("you don't have permission to view the desired document", zap.Error(err))
+		response.FailWithMessage("you don't have permission to view the desired document", c)
 		return
 	}
 
