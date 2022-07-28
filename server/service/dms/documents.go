@@ -671,16 +671,25 @@ func (documentsService *DocumentsService) GetDocumentRevisions(documentId uint) 
 	for _, v := range revisions {
 		err = documentsService.attachCreatedUser(v)
 		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				continue
+			}
+
 			return nil, err
 		}
 
 		err = documentsService.attachUpdatedUser(v)
+
 		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				continue
+			}
+
 			return nil, err
 		}
 	}
 
-	if err != nil {
+	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, err
 	}
 
