@@ -655,50 +655,43 @@ func (documentsService *DocumentsService) GetDocuments(doc dmsReq.DocumentsSearc
 	}
 
 	if doc.PreloadBasedDocs == 1 {
-		err = documentsService.attachBaseDocuments(&document)
-		if err != nil {
+		if err, panicErr := documentsService.attachBaseDocuments(&document); panicErr {
 			return nil, err
 		}
 	}
 
 	if doc.PreloadRelatedDocs == 1 {
-		err = documentsService.attachReferencesDocuments(&document)
-		if err != nil {
+		if err, panicErr := documentsService.attachReferencesDocuments(&document); panicErr {
 			return nil, err
 		}
 	}
 
 	if doc.PreloadRelatedUsers == 1 {
-		err = documentsService.attachRelatedUsers(&document)
-		if err != nil {
+		if err, panicErr := documentsService.attachRelatedUsers(&document); panicErr {
 			return nil, err
 		}
 	}
 
 	if doc.PreloadRelatedAgencies == 1 {
-		err = documentsService.attachRelatedAgencies(&document)
-		if err != nil {
+		if err, panicErr := documentsService.attachRelatedAgencies(&document); panicErr {
 			return nil, err
 		}
 	}
 
 	if doc.PreloadCreatedBy == 1 {
-		err = documentsService.attachCreatedUser(&document)
-		if err != nil {
+		if err, panicErr := documentsService.attachCreatedUser(&document); panicErr {
 			return nil, err
 		}
 	}
 
 	if doc.PreloadUpdatedBy == 1 {
-		err = documentsService.attachUpdatedUser(&document)
-		if err != nil {
+		if err, panicErr := documentsService.attachUpdatedUser(&document); panicErr {
 			return nil, err
 		}
 	}
 
 	if doc.PreloadBeResponsibleBy == 1 {
-		err = documentsService.attachResponsibleUser(&document)
-		if err != nil {
+		if err, panicErr := documentsService.attachResponsibleUser(&document); panicErr {
 			return nil, err
 		}
 	}
@@ -706,8 +699,7 @@ func (documentsService *DocumentsService) GetDocuments(doc dmsReq.DocumentsSearc
 	if doc.PreloadAuthority == 1 {
 		service := new(DocumentRulesService)
 		if err := service.CheckPermission(userId, userUUID, document.ID, dms.PERMISSION_OWNER); err == nil {
-			err = documentsService.attachAuthority(&document)
-			if err != nil {
+			if err, panicErr := documentsService.attachAuthority(&document); panicErr {
 				return nil, err
 			}
 		}
@@ -739,33 +731,22 @@ func (documentsService *DocumentsService) GetDocumentRevisions(documentId uint) 
 	revisions := make([]*dms.Documents, 0)
 
 	err = global.GVA_DB.Model(&dms.Documents{}).
-		Where("type = ? AND base_id = ?", dms.TYPE_REVISION, documentId).
+		Where("type = ? AND belong_to = ?", dms.TYPE_REVISION, documentId).
 		Find(&revisions).
 		Error
 
-	for _, v := range revisions {
-		err = documentsService.attachCreatedUser(v)
-		if err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				continue
-			}
-
-			return nil, err
-		}
-
-		err = documentsService.attachUpdatedUser(v)
-
-		if err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				continue
-			}
-
-			return nil, err
-		}
+	if err != nil {
+		return nil, err
 	}
 
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, err
+	for _, v := range revisions {
+		if err, panicErr := documentsService.attachCreatedUser(v); panicErr {
+			return nil, err
+		}
+
+		if err, panicErr := documentsService.attachUpdatedUser(v); panicErr {
+			return nil, err
+		}
 	}
 
 	return revisions, nil
@@ -996,13 +977,17 @@ func (documentsService *DocumentsService) Duplicate(documentId uint, loginUserId
 
 // ===================== INTERNAL METHODS SECTION ========================
 
-func (documentsService *DocumentsService) attachBaseDocuments(document *dms.Documents) (err error) {
+func (documentsService *DocumentsService) attachBaseDocuments(document *dms.Documents) (err error, panicErr bool) {
 	var refs []dms.DocumentRelationReferences
 	db := global.GVA_DB.Model(&dms.DocumentRelationReferences{})
 
 	err = db.Select("dest_id").Where("document_id = ? AND relation_type = ?", document.ID, "base").Find(&refs).Error
 	if err != nil {
-		return nil
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err, true
+		}
+
+		return err, false
 	}
 
 	var documentIds []uint
@@ -1014,19 +999,27 @@ func (documentsService *DocumentsService) attachBaseDocuments(document *dms.Docu
 
 	err = db.Find(&document.BasedDocuments, documentIds).Error
 	if err != nil {
-		return nil
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err, true
+		}
+
+		return err, false
 	}
 
-	return nil
+	return nil, false
 }
 
-func (documentsService *DocumentsService) attachReferencesDocuments(document *dms.Documents) (err error) {
+func (documentsService *DocumentsService) attachReferencesDocuments(document *dms.Documents) (err error, panicErr bool) {
 	var refs []dms.DocumentRelationReferences
 	db := global.GVA_DB.Model(&dms.DocumentRelationReferences{})
 
 	err = db.Select("dest_id").Where("document_id = ? AND relation_type = ?", document.ID, "relation").Find(&refs).Error
 	if err != nil {
-		return nil
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err, true
+		}
+
+		return err, false
 	}
 
 	var documentIds []uint
@@ -1038,19 +1031,27 @@ func (documentsService *DocumentsService) attachReferencesDocuments(document *dm
 
 	err = db.Find(&document.RelatedDocuments, documentIds).Error
 	if err != nil {
-		return nil
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err, true
+		}
+
+		return err, false
 	}
 
-	return nil
+	return nil, false
 }
 
-func (documentsService *DocumentsService) attachRelatedUsers(document *dms.Documents) (err error) {
+func (documentsService *DocumentsService) attachRelatedUsers(document *dms.Documents) (err error, panicErr bool) {
 	var refs []dms.DocumentRelationReferences
 	db := global.GVA_DB.Model(&dms.DocumentRelationReferences{})
 
 	err = db.Select("dest_id").Where("document_id = ? AND relation_type = ?", document.ID, "user").Find(&refs).Error
 	if err != nil {
-		return nil
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err, true
+		}
+
+		return err, false
 	}
 
 	var documentIds []uint
@@ -1062,19 +1063,27 @@ func (documentsService *DocumentsService) attachRelatedUsers(document *dms.Docum
 
 	err = db.Find(&document.RelatedUsers, documentIds).Error
 	if err != nil {
-		return nil
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err, true
+		}
+
+		return err, false
 	}
 
-	return nil
+	return nil, false
 }
 
-func (documentsService *DocumentsService) attachRelatedAgencies(document *dms.Documents) (err error) {
+func (documentsService *DocumentsService) attachRelatedAgencies(document *dms.Documents) (err error, panicErr bool) {
 	var refs []dms.DocumentRelationReferences
 	db := global.GVA_DB.Model(&dms.DocumentRelationReferences{})
 
 	err = db.Select("dest_id").Where("document_id = ? AND relation_type = ?", document.ID, "agency").Find(&refs).Error
 	if err != nil {
-		return nil
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err, true
+		}
+
+		return err, false
 	}
 
 	var documentIds []uint
@@ -1086,62 +1095,82 @@ func (documentsService *DocumentsService) attachRelatedAgencies(document *dms.Do
 
 	err = db.Find(&document.RelatedAgencies, documentIds).Error
 	if err != nil {
-		return nil
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err, true
+		}
+
+		return err, false
 	}
 
-	return nil
+	return nil, false
 }
 
-func (documentsService *DocumentsService) attachCreatedUser(document *dms.Documents) (err error) {
+func (documentsService *DocumentsService) attachCreatedUser(document *dms.Documents) (err error, panicErr bool) {
 	db := global.GVA_DB.Model(&sysModel.SysUser{})
 	var user sysModel.SysUser
 
 	err = db.First(&user, "id = ?", document.CreatedBy).Error
 	if err != nil {
-		return err
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err, true
+		}
+
+		return err, false
 	}
 
 	document.CreatedUser = &user
 
-	return nil
+	return nil, false
 }
 
-func (documentsService *DocumentsService) attachUpdatedUser(document *dms.Documents) (err error) {
+func (documentsService *DocumentsService) attachUpdatedUser(document *dms.Documents) (err error, panicErr bool) {
 	db := global.GVA_DB.Model(&sysModel.SysUser{})
 	var user sysModel.SysUser
 
 	err = db.First(&user, "id = ?", document.UpdatedBy).Error
 	if err != nil {
-		return err
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, true
+		}
+
+		return err, false
 	}
 
 	document.UpdatedUser = &user
 
-	return nil
+	return nil, false
 }
 
-func (documentsService *DocumentsService) attachResponsibleUser(document *dms.Documents) (err error) {
+func (documentsService *DocumentsService) attachResponsibleUser(document *dms.Documents) (err error, panicErr bool) {
 	db := global.GVA_DB.Model(&sysModel.SysUser{})
 	var user sysModel.SysUser
 
 	err = db.First(&user, "id = ?", document.BeResponsibleBy).Error
 	if err != nil {
-		return err
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, true
+		}
+
+		return err, false
 	}
 
 	document.ResponsibleUser = &user
 
-	return nil
+	return nil, false
 }
 
-func (documentsService *DocumentsService) attachAuthority(document *dms.Documents) (err error) {
+func (documentsService *DocumentsService) attachAuthority(document *dms.Documents) (err error, panicErr bool) {
 	documentRuleDb := global.GVA_DB.Model(&dms.DocumentRules{})
 
 	var documentRules []dms.DocumentRules
 
 	err = documentRuleDb.Where("document_id = ?", document.ID).Find(&documentRules).Error
 	if err != nil {
-		return err
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return err, true
+		}
+
+		return err, false
 	}
 
 	documentAuthority := new(response.DocumentAuthority)
@@ -1162,7 +1191,11 @@ func (documentsService *DocumentsService) attachAuthority(document *dms.Document
 			var user sysModel.SysUser
 			err = global.GVA_DB.Model(&sysModel.SysUser{}).First(&user, "id = ?", d.SubjectId).Error
 			if err != nil {
-				return err
+				if !errors.Is(err, gorm.ErrRecordNotFound) {
+					return err, true
+				}
+
+				return err, false
 			}
 
 			if d.Permission == dms.PERMISSION_VIEW {
@@ -1178,7 +1211,11 @@ func (documentsService *DocumentsService) attachAuthority(document *dms.Document
 			var role sysModel.SysAuthority
 			err = global.GVA_DB.Model(sysModel.SysAuthority{}).First(&role, "authority_id = ?", d.SubjectId).Error
 			if err != nil {
-				return err
+				if !errors.Is(err, gorm.ErrRecordNotFound) {
+					return err, true
+				}
+
+				return err, false
 			}
 
 			if d.Permission == dms.PERMISSION_VIEW {
@@ -1220,7 +1257,7 @@ func (documentsService *DocumentsService) attachAuthority(document *dms.Document
 
 	document.Authority = documentAuthority
 
-	return nil
+	return nil, false
 }
 
 // ===================== END OF INTERNAL METHODS SECTION ========================
