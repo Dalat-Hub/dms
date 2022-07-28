@@ -1,6 +1,7 @@
 package dms
 
 import (
+	"errors"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/dms"
@@ -11,6 +12,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"gopkg.in/guregu/null.v4"
 	"gorm.io/gorm"
+	"strconv"
 	"time"
 )
 
@@ -24,37 +26,41 @@ func (documentsService *DocumentsService) CreateDocuments(documents dms.Document
 }
 
 // CreateDraftDocument create new draft document
-func (documentsService *DocumentsService) CreateDraftDocument(draft dmsReq.DraftDocument) (doc *dms.Documents, err error) {
+func (documentsService *DocumentsService) CreateDraftDocument(draft dmsReq.DraftDocument, loginUserId uint) (doc *dms.Documents, err error) {
 	var document dms.Documents
 
 	err = global.GVA_DB.Transaction(func(tx *gorm.DB) error {
 		document = dms.Documents{
-			GVA_MODEL:       global.GVA_MODEL{},
-			Title:           draft.Title,
-			ShortTitle:      "",
-			Expert:          "",
-			Content:         "",
-			DateIssued:      null.Time{},
-			StillInEffect:   false,
-			EffectDate:      null.Time{},
-			ExpirationDate:  null.Time{},
-			SignNumber:      0,
-			SignYear:        0,
-			SignCategory:    "",
-			SignAgency:      "",
-			SignText:        uuid.NewV4().String(),
-			CategoryId:      0,
-			AgencyId:        0,
-			CreatedBy:       0,
-			BeResponsibleBy: 0,
-			ViewCount:       0,
-			DownloadCount:   0,
-			Status:          dms.STATUS_DRAFT,
-			Type:            dms.TYPE_DOCUMENT,
-			Priority:        dms.PRIORITY_NORMAL,
-			ParentId:        0,
-			CurrentId:       0,
-			Path:            "",
+			GVA_MODEL:        global.GVA_MODEL{},
+			Title:            draft.Title,
+			ShortTitle:       "",
+			Expert:           "",
+			Content:          "",
+			DateIssued:       null.Time{},
+			StillInEffect:    false,
+			EffectDate:       null.Time{},
+			ExpirationDate:   null.Time{},
+			SignNumber:       0,
+			SignYear:         0,
+			SignCategory:     "",
+			SignAgency:       "",
+			SignText:         uuid.NewV4().String(),
+			CategoryId:       0,
+			AgencyId:         0,
+			CreatedBy:        loginUserId,
+			UpdatedBy:        0,
+			BeResponsibleBy:  loginUserId,
+			ViewCount:        0,
+			DownloadCount:    0,
+			Status:           dms.STATUS_DRAFT,
+			Type:             dms.TYPE_DOCUMENT,
+			Priority:         dms.PRIORITY_NORMAL,
+			BelongTo:         0,
+			ParentId:         0,
+			CurrentId:        0,
+			Path:             "",
+			PublicToView:     false,
+			PublicToDownload: false,
 		}
 
 		err = tx.Model(&dms.Documents{}).Create(&document).Error
@@ -80,6 +86,40 @@ func (documentsService *DocumentsService) CreateDraftDocument(draft dmsReq.Draft
 			if err != nil {
 				return err
 			}
+		}
+
+		// authorizing
+		authorities := make([]dms.DocumentRules, 0)
+
+		authorities = append(authorities, dms.DocumentRules{
+			GVA_MODEL:  global.GVA_MODEL{},
+			DocumentId: document.ID,
+			Permission: dms.PERMISSION_OWNER,
+			SubjectId:  loginUserId,
+			Type:       dms.RULE_TYPE_USER,
+		})
+
+		for _, v := range relatedUsers {
+			authorities = append(authorities, dms.DocumentRules{
+				GVA_MODEL:  global.GVA_MODEL{},
+				DocumentId: document.ID,
+				Permission: dms.PERMISSION_VIEW,
+				SubjectId:  v.ID,
+				Type:       dms.RULE_TYPE_USER,
+			})
+
+			authorities = append(authorities, dms.DocumentRules{
+				GVA_MODEL:  global.GVA_MODEL{},
+				DocumentId: document.ID,
+				Permission: dms.PERMISSION_EDIT,
+				SubjectId:  v.ID,
+				Type:       dms.RULE_TYPE_USER,
+			})
+		}
+
+		err = tx.Model(&dms.DocumentRules{}).Create(&authorities).Error
+		if err != nil {
+			return err
 		}
 
 		return nil
