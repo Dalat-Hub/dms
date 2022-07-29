@@ -12,69 +12,90 @@ import (
 	"github.com/swaggo/gin-swagger/swaggerFiles"
 )
 
-// 初始化总路由
+// Initialize the master routes
 
 func Routers() *gin.Engine {
 	Router := gin.Default()
+	dmsRouter := router.RouterGroupApp.Dms
 	systemRouter := router.RouterGroupApp.System
 	exampleRouter := router.RouterGroupApp.Example
-	// 如果想要不使用nginx代理前端网页，可以修改 web/.env.production 下的
+	// If you want to not use nginx to proxy the front-end web pages, you can modify the web/.env.production under
 	// VUE_APP_BASE_API = /
 	// VUE_APP_BASE_PATH = http://localhost
-	// 然后执行打包命令 npm run build。在打开下面4行注释
+	// Then execute the packaging command npm run build. Comment 4 lines below open
 	// Router.LoadHTMLGlob("./dist/*.html") // npm打包成dist的路径
 	// Router.Static("/favicon.ico", "./dist/favicon.ico")
-	// Router.Static("/static", "./dist/assets")   // dist里面的静态资源
-	// Router.StaticFile("/", "./dist/index.html") // 前端网页入口页面
+	// Router.Static("/static", "./dist/assets")   // Static resources in dist
+	// Router.StaticFile("/", "./dist/index.html") // Front-end webpage entry page
 
-	Router.StaticFS(global.GVA_CONFIG.Local.Path, http.Dir(global.GVA_CONFIG.Local.StorePath)) // 为用户头像和文件提供静态地址
-	// Router.Use(middleware.LoadTls())  // 如果需要使用https 请打开此中间件 然后前往 core/server.go 将启动模式 更变为 Router.RunTLS("端口","你的cre/pem文件","你的key文件")
-	// 跨域，如需跨域可以打开下面的注释
-	// Router.Use(middleware.Cors()) // 直接放行全部跨域请求
-	//Router.Use(middleware.CorsByRules()) // 按照配置的规则放行跨域请求
+	// Provide static addresses for user avatars and files
+	Router.StaticFS(global.GVA_CONFIG.Local.Path, http.Dir(global.GVA_CONFIG.Local.StorePath))
+
+	// If you need to use https, please open this middleware and go to core/server.go and change the startup mode to Router.RunTLS("port", "your cre/pem file", "your key file")
+	// Router.Use(middleware.LoadTls())
+
+	// Cross-domain, if you need to cross-domain, you can open the comment below
+	// Router.Use(middleware.Cors()) // Directly release all cross-domain requests
+
+	//Router.Use(middleware.CorsByRules()) // Release cross-origin requests according to the configured rules
 	//global.GVA_LOG.Info("use middleware cors")
+
 	Router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	global.GVA_LOG.Info("register swagger handler")
-	// 方便统一添加路由组前缀 多服务器上线使用
+
+	// It is convenient to uniformly add routing group prefixes and use multiple servers online.
 
 	PublicGroup := Router.Group("")
 	{
-		// 健康监测
+		// health monitoring
 		PublicGroup.GET("/health", func(c *gin.Context) {
 			c.JSON(200, "ok")
 		})
 	}
 	{
-		systemRouter.InitBaseRouter(PublicGroup) // 注册基础功能路由 不做鉴权
-		systemRouter.InitInitRouter(PublicGroup) // 自动初始化相关
+		systemRouter.InitBaseRouter(PublicGroup) // Register basic function routing without authentication
+		systemRouter.InitInitRouter(PublicGroup) // Automatic initialization related
 	}
+
 	PrivateGroup := Router.Group("")
 	PrivateGroup.Use(middleware.JWTAuth()).Use(middleware.CasbinHandler())
 	{
-		systemRouter.InitApiRouter(PrivateGroup)                 // 注册功能api路由
-		systemRouter.InitJwtRouter(PrivateGroup)                 // jwt相关路由
-		systemRouter.InitUserRouter(PrivateGroup)                // 注册用户路由
-		systemRouter.InitMenuRouter(PrivateGroup)                // 注册menu路由
-		systemRouter.InitSystemRouter(PrivateGroup)              // system相关路由
-		systemRouter.InitCasbinRouter(PrivateGroup)              // 权限相关路由
-		systemRouter.InitAutoCodeRouter(PrivateGroup)            // 创建自动化代码
-		systemRouter.InitAuthorityRouter(PrivateGroup)           // 注册角色路由
-		systemRouter.InitSysDictionaryRouter(PrivateGroup)       // 字典管理
-		systemRouter.InitAutoCodeHistoryRouter(PrivateGroup)     // 自动化代码历史
-		systemRouter.InitSysOperationRecordRouter(PrivateGroup)  // 操作记录
-		systemRouter.InitSysDictionaryDetailRouter(PrivateGroup) // 字典详情管理
-		systemRouter.InitAuthorityBtnRouterRouter(PrivateGroup)  // 字典详情管理
+		systemRouter.InitApiRouter(PrivateGroup)                 // register function api route
+		systemRouter.InitJwtRouter(PrivateGroup)                 // jwt related routes
+		systemRouter.InitUserRouter(PrivateGroup)                // registered user routing
+		systemRouter.InitMenuRouter(PrivateGroup)                // register menu route
+		systemRouter.InitSystemRouter(PrivateGroup)              // system related routes
+		systemRouter.InitCasbinRouter(PrivateGroup)              // permission related routing
+		systemRouter.InitAutoCodeRouter(PrivateGroup)            // create automation code
+		systemRouter.InitAuthorityRouter(PrivateGroup)           // register role routing
+		systemRouter.InitSysDictionaryRouter(PrivateGroup)       // dictionary management
+		systemRouter.InitAutoCodeHistoryRouter(PrivateGroup)     // automate code history
+		systemRouter.InitSysOperationRecordRouter(PrivateGroup)  // operation record
+		systemRouter.InitSysDictionaryDetailRouter(PrivateGroup) // dictionary details management
+		systemRouter.InitAuthorityBtnRouterRouter(PrivateGroup)  // dictionary details management
 
-		exampleRouter.InitExcelRouter(PrivateGroup)                 // 表格导入导出
-		exampleRouter.InitCustomerRouter(PrivateGroup)              // 客户路由
-		exampleRouter.InitFileUploadAndDownloadRouter(PrivateGroup) // 文件上传下载功能路由
+		exampleRouter.InitExcelRouter(PrivateGroup)                 // table import and export
+		exampleRouter.InitCustomerRouter(PrivateGroup)              // customer routing
+		exampleRouter.InitFileUploadAndDownloadRouter(PrivateGroup) // file upload and download function routing
 
 		// Code generated by github.com/flipped-aurora/gin-vue-admin/server Begin; DO NOT EDIT.
 
+		dmsRouter.InitDocumentAgenciesRouter(PrivateGroup)
+		dmsRouter.InitDocumentCategoriesRouter(PrivateGroup)
+		dmsRouter.InitDocumentFieldReferencesRouter(PrivateGroup)
+		dmsRouter.InitDocumentFieldsRouter(PrivateGroup)
+		dmsRouter.InitDocumentFilesRouter(PrivateGroup)
+		dmsRouter.InitDocumentPriorityLevelsRouter(PrivateGroup)
+		dmsRouter.InitDocumentRelationReferencesRouter(PrivateGroup)
+		dmsRouter.InitDocumentSignerReferencesRouter(PrivateGroup)
+		dmsRouter.InitDocumentsRouter(PrivateGroup)
+		dmsRouter.InitDocumentUsersRouter(PrivateGroup)
+		dmsRouter.InitDocumentRulesRouter(PrivateGroup)
+		dmsRouter.InitDocumentSignersRouter(PrivateGroup)
 		// Code generated by github.com/flipped-aurora/gin-vue-admin/server End; DO NOT EDIT.
 	}
 
-	InstallPlugin(Router) // 安装插件
+	InstallPlugin(Router) // install the plugin
 
 	global.GVA_LOG.Info("router register success")
 	return Router
