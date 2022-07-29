@@ -194,7 +194,7 @@ func (documentsService *DocumentsService) CreateFullDocument(full dmsReq.FullDoc
 				signers = append(signers, dms.DocumentSignerReferences{
 					GVA_MODEL:  global.GVA_MODEL{},
 					DocumentId: document.ID,
-					UserId:     userId,
+					SignerId:   userId,
 				})
 			}
 

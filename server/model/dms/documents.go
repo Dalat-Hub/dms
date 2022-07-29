@@ -42,7 +42,7 @@ type Documents struct {
 	Agency   *DocumentAgencies   `json:"agency" gorm:"foreignKey:AgencyId"`
 	Category *DocumentCategories `json:"category" gorm:"foreignKey:CategoryId"`
 	Fields   []*DocumentFields   `json:"fields" gorm:"many2many:document_field_references;foreignKey:ID;joinForeignKey:DocumentId;References:ID;joinReferences:FieldId;"`
-	Signers  []*sysModel.SysUser `json:"signers" gorm:"many2many:document_signer_references;foreignKey:ID;joinForeignKey:DocumentId;References:ID;joinReferences:UserId;"`
+	Signers  []*DocumentSigners  `json:"signers" gorm:"many2many:document_signer_references;foreignKey:ID;joinForeignKey:DocumentId;References:ID;joinReferences:SignerId;"`
 
 	CreatedUser     *sysModel.SysUser `json:"createdUser" gorm:"-"`
 	UpdatedUser     *sysModel.SysUser `json:"updatedUser" gorm:"-"`
