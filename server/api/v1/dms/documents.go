@@ -238,6 +238,34 @@ func (documentsApi *DocumentsApi) UpdateRelatedDocumentInformation(c *gin.Contex
 	}
 }
 
+// UpdateDocumentFiles update document attached files
+// @Tags Documents
+// @Summary update document attached files
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body dms.Documents true "update attached document files"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
+// @Router /documents/updateDocumentFiles [put]
+func (documentsApi *DocumentsApi) UpdateDocumentFiles(c *gin.Context) {
+	var file reqDocuments.UpdateFile
+	var err error
+
+	err = c.ShouldBindJSON(&file)
+	if err != nil {
+		global.GVA_LOG.Error("provide valid updated document", zap.Error(err))
+		response.FailWithMessage("provide valid updated document", c)
+		return
+	}
+
+	if err = documentsService.UpdateDocumentAttachedFiles(file); err != nil {
+		global.GVA_LOG.Error("fail to update document", zap.Error(err))
+		response.FailWithMessage("fail to update document", c)
+	} else {
+		response.OkWithMessage("success", c)
+	}
+}
+
 // FindDocuments find document by ID
 // @Tags Documents
 // @Summary find document by ID

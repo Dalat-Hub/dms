@@ -743,6 +743,94 @@ func (documentsService *DocumentsService) UpdateRelationDocumentInformation(rela
 	return err
 }
 
+// UpdateDocumentAttachedFiles update document attached files
+func (documentsService *DocumentsService) UpdateDocumentAttachedFiles(fileInfo documents.UpdateFile) (err error) {
+	var oldDocument dms.Documents
+	err = global.GVA_DB.Model(&dms.Documents{}).First(&oldDocument, "id = ?", fileInfo.ID).Error
+	if err != nil {
+		return err
+	}
+
+	var revisionDocument *dms.Documents
+	revisionDocument, err = documentsService.Duplicate(oldDocument.ID, fileInfo.UpdatedBy, dms.TYPE_REVISION)
+	if err != nil {
+		return err
+	}
+
+	oldDocument.UpdatedBy = fileInfo.UpdatedBy
+	oldDocument.BeResponsibleBy = fileInfo.BeResponsibleBy
+
+	if oldDocument.Path == "" {
+		oldDocument.Path = strconv.Itoa(int(revisionDocument.ID))
+	} else {
+		oldDocument.Path = strconv.Itoa(int(revisionDocument.ID)) + "/" + oldDocument.Path
+	}
+
+	oldDocument.ParentId = revisionDocument.ID
+
+	if revisionDocument.BelongTo == 0 {
+		oldDocument.BelongTo = revisionDocument.ID
+	}
+
+	newFile := dms.DocumentFiles{
+		GVA_MODEL:  global.GVA_MODEL{},
+		Name:       fileInfo.Name,
+		Key:        fileInfo.Key,
+		Url:        fileInfo.Url,
+		Tag:        fileInfo.Tag,
+		Size:       fileInfo.Size,
+		Order:      fileInfo.Order,
+		DocumentId: oldDocument.ID,
+		Path:       fileInfo.Path,
+	}
+
+	// authorizing
+	authorities := make([]dms.DocumentRules, 0)
+
+	authorities = append(authorities, dms.DocumentRules{
+		GVA_MODEL:  global.GVA_MODEL{},
+		DocumentId: revisionDocument.ID,
+		Permission: dms.PERMISSION_OWNER,
+		SubjectId:  oldDocument.CreatedBy,
+		Type:       dms.RULE_TYPE_USER,
+	})
+
+	err = global.GVA_DB.Transaction(func(tx *gorm.DB) error {
+		// update document
+		err = tx.Model(&dms.Documents{}).Where("id = ?", oldDocument.ID).Save(&oldDocument).Error
+		if err != nil {
+			return err
+		}
+
+		// clear old file
+		err = tx.Model(&dms.DocumentFiles{}).
+			Unscoped().
+			Where("document_id = ?", oldDocument.ID).
+			Delete(&dms.DocumentFiles{}).
+			Error
+
+		if err != nil {
+			return err
+		}
+
+		// create new file
+		err = tx.Model(&dms.DocumentFiles{}).Create(&newFile).Error
+		if err != nil {
+			return err
+		}
+
+		// add authority for the revision document
+		err = tx.Model(&dms.DocumentRules{}).Create(&authorities).Error
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	return err
+}
+
 // GetDocuments get document by Id
 func (documentsService *DocumentsService) GetDocuments(doc dmsReq.DocumentsSearch, userId uint, userUUID uuid.UUID) (documents *dms.Documents, err error) {
 	db := global.GVA_DB.Model(&dms.Documents{})

@@ -766,8 +766,8 @@ import { useUserStore } from '@/pinia/modules/user'
 import { getDict } from '../../utils/dictionary'
 import { createDocumentAgencies, getDocumentAgenciesList } from '../../api/documentAgencies'
 import { createDocumentCategories, getDocumentCategoriesList } from '../../api/documentCategories'
-import { createDocumentFields, getDocumentFieldsList } from '../../api/documentFields'
-import { findDocuments, createDraftDocument, getDocumentFiles, getDocumentsList, updateBasicDocuments, getDocumentRevisions, updateRelatedDocuments } from '../../api/documents'
+import { createDocumentFields, getDocumentFieldsList, updateDocumentFields } from '../../api/documentFields'
+import { findDocuments, createDraftDocument, getDocumentFiles, getDocumentsList, updateBasicDocuments, getDocumentRevisions, updateRelatedDocuments, updateDocumentFiles } from '../../api/documents'
 import { getUserList } from '../../api/user'
 import { getAuthorityInfo } from '../../api/authority'
 import { formatDate } from '../../utils/format'
@@ -1336,6 +1336,31 @@ const onRemoveFile = () => {
 }
 
 const onUploadSuccess = async(response, uploadFile, uploadFiles) => {
+  if (response.code === 0) {
+    const res = await updateDocumentFiles({
+      id: searchInfo.value.ID,
+      updatedBy: formOwnerData.value.updatedBy,
+      beResponsibleBy: formOwnerData.value.beResponsibleBy,
+      name: response.data.file.name,
+      key: response.data.file.key,
+      url: response.data.file.url,
+      tag: response.data.file.tag,
+      size: uploadFile.size,
+      order: 0,
+      path: response.data.file.url
+    })
+
+    if (res.code === 0) {
+      const pdfSource = `${path}/${response.data.file.url}`
+
+      formFileData.value.src = pdfSource
+
+      ElMessage({
+        type: 'success',
+        message: 'Cập nhật tập tin đính kèm thành công',
+      })
+    }
+  }
 }
 
 const uploadFile = () => {

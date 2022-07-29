@@ -23,6 +23,7 @@ func (s *DocumentsRouter) InitDocumentsRouter(Router *gin.RouterGroup) {
 		documentsRouter.PUT("updateDocuments", documentsApi.UpdateDocuments)
 		documentsRouter.PUT("updateBasicDocuments", documentsApi.UpdateBasicDocumentInformation)
 		documentsRouter.PUT("updateRelatedDocuments", documentsApi.UpdateRelatedDocumentInformation)
+		documentsRouter.PUT("updateDocumentFiles", documentsApi.UpdateDocumentFiles)
 		documentsRouter.POST("makeDuplication", documentsApi.MakeDuplication)
 	}
 	{

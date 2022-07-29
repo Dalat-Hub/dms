@@ -129,6 +129,22 @@ export const updateRelatedDocuments = (data) => {
 }
 
 // @Tags Documents
+// @Summary update document attached files
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body documents.UpdateFile true "update document attached files"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
+// @Router /documents/updateDocumentFiles [put]
+export const updateDocumentFiles = (data) => {
+  return service({
+    url: '/documents/updateDocumentFiles',
+    method: 'put',
+    data,
+  })
+}
+
+// @Tags Documents
 // @Summary get document by ID
 // @Security ApiKeyAuth
 // @accept application/json
