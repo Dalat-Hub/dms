@@ -534,6 +534,7 @@ func (documentsService *DocumentsService) UpdateBasicDocumentInformation(basic d
 	}
 
 	shortTitle := category.Name + " " + basic.SignText
+	oldStatus := oldDocument.Status
 
 	oldDocument.Title = basic.Title
 	oldDocument.Expert = basic.Expert
@@ -644,6 +645,20 @@ func (documentsService *DocumentsService) UpdateBasicDocumentInformation(basic d
 		err = tx.Model(&dms.DocumentRules{}).Create(&authorities).Error
 		if err != nil {
 			return err
+		}
+
+		// is there update from 'draft' to `published`
+		if oldStatus == dms.STATUS_DRAFT && basic.Status == dms.STATUS_PUBLISHED {
+
+			// complete tasks
+			err = tx.Model(&dms.DocumentUsers{}).
+				Where("document_id = ?", oldDocument.ID).
+				Update("done_at", time.Now()).
+				Error
+
+			if err != nil {
+				return err
+			}
 		}
 
 		return nil
