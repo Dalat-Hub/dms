@@ -5,8 +5,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/dms"
 )
 
-type DocumentsSearch struct {
-	dms.Documents
+type DocumentSignersSearch struct {
+	dms.DocumentSigners
 	request.PageInfo
-	PreloadDocument
 }
