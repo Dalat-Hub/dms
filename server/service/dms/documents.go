@@ -33,9 +33,9 @@ func (documentsService *DocumentsService) CreateDraftDocument(draft dmsReq.Draft
 		document = dms.Documents{
 			GVA_MODEL:        global.GVA_MODEL{},
 			Title:            draft.Title,
-			ShortTitle:       "",
-			Expert:           "",
-			Content:          "",
+			ShortTitle:       draft.Title,
+			Expert:           draft.Title,
+			Content:          draft.Title,
 			DateIssued:       null.Time{},
 			StillInEffect:    false,
 			EffectDate:       null.Time{},
@@ -69,14 +69,39 @@ func (documentsService *DocumentsService) CreateDraftDocument(draft dmsReq.Draft
 		}
 
 		relatedUsers := make([]dms.DocumentUsers, 0)
+		hasUndefinedUser := false
+
+		if len(draft.RelatedUsers) == 0 {
+			hasUndefinedUser = true
+		}
+
 		for _, userId := range draft.RelatedUsers {
+			if userId == 0 {
+				hasUndefinedUser = true
+				break
+			}
+
 			relatedUsers = append(relatedUsers, dms.DocumentUsers{
 				GVA_MODEL:  global.GVA_MODEL{},
 				DocumentId: document.ID,
 				Title:      draft.Title,
-				ShortTitle: "--",
-				SignText:   "--",
+				ShortTitle: draft.Title,
+				SignText:   "",
 				UserId:     userId,
+				DoneAt:     null.Time{},
+			})
+		}
+
+		if hasUndefinedUser {
+			relatedUsers = make([]dms.DocumentUsers, 0)
+
+			relatedUsers = append(relatedUsers, dms.DocumentUsers{
+				GVA_MODEL:  global.GVA_MODEL{},
+				DocumentId: document.ID,
+				Title:      draft.Title,
+				ShortTitle: draft.Title,
+				SignText:   "",
+				UserId:     0,
 				DoneAt:     null.Time{},
 			})
 		}

@@ -643,11 +643,13 @@
       :before-close="closeDocumentDialog"
       title="Thêm nhanh văn bản"
     >
-      <el-form :model="documentFormData" label-position="right" label-width="120px">
+      <el-form :model="documentFormData" label-position="right" label-width="150px">
         <el-form-item label="Tiêu đề">
           <el-input v-model="documentFormData.title" clearable placeholder="Tiêu đề văn bản" />
+          <p>Ví dụ: Luật Giáo dục ngày 14 tháng 6 năm 2019</p>
+          <p>Hoặc: Nghị định số 69/2017/NĐ-CP ngày 25 tháng 5 năm 2017</p>
         </el-form-item>
-        <el-form-item label="Liên quan">
+        <el-form-item label="Gắn thẻ người dùng">
           <el-select
             v-model="documentFormData.relatedUsers"
             :style="{ width: '100%' }"
@@ -656,6 +658,7 @@
             multiple
             placeholder="Chọn người dùng liên quan"
           >
+            <el-option :key="0" label="Phân bổ sau" :value="0" />
             <el-option
               v-for="item in usersOptions"
               :key="item.ID"
@@ -663,6 +666,7 @@
               :value="item.ID"
             />
           </el-select>
+          <p>Trong trường hợp chưa xác định người dùng hoàn thiện văn bản này, vui lòng chọn "Phân bổ sau"</p>
         </el-form-item>
       </el-form>
       <template #footer>
