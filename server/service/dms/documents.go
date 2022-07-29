@@ -556,7 +556,7 @@ func (documentsService *DocumentsService) UpdateBasicDocumentInformation(basic d
 		newSignerReferences = append(newSignerReferences, dms.DocumentSignerReferences{
 			GVA_MODEL:  global.GVA_MODEL{},
 			DocumentId: oldDocument.ID,
-			UserId:     userId,
+			SignerId:   userId,
 		})
 	}
 
