@@ -18,6 +18,7 @@ func (s *DocumentUsersRouter) InitDocumentUsersRouter(Router *gin.RouterGroup) {
 		documentUsersRouter.DELETE("deleteDocumentUsers", documentUsersApi.DeleteDocumentUsers)
 		documentUsersRouter.DELETE("deleteDocumentUsersByIds", documentUsersApi.DeleteDocumentUsersByIds)
 		documentUsersRouter.PUT("updateDocumentUsers", documentUsersApi.UpdateDocumentUsers)
+		documentUsersRouter.POST("distributeTasks", documentUsersApi.DistributeTasks)
 	}
 	{
 		documentUsersRouterWithoutRecord.GET("findDocumentUsers", documentUsersApi.FindDocumentUsers)

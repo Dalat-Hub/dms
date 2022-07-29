@@ -33,6 +33,7 @@ func (documentUsersApi *DocumentUsersApi) CreateDocumentUsers(c *gin.Context) {
 	if err != nil {
 		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
 		response.FailWithMessage("please provide valid data", c)
+		return
 	}
 
 	if err = documentUsersService.CreateDocumentUsers(documentUsers); err != nil {
@@ -60,6 +61,7 @@ func (documentUsersApi *DocumentUsersApi) DeleteDocumentUsers(c *gin.Context) {
 	if err != nil {
 		global.GVA_LOG.Error("provide valid data", zap.Error(err))
 		response.FailWithMessage("provide valid data", c)
+		return
 	}
 
 	if err = documentUsersService.DeleteDocumentUsers(documentUsers); err != nil {
@@ -87,6 +89,7 @@ func (documentUsersApi *DocumentUsersApi) DeleteDocumentUsersByIds(c *gin.Contex
 	if err != nil {
 		global.GVA_LOG.Error("provide valid data", zap.Error(err))
 		response.FailWithMessage("provide valid data", c)
+		return
 	}
 
 	if err = documentUsersService.DeleteDocumentUsersByIds(IDS); err != nil {
@@ -114,6 +117,7 @@ func (documentUsersApi *DocumentUsersApi) UpdateDocumentUsers(c *gin.Context) {
 	if err != nil {
 		global.GVA_LOG.Error("provide valid data", zap.Error(err))
 		response.FailWithMessage("provide valid data", c)
+		return
 	}
 
 	if err = documentUsersService.UpdateDocumentUsers(documentUsers); err != nil {
@@ -141,6 +145,7 @@ func (documentUsersApi *DocumentUsersApi) FindDocumentUsers(c *gin.Context) {
 	if err != nil {
 		global.GVA_LOG.Error("provide valid data", zap.Error(err))
 		response.FailWithMessage("provide valid data", c)
+		return
 	}
 
 	if redocumentUsers, err := documentUsersService.GetDocumentUsers(documentUsers.ID); err != nil {
@@ -168,6 +173,7 @@ func (documentUsersApi *DocumentUsersApi) GetDocumentUsersList(c *gin.Context) {
 	if err != nil {
 		global.GVA_LOG.Error("provide valid data", zap.Error(err))
 		response.FailWithMessage("provide valid data", c)
+		return
 	}
 
 	if list, total, err := documentUsersService.GetDocumentUsersInfoList(pageInfo); err != nil {
@@ -180,5 +186,33 @@ func (documentUsersApi *DocumentUsersApi) GetDocumentUsersList(c *gin.Context) {
 			Page:     pageInfo.Page,
 			PageSize: pageInfo.PageSize,
 		}, "success", c)
+	}
+}
+
+// DistributeTasks redistribute tasks
+// @Tags DocumentUsers
+// @Summary redistribute tasks
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body dms.DocumentUsersDistribution true "redistribute tasks"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
+// @Router /documentUsers/distributeTasks [post]
+func (documentUsersApi *DocumentUsersApi) DistributeTasks(c *gin.Context) {
+	var task dmsReq.DocumentUsersDistribution
+	var err error
+
+	err = c.ShouldBindJSON(&task)
+	if err != nil {
+		global.GVA_LOG.Error("provide valid data", zap.Error(err))
+		response.FailWithMessage("provide valid data", c)
+		return
+	}
+
+	if err = documentUsersService.DistributeTasks(task); err != nil {
+		global.GVA_LOG.Error("error occurs", zap.Error(err))
+		response.FailWithMessage("error occurs", c)
+	} else {
+		response.OkWithMessage("success", c)
 	}
 }

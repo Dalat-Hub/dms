@@ -98,6 +98,7 @@
                             placeholder="Chọn cơ quan ban hành văn bản"
                             @change="handleOnAgencyChange"
                           >
+                            <el-option label="Chưa xác định" :value="0" />
                             <el-option
                               v-for="item in agencyOptions"
                               :key="item.ID"
@@ -125,6 +126,7 @@
                             placeholder="Chọn thể loại văn bản"
                             @change="handleOnCategoryChange"
                           >
+                            <el-option label="Chưa xác định" :value="0" />
                             <el-option
                               v-for="item in categoryOptions"
                               :key="item.ID"
@@ -264,9 +266,9 @@
                         placeholder="Chọn 1 hoặc nhiều cá nhân kí văn bản"
                       >
                         <el-option
-                          v-for="item in usersOptions"
+                          v-for="item in signerOptions"
                           :key="item.ID"
-                          :label="item.nickName"
+                          :label="signerTitleMap[item.title] + ' ' + item.fullname"
                           :value="item.ID"
                         />
                       </el-select>
@@ -773,11 +775,12 @@ import { useUserStore } from '@/pinia/modules/user'
 import { getDict } from '../../utils/dictionary'
 import { createDocumentAgencies, getDocumentAgenciesList } from '../../api/documentAgencies'
 import { createDocumentCategories, getDocumentCategoriesList } from '../../api/documentCategories'
-import { createDocumentFields, getDocumentFieldsList, updateDocumentFields } from '../../api/documentFields'
+import { createDocumentFields, getDocumentFieldsList } from '../../api/documentFields'
 import { findDocuments, createDraftDocument, getDocumentFiles, getDocumentsList, updateBasicDocuments, getDocumentRevisions, updateRelatedDocuments, updateDocumentFiles } from '../../api/documents'
 import { getUserList } from '../../api/user'
 import { getAuthorityInfo } from '../../api/authority'
 import { formatDate } from '../../utils/format'
+import { getDocumentSignersList } from '@/api/documentSigners'
 
 const route = useRoute()
 const router = useRouter()
@@ -858,6 +861,10 @@ const agencyLevelOptions = ref([])
 const roleOptions = ref([])
 const documentFileList = ref([])
 const revisions = ref([])
+
+const signerTitleOptions = ref([])
+const signerTitleMap = ref({})
+const signerOptions = ref([])
 
 const path = import.meta.env.VITE_BASE_API
 
@@ -1082,6 +1089,25 @@ const loadRevisions = async() => {
   }
 }
 
+const loadSignerOptions = async() => {
+  const table = await getDocumentSignersList({ page: 1, pageSize: 1000 })
+  if (table.code === 0) {
+    signerOptions.value = table.data.list
+  }
+}
+
+const loadSignerTitleOptions = async() => {
+  const data = await getDict('signerTitles')
+  signerTitleOptions.value = data
+
+  signerTitleMap.value = data.reduce((acc, cur) => {
+    return {
+      ...acc,
+      [cur.value]: cur.label
+    }
+  }, {})
+}
+
 getDocument()
 loadAgencyOptions()
 loadAgencyLevelOptions()
@@ -1094,6 +1120,9 @@ loadPriorityOptions()
 loadStatusOptions()
 loadAttachedFiles()
 loadRevisions()
+
+loadSignerOptions()
+loadSignerTitleOptions()
 
 // ========== end of prepare data section ==================
 
