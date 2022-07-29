@@ -1268,6 +1268,11 @@ func (documentsService *DocumentsService) attachBaseDocuments(document *dms.Docu
 		return err, false
 	}
 
+	if len(refs) == 0 {
+		document.BasedDocuments = make([]dms.Documents, 0)
+		return nil, false
+	}
+
 	var documentIds []uint
 	for _, v := range refs {
 		documentIds = append(documentIds, v.DestId)
@@ -1298,6 +1303,11 @@ func (documentsService *DocumentsService) attachReferencesDocuments(document *dm
 		}
 
 		return err, false
+	}
+
+	if len(refs) == 0 {
+		document.RelatedDocuments = make([]dms.Documents, 0)
+		return nil, false
 	}
 
 	var documentIds []uint
@@ -1332,6 +1342,11 @@ func (documentsService *DocumentsService) attachRelatedUsers(document *dms.Docum
 		return err, false
 	}
 
+	if len(refs) == 0 {
+		document.RelatedUsers = make([]sysModel.SysUser, 0)
+		return nil, false
+	}
+
 	var documentIds []uint
 	for _, v := range refs {
 		documentIds = append(documentIds, v.DestId)
@@ -1362,6 +1377,11 @@ func (documentsService *DocumentsService) attachRelatedAgencies(document *dms.Do
 		}
 
 		return err, false
+	}
+
+	if len(refs) == 0 {
+		document.RelatedAgencies = make([]dms.DocumentAgencies, 0)
+		return nil, false
 	}
 
 	var documentIds []uint
