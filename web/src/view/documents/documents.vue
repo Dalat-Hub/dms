@@ -10,7 +10,6 @@
     </div>
     <div class="gva-table-box">
       <div class="gva-btn-list">
-        <el-button size="small" type="primary" icon="plus" @click="openDialog">Thêm mới</el-button>
         <el-popover v-model:visible="deleteVisible" placement="top" width="160">
           <p>Xoá những tài liệu đã chọn?</p>
           <div style="text-align: right; margin-top: 8px;">
@@ -31,16 +30,29 @@
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" />
-        <el-table-column align="left" label="Số hiệu" prop="signText" width="300" />
-        <el-table-column align="left" label="Ngày ban hành" width="250">
-          <template #default="scope">{{ formatDate(scope.row.dateIssued) }}</template>
+        <el-table-column align="left" label="Số hiệu" width="300">
+          <template #default="scope">
+            <span v-if="scope.row.shortTitle"> {{ scope.row.shortTitle }}</span>
+            <span v-else style="color: orangered;">N/A</span>
+          </template>
         </el-table-column>
-        <el-table-column align="left" label="Hiệu lực" prop="stillInEffect" width="120">
-          <template #default="scope">{{ formatBoolean(scope.row.stillInEffect) }}</template>
+        <el-table-column align="left" label="Ngày ban hành" width="250">
+          <template #default="scope">
+            <span v-if="scope.row.dateIssued"> {{ formatDate(scope.row.dateIssued) }}</span>
+            <span v-else style="color: orangered;">N/A</span>
+          </template>
+        </el-table-column>
+        <el-table-column align="left" label="Hiệu lực" width="120">
+          <template #default="scope">
+            <el-tag v-if="scope.row.stillInEffect" class="ml-2" type="success">Còn</el-tag>
+            <el-tag v-else class="ml-2" type="danger">Hết</el-tag>
+          </template>
         </el-table-column>
         <el-table-column align="left" label="Lượt xem" prop="viewCount" width="120" />
         <el-table-column align="left" label="Lượt tải" prop="downloadCount" width="120" />
-        <el-table-column align="left" label="Trạng thái" prop="status" width="120" />
+        <el-table-column align="left" label="Trạng thái" width="120">
+          <template #default="scope"> {{ statusOptions[scope.row.status] || '--' }} </template>
+        </el-table-column>
         <el-table-column align="left" label="Ngày tạo" width="250">
           <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
         </el-table-column>
@@ -66,58 +78,6 @@
         />
       </div>
     </div>
-    <el-dialog v-model="dialogFormVisible" :before-close="closeDialog" title="Hộp thoại văn bản">
-      <el-form ref="elFormRef" :model="formData" label-position="right" :rules="rule" label-width="150px">
-        <el-form-item label="Tiêu đề:" prop="title">
-          <el-input v-model="formData.title" :clearable="true" placeholder="Tiêu đề văn bản" />
-        </el-form-item>
-        <el-form-item label="Mô tả ngắn" prop="expert">
-          <el-input v-model="formData.expert" :clearable="true" placeholder="Mô tả ngắn của văn bản" />
-        </el-form-item>
-        <el-form-item label="Nội dung" prop="content">
-          <el-input v-model="formData.content" :clearable="true" placeholder="Nội dung của văn bản" />
-        </el-form-item>
-        <el-form-item label="Ngày ban hành" prop="dateIssued">
-          <el-date-picker v-model="formData.dateIssued" type="date" style="width:100%" placeholder="Ngày ban hành" :clearable="true" />
-        </el-form-item>
-        <el-form-item label="Ngày có hiệu lực" prop="effectDate">
-          <el-date-picker v-model="formData.effectDate" type="date" style="width:100%" placeholder="Ngày có hiệu lực" :clearable="true" />
-        </el-form-item>
-        <el-form-item label="Ngày hết hiệu lực" prop="expirationDate">
-          <el-date-picker v-model="formData.expirationDate" type="date" style="width:100%" placeholder="Ngày hết hiệu lực" :clearable="true" />
-        </el-form-item>
-        <el-form-item label="Số kí hiệu" prop="signNumber">
-          <el-input v-model.number="formData.signNumber" :clearable="true" placeholder="Số kí hiệu" />
-        </el-form-item>
-        <el-form-item label="Năm ban hành" prop="signYear">
-          <el-input v-model.number="formData.signYear" :clearable="true" placeholder="Năm ban hành" />
-        </el-form-item>
-        <el-form-item label="Thể loại" prop="categoryId">
-          <el-input v-model.number="formData.categoryId" :clearable="true" placeholder="Thể loại" />
-        </el-form-item>
-        <el-form-item label="Cơ quan ban hành" prop="agencyId">
-          <el-input v-model.number="formData.agencyId" :clearable="true" placeholder="Cơ quan ban hành" />
-        </el-form-item>
-        <el-form-item label="Tạo bởi" prop="createdBy">
-          <el-input v-model.number="formData.createdBy" :clearable="true" placeholder="Tạo bởi" />
-        </el-form-item>
-        <el-form-item label="Chịu trách nhiệm bởi" prop="beResponsibleBy">
-          <el-input v-model.number="formData.beResponsibleBy" :clearable="true" placeholder="Chịu trách nhiệm bởi" />
-        </el-form-item>
-        <el-form-item label="Trạng thái" prop="status">
-          <el-input v-model="formData.status" :clearable="true" placeholder="Trạng thái" />
-        </el-form-item>
-        <el-form-item label="Độ ưu tiên" prop="priorityId">
-          <el-input v-model.number="formData.priorityId" :clearable="true" placeholder="Độ ưu tiên" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button size="small" @click="closeDialog">Đóng hộp thoại</el-button>
-          <el-button size="small" type="primary" @click="enterDialog">Xác nhận</el-button>
-        </div>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
@@ -129,56 +89,20 @@ export default {
 
 <script setup>
 import {
-  createDocuments,
   deleteDocuments,
   deleteDocumentsByIds,
-  updateDocuments,
-  findDocuments,
   getDocumentsList,
   makeDuplication
 } from '@/api/documents'
 
 // Full introduction of formatting tools, please keep as needed
-import { getDictFunc, formatDate, formatBoolean, filterDict } from '@/utils/format'
+import { formatDate, formatBoolean } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ref, reactive } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { getDict } from '../../utils/dictionary'
 
 const router = useRouter()
-
-// Auto-generated dictionary (may be empty) and fields
-const formData = ref({
-  title: '',
-  expert: '',
-  content: '',
-  dateIssued: null,
-  stillInEffect: false,
-  effectDate: null,
-  expirationDate: null,
-  signNumber: 0,
-  signYear: 0,
-  signCategory: '',
-  signAgency: '',
-  signText: '',
-  categoryId: 0,
-  agencyId: 0,
-  createdBy: 0,
-  beResponsibleBy: 0,
-  viewCount: 0,
-  downloadCount: 0,
-  status: '',
-  type: '',
-  priorityId: 0,
-  parentId: 0,
-  currentId: 0,
-  path: '',
-})
-
-// Validation rules
-const rule = reactive({
-})
-
-const elFormRef = ref()
 
 // =========== Form Control Section ===========
 const page = ref(1)
@@ -225,7 +149,23 @@ const getTableData = async() => {
   }
 }
 
+const statusOptions = ref({ })
+
+const loadStatusOptions = async() => {
+  const data = await getDict('documentStatuses')
+
+  statusOptions.value = data.reduce((acc, cur) => {
+    return {
+      ...acc,
+      [cur.value]: cur.label
+    }
+  }, {})
+
+  console.log(data)
+}
+
 getTableData()
+loadStatusOptions()
 
 // ============= End of form control section ===============
 
@@ -303,19 +243,6 @@ const onDelete = async() => {
   }
 }
 
-// Behavior control mark (need to be added or changed inside the pop-up window)
-const type = ref('')
-
-// Update row
-const updateDocumentsFunc = async(row) => {
-  const res = await findDocuments({ ID: row.ID })
-  type.value = 'update'
-  if (res.code === 0) {
-    formData.value = res.data.redocuments
-    dialogFormVisible.value = true
-  }
-}
-
 // Delete row
 const deleteDocumentsFunc = async(row) => {
   const res = await deleteDocuments({ ID: row.ID })
@@ -329,72 +256,6 @@ const deleteDocumentsFunc = async(row) => {
     }
     getTableData()
   }
-}
-
-// Popup control marker
-const dialogFormVisible = ref(false)
-
-// Open the popup
-const openDialog = () => {
-  type.value = 'create'
-  dialogFormVisible.value = true
-}
-
-// Close the popup
-const closeDialog = () => {
-  dialogFormVisible.value = false
-  formData.value = {
-    title: '',
-    expert: '',
-    content: '',
-    dateIssued: new Date(),
-    stillInEffect: false,
-    effectDate: new Date(),
-    expirationDate: new Date(),
-    signNumber: 0,
-    signYear: 0,
-    signCategory: '',
-    signAgency: '',
-    signText: '',
-    categoryId: 0,
-    agencyId: 0,
-    createdBy: 0,
-    beResponsibleBy: 0,
-    viewCount: 0,
-    downloadCount: 0,
-    status: '',
-    type: '',
-    priorityId: 0,
-    parentId: 0,
-    currentId: 0,
-    path: '',
-  }
-}
-// Confirm the popup
-const enterDialog = async() => {
-     elFormRef.value?.validate(async(valid) => {
-       if (!valid) return
-       let res
-       switch (type.value) {
-         case 'create':
-           res = await createDocuments(formData.value)
-           break
-         case 'update':
-           res = await updateDocuments(formData.value)
-           break
-         default:
-           res = await createDocuments(formData.value)
-           break
-       }
-       if (res.code === 0) {
-         ElMessage({
-           type: 'success',
-           message: 'Thực hiện thao tác thành công'
-         })
-         closeDialog()
-         getTableData()
-       }
-     })
 }
 
 const duplicateDocument = async(document) => {
