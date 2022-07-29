@@ -1,16 +1,87 @@
 <template>
   <div>
-    <el-form ref="elForm" :model="formData" label-position="top" label-width="150px">
-      <el-row justify="center">
-        <el-col :lg="22">
-          <el-row :gutter="10">
-            <el-col :lg="17" :sm="24">
-              <div class="gva-card-box">
-                <div class="el-card is-always-shadow gva-card quick-entrance">
-                  <div class="el-card__body">
+    <el-row justify="center">
+      <el-col :span="22">
+        <warning-bar
+          v-if="document && document.type != 1"
+          :title="`Bạn đang xem phiên bản sao lưu của tài liệu: ${document && document.shortTitle}`"
+        />
+
+        <warning-bar
+          v-if="document && document.status === 1"
+          :title="`Bạn đang cập nhật văn bản chưa hoàn chỉnh, vui lòng hoàn thiện dữ liệu và đổi trạng thái thành xuất bản`"
+        />
+      </el-col>
+
+      <el-col :lg="22">
+        <el-row :gutter="10">
+          <el-col :lg="17" :sm="24">
+            <div class="gva-card-box">
+              <div class="el-card is-always-shadow gva-card quick-entrance">
+                <div class="el-card__body">
+                  <div class="el-card__heading">
+                    <h3>Thông tin sở hữu</h3>
+                  </div>
+                  <el-form ref="elForm" :model="formOwnerData" label-position="top" label-width="150px">
+                    <el-form-item label="Văn bản được tạo bởi">
+                      <el-col :span="11">
+                        <el-input v-model="createdUserName" :style="{ width: '100%' }" readonly />
+                      </el-col>
+                      <el-col class="text-center" :span="2" style="width: 100%; text-align: center;">-</el-col>
+
+                      <el-col :span="11">
+                        <el-input v-model="createdTime" :style="{ width: '100%' }" readonly />
+                      </el-col>
+
+                    </el-form-item>
+                    <el-form-item label="Văn bản được cập nhật bởi">
+                      <el-select
+                        v-model="formOwnerData.updatedBy"
+                        :style="{ width: '100%' }"
+                        clearable
+                        filterable
+                        placeholder="Chọn cá nhân cập nhật văn bản"
+                      >
+                        <el-option
+                          v-for="item in usersOptions"
+                          :key="item.ID"
+                          :label="item.nickName"
+                          :value="item.ID"
+                        />
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item label="Được chịu trách nhiệm bởi">
+                      <el-select
+                        v-model="formOwnerData.beResponsibleBy"
+                        :style="{ width: '100%' }"
+                        clearable
+                        filterable
+                        placeholder="Chọn cá nhân chịu trách nhiệm"
+                      >
+                        <el-option
+                          v-for="item in usersOptions"
+                          :key="item.ID"
+                          :label="item.nickName"
+                          :value="item.ID"
+                        />
+                      </el-select>
+                    </el-form-item>
+
+                  </el-form>
+                </div>
+              </div>
+            </div>
+
+            <div class="gva-card-box" style="margin: 1rem 0">
+              <div class="el-card is-always-shadow gva-card quick-entrance">
+                <div class="el-card__body">
+                  <div class="el-card__heading">
+                    <h3>Cập nhật thông tin cơ bản</h3>
+                  </div>
+                  <el-form ref="elForm" :model="formBasicData" label-position="top" label-width="150px">
                     <el-form-item label="Tiêu đề văn bản">
                       <el-input
-                        v-model="formData.title"
+                        v-model="formBasicData.title"
                         :style="{ width: '100%' }"
                         clearable
                         placeholder="Nhập tiêu đề văn bản"
@@ -20,7 +91,7 @@
                       <el-col class="el-col-18 el-col-lg-20">
                         <el-form-item label="Cơ quan ban hành văn bản">
                           <el-select
-                            v-model="formData.agency"
+                            v-model="formBasicData.agencyId"
                             :style="{ width: '100%' }"
                             clearable
                             filterable
@@ -38,7 +109,8 @@
                       </el-col>
                       <el-col class="el-col-6 el-col-lg-4">
                         <el-form-item label="">
-                          <el-button size="large" style="width: 100%" type="success" @click="openAgencyDialog"> Thêm Nhanh</el-button>
+                          <el-button size="large" style="width: 100%" type="success" @click="openAgencyDialog"> Thêm
+                            Nhanh</el-button>
                         </el-form-item>
                       </el-col>
                     </el-row>
@@ -46,7 +118,7 @@
                       <el-col class="el-col-18 el-col-lg-20">
                         <el-form-item label="Thể loại văn bản">
                           <el-select
-                            v-model="formData.category"
+                            v-model="formBasicData.categoryId"
                             :style="{ width: '100%' }"
                             clearable
                             filterable
@@ -65,14 +137,15 @@
                       </el-col>
                       <el-col class="el-col-6 el-col-lg-4">
                         <el-form-item label="">
-                          <el-button size="large" style="width: 100%" type="success" @click="openCategoryDialog"> Thêm Nhanh</el-button>
+                          <el-button size="large" style="width: 100%" type="success" @click="openCategoryDialog"> Thêm
+                            Nhanh</el-button>
                         </el-form-item>
                       </el-col>
                     </el-row>
                     <el-row align="bottom" justify="space-between" type="flex">
                       <el-form-item class="el-col el-col-lg-8" label="Ngày ban hành">
                         <el-date-picker
-                          v-model="formData.date_issued"
+                          v-model="formBasicData.date_issued"
                           :style="{ width: '100%' }"
                           clearable
                           format="DD/MM/YYYY"
@@ -82,7 +155,7 @@
                       </el-form-item>
                       <el-form-item class="el-col el-col-lg-8" label="Ngày có hiệu lực">
                         <el-date-picker
-                          v-model="formData.date_effected"
+                          v-model="formBasicData.date_effected"
                           :style="{ width: '100%' }"
                           clearable
                           format="DD/MM/YYYY"
@@ -91,7 +164,7 @@
                       </el-form-item>
                       <el-form-item class="el-col el-col-lg-8" label="Ngày hết hiệu lực">
                         <el-date-picker
-                          v-model="formData.date_expiration"
+                          v-model="formBasicData.date_expiration"
                           :style="{ width: '100%' }"
                           clearable
                           format="DD/MM/YYYY"
@@ -102,7 +175,7 @@
                     <el-row align="bottom" justify="space-between" type="flex">
                       <el-form-item class="el-col el-col-sm-12 el-col-lg-6" label="Số">
                         <el-input
-                          v-model="formData.signNumber"
+                          v-model="formBasicData.signNumber"
                           :style="{ width: '100%' }"
                           clearable
                           placeholder="Số văn bản"
@@ -110,7 +183,7 @@
                       </el-form-item>
                       <el-form-item class="el-col el-col-sm-12 el-col-lg-6" label="Năm">
                         <el-input
-                          v-model="formData.signYear"
+                          v-model="formBasicData.signYear"
                           :style="{ width: '100%' }"
                           clearable
                           placeholder="Năm phát hành"
@@ -118,7 +191,7 @@
                       </el-form-item>
                       <el-form-item class="el-col el-col-sm-12 el-col-lg-6" label="Thể loại">
                         <el-input
-                          v-model="formData.categoryReadonly"
+                          v-model="formBasicData.categoryReadonly"
                           :style="{ width: '100%' }"
                           placeholder="Chọn phía trên"
                           readonly
@@ -126,7 +199,7 @@
                       </el-form-item>
                       <el-form-item class="el-col el-col-sm-12 el-col-lg-6" label="Cơ quan">
                         <el-input
-                          v-model="formData.agencyReadonly"
+                          v-model="formBasicData.agencyReadonly"
                           :style="{ width: '100%' }"
                           placeholder="Chọn phía trên"
                           readonly
@@ -137,7 +210,7 @@
                       <el-col class="el-col-18 el-col-lg-20">
                         <el-form-item label="Lĩnh vực văn bản">
                           <el-select
-                            v-model="formData.fields"
+                            v-model="formBasicData.fields"
                             :style="{ width: '100%' }"
                             clearable
                             filterable
@@ -155,14 +228,15 @@
                       </el-col>
                       <el-col class="el-col-6 el-col-lg-4">
                         <el-form-item label="">
-                          <el-button size="large" style="width: 100%" type="success" @click="openFieldDialog"> Thêm Nhanh</el-button>
+                          <el-button size="large" style="width: 100%" type="success" @click="openFieldDialog"> Thêm
+                            Nhanh</el-button>
                         </el-form-item>
                       </el-col>
                     </el-row>
 
                     <el-form-item label="Mô tả ngắn">
                       <el-input
-                        v-model="formData.expert"
+                        v-model="formBasicData.expert"
                         :style="{ width: '100%' }"
                         clearable
                         placeholder="Nhập mô tả ngắn nếu có"
@@ -172,7 +246,7 @@
                     </el-form-item>
                     <el-form-item label="Nội dung">
                       <el-input
-                        v-model="formData.content"
+                        v-model="formBasicData.content"
                         :style="{ width: '100%' }"
                         clearable
                         placeholder="Nhập nội dung văn bản nếu có"
@@ -180,17 +254,74 @@
                         type="textarea"
                       />
                     </el-form-item>
-                  </div>
+                    <el-form-item label="Danh sách cá nhân kí văn bản">
+                      <el-select
+                        v-model="formBasicData.signers"
+                        :style="{ width: '100%' }"
+                        clearable
+                        filterable
+                        multiple
+                        placeholder="Chọn 1 hoặc nhiều cá nhân kí văn bản"
+                      >
+                        <el-option
+                          v-for="item in usersOptions"
+                          :key="item.ID"
+                          :label="item.nickName"
+                          :value="item.ID"
+                        />
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item label="Độ ưu tiên">
+                      <el-select
+                        v-model="formBasicData.priorityLevel"
+                        :style="{ width: '100%' }"
+                        clearable
+                        placeholder="Mức độ ưu tiên của văn bản"
+                      >
+                        <el-option
+                          v-for="item in priorityLevelOptions"
+                          :key="item.value"
+                          :label="item.label"
+                          :value="item.value"
+                        />
+                      </el-select>
+                    </el-form-item>
+                    <el-form-item label="Trạng thái">
+                      <el-select
+                        v-model="formBasicData.status"
+                        :style="{ width: '100%' }"
+                        clearable
+                        placeholder="Trạng thái của văn bản"
+                      >
+                        <el-option
+                          v-for="(item, index) in statusOptions"
+                          :key="index"
+                          :label="item.label"
+                          :value="item.value"
+                        />
+                      </el-select>
+                    </el-form-item>
+
+                    <el-form-item size="large">
+                      <el-button type="primary" @click="updateBasicDocument">Cập nhật thông tin cơ bản</el-button>
+                    </el-form-item>
+                  </el-form>
                 </div>
               </div>
-              <div class="gva-card-box" style="margin: 10px 0">
-                <div class="el-card is-always-shadow gva-card quick-entrance">
-                  <div class="el-card__body">
+            </div>
+
+            <div class="gva-card-box" style="margin: 1rem 0">
+              <div class="el-card is-always-shadow gva-card quick-entrance">
+                <div class="el-card__body">
+                  <div class="el-card__heading">
+                    <h3>Cập nhật thông tin liên quan</h3>
+                  </div>
+                  <el-form ref="elForm" :model="formRelatedData" label-position="top" label-width="150px">
                     <el-row align="bottom" justify="space-between" type="flex">
                       <el-col class="el-col-18 el-col-lg-20">
                         <el-form-item label="Văn bản căn cứ">
                           <el-select
-                            v-model="formData.baseDocuments"
+                            v-model="formRelatedData.baseDocuments"
                             :style="{ width: '100%' }"
                             clearable
                             filterable
@@ -218,12 +349,11 @@
                         </el-form-item>
                       </el-col>
                     </el-row>
-
                     <el-row align="bottom" justify="space-between" type="flex">
                       <el-col class="el-col-18 el-col-lg-20">
                         <el-form-item label="Văn bản liên quan">
                           <el-select
-                            v-model="formData.relatedDocuments"
+                            v-model="formRelatedData.relatedDocuments"
                             :style="{ width: '100%' }"
                             clearable
                             filterable
@@ -251,28 +381,21 @@
                         </el-form-item>
                       </el-col>
                     </el-row>
-
                     <el-form-item label="Phòng ban liên quan">
                       <el-select
-                        v-model="formData.relatedAgencies"
+                        v-model="formRelatedData.relatedAgencies"
                         :style="{ width: '100%' }"
                         clearable
                         filterable
                         multiple
                         placeholder="Chọn phòng ban liên quan"
                       >
-                        <el-option
-                          v-for="item in agencyOptions"
-                          :key="item.ID"
-                          :label="item.name"
-                          :value="item.ID"
-                        />
+                        <el-option v-for="item in agencyOptions" :key="item.ID" :label="item.name" :value="item.ID" />
                       </el-select>
                     </el-form-item>
-
                     <el-form-item label="Người dùng liên quan">
                       <el-select
-                        v-model="formData.relatedUsers"
+                        v-model="formRelatedData.relatedUsers"
                         :style="{ width: '100%' }"
                         clearable
                         filterable
@@ -287,23 +410,32 @@
                         />
                       </el-select>
                     </el-form-item>
-                  </div>
+
+                    <el-form-item size="large">
+                      <el-button type="primary" @click="updateDocumentRelation">Cập nhật thông tin liên quan</el-button>
+                    </el-form-item>
+                  </el-form>
                 </div>
               </div>
-            </el-col>
-            <el-col :lg="7" :sm="24">
-              <div class="gva-card-box">
-                <div class="el-card is-always-shadow gva-card quick-entrance">
-                  <div class="el-card__body">
+            </div>
+
+            <div v-if="formAuthorityData.hasValue" class="gva-card-box" style="margin: 1rem 0">
+              <div class="el-card is-always-shadow gva-card quick-entrance">
+                <div class="el-card__body">
+                  <div class="el-card__heading">
+                    <h3>Thông tin phân quyền</h3>
+                  </div>
+                  <el-form ref="elForm" :model="formAuthorityData" label-position="top" label-width="150px">
                     <el-form-item label="Xem văn bản">
-                      <el-radio-group v-model="documentRule.view">
-                        <el-radio label="all" size="large">Tất cả mọi người</el-radio>
+                      <el-radio-group v-model="formAuthorityData.view">
+                        <el-radio label="all" size="large">Công khai</el-radio>
+                        <el-radio label="admin" size="large">Chỉ người dùng quản trị</el-radio>
                         <el-radio label="limit" size="large">Hạn chế</el-radio>
                       </el-radio-group>
                     </el-form-item>
-                    <el-form-item v-if="documentRule.view === 'limit'" label="Cá nhân xem văn bản">
+                    <el-form-item v-if="formAuthorityData.view === 'limit'" label="Cá nhân xem văn bản">
                       <el-select
-                        v-model="documentRule.viewUsers"
+                        v-model="formAuthorityData.viewUsers"
                         :style="{ width: '100%' }"
                         clearable
                         filterable
@@ -318,9 +450,9 @@
                         />
                       </el-select>
                     </el-form-item>
-                    <el-form-item v-if="documentRule.view === 'limit'" label="Nhóm xem văn bản">
+                    <el-form-item v-if="formAuthorityData.view === 'limit'" label="Nhóm xem văn bản">
                       <el-select
-                        v-model="documentRule.viewRoles"
+                        v-model="formAuthorityData.viewRoles"
                         :style="{ width: '100%' }"
                         clearable
                         filterable
@@ -336,14 +468,15 @@
                       </el-select>
                     </el-form-item>
                     <el-form-item label="Tải tập tin đính kèm">
-                      <el-radio-group v-model="documentRule.download">
-                        <el-radio label="all" size="large">Tất cả mọi người</el-radio>
+                      <el-radio-group v-model="formAuthorityData.download">
+                        <el-radio label="all" size="large">Công khai</el-radio>
+                        <el-radio label="admin" size="large">Chỉ người dùng quản trị</el-radio>
                         <el-radio label="limit" size="large">Hạn chế</el-radio>
                       </el-radio-group>
                     </el-form-item>
-                    <el-form-item v-if="documentRule.download === 'limit'" label="Cá nhân tải tập tin">
+                    <el-form-item v-if="formAuthorityData.download === 'limit'" label="Cá nhân tải tập tin">
                       <el-select
-                        v-model="documentRule.downloadUsers"
+                        v-model="formAuthorityData.downloadUsers"
                         :style="{ width: '100%' }"
                         clearable
                         filterable
@@ -358,9 +491,9 @@
                         />
                       </el-select>
                     </el-form-item>
-                    <el-form-item v-if="documentRule.download === 'limit'" label="Nhóm tải tập tin">
+                    <el-form-item v-if="formAuthorityData.download === 'limit'" label="Nhóm tải tập tin">
                       <el-select
-                        v-model="documentRule.downloadRoles"
+                        v-model="formAuthorityData.downloadRoles"
                         :style="{ width: '100%' }"
                         clearable
                         filterable
@@ -376,14 +509,14 @@
                       </el-select>
                     </el-form-item>
                     <el-form-item label="Chỉnh sủa">
-                      <el-radio-group v-model="documentRule.edit">
+                      <el-radio-group v-model="formAuthorityData.edit">
                         <el-radio label="only" size="large">Chỉ tôi</el-radio>
                         <el-radio label="limit" size="large">Hạn chế</el-radio>
                       </el-radio-group>
                     </el-form-item>
-                    <el-form-item v-if="documentRule.edit === 'limit'" label="Cá nhân sửa tập tin">
+                    <el-form-item v-if="formAuthorityData.edit === 'limit'" label="Cá nhân sửa tập tin">
                       <el-select
-                        v-model="documentRule.editUsers"
+                        v-model="formAuthorityData.editUsers"
                         :style="{ width: '100%' }"
                         clearable
                         filterable
@@ -398,9 +531,9 @@
                         />
                       </el-select>
                     </el-form-item>
-                    <el-form-item v-if="documentRule.edit === 'limit'" label="Nhóm sửa tập tin">
+                    <el-form-item v-if="formAuthorityData.edit === 'limit'" label="Nhóm sửa tập tin">
                       <el-select
-                        v-model="documentRule.editRoles"
+                        v-model="formAuthorityData.editRoles"
                         :style="{ width: '100%' }"
                         clearable
                         filterable
@@ -416,14 +549,14 @@
                       </el-select>
                     </el-form-item>
                     <el-form-item label="Sở hữu">
-                      <el-radio-group v-model="documentRule.owner">
+                      <el-radio-group v-model="formAuthorityData.owner">
                         <el-radio label="only" size="large">Chỉ tôi</el-radio>
                         <el-radio label="limit" size="large">Hạn chế</el-radio>
                       </el-radio-group>
                     </el-form-item>
-                    <el-form-item v-if="documentRule.owner === 'limit'" label="Cá nhân sở hữu tập tin">
+                    <el-form-item v-if="formAuthorityData.owner === 'limit'" label="Cá nhân sở hữu tập tin">
                       <el-select
-                        v-model="documentRule.ownerUsers"
+                        v-model="formAuthorityData.ownerUsers"
                         :style="{ width: '100%' }"
                         clearable
                         filterable
@@ -438,9 +571,9 @@
                         />
                       </el-select>
                     </el-form-item>
-                    <el-form-item v-if="documentRule.edit === 'limit'" label="Nhóm sở hữu tập tin">
+                    <el-form-item v-if="formAuthorityData.edit === 'limit'" label="Nhóm sở hữu tập tin">
                       <el-select
-                        v-model="documentRule.ownerRoles"
+                        v-model="formAuthorityData.ownerRoles"
                         :style="{ width: '100%' }"
                         clearable
                         filterable
@@ -455,14 +588,26 @@
                         />
                       </el-select>
                     </el-form-item>
-                  </div>
+
+                    <el-form-item size="large">
+                      <el-button type="info" @click="updateDocumentAuthority">Khôi phục như lúc đầu</el-button>
+                      <el-button type="primary" @click="updateDocumentAuthority">Cập nhật thông tin phân quyền
+                      </el-button>
+                    </el-form-item>
+
+                  </el-form>
                 </div>
               </div>
+            </div>
 
-              <div class="gva-card-box" style="margin-top: 1rem;">
-                <div class="el-card is-always-shadow gva-card quick-entrance">
-                  <div class="el-card__body">
-                    <el-form-item label="Tải lên danh sách các tập tin đính kèm">
+            <div class="gva-card-box" style="margin: 1rem 0">
+              <div class="el-card is-always-shadow gva-card quick-entrance">
+                <div class="el-card__body">
+                  <div class="el-card__heading">
+                    <h3>Tập tin đính kèm</h3>
+                  </div>
+                  <el-form ref="elForm" :model="formFileData" label-position="top" label-width="150px">
+                    <el-form-item :label="formFileData.title">
                       <el-upload
                         ref="documentFileUpload"
                         :action="`${path}/fileUploadAndDownload/upload`"
@@ -477,113 +622,57 @@
                         :on-success="onUploadSuccess"
                         :show-file-list="true"
                       >
-                        <el-button icon="el-icon-upload" size="small" type="primary">Chọn danh sách tập tin đính kèm
+                        <el-button icon="el-icon-upload" size="small" type="primary">{{ formFileData.buttonTitle }}
                         </el-button>
                       </el-upload>
                     </el-form-item>
-                    <el-form-item label="Văn bản được tạo bởi">
-                      <el-select
-                        v-model="formData.createdBy"
-                        :style="{ width: '100%' }"
-                        clearable
-                        filterable
-                        placeholder="Chọn cá nhân tạo văn bản"
-                      >
-                        <el-option
-                          v-for="item in usersOptions"
-                          :key="item.ID"
-                          :label="item.nickName"
-                          :value="item.ID"
-                        />
-                      </el-select>
-                    </el-form-item>
-                    <el-form-item label="Được chịu trách nhiệm bởi">
-                      <el-select
-                        v-model="formData.beResponsibleBy"
-                        :style="{ width: '100%' }"
-                        clearable
-                        filterable
-                        placeholder="Chọn cá nhân chịu trách nhiệm"
-                      >
-                        <el-option
-                          v-for="item in usersOptions"
-                          :key="item.ID"
-                          :label="item.nickName"
-                          :value="item.ID"
-                        />
-                      </el-select>
-                    </el-form-item>
-
-                    <el-row align="bottom" justify="space-between" type="flex">
-                      <el-col class="el-col-20 el-col-lg-21">
-                        <el-form-item label="Danh sách cá nhân kí văn bản">
-                          <el-select
-                            v-model="formData.signers"
-                            :style="{ width: '100%' }"
-                            clearable
-                            filterable
-                            multiple
-                            placeholder="Chọn 1 hoặc nhiều cá nhân kí văn bản"
-                          >
-                            <el-option
-                              v-for="item in signerOptions"
-                              :key="item.ID"
-                              :label="`${signerTitleMap[item.title] || ''} ${item.fullname}`"
-                              :value="item.ID"
-                            />
-                          </el-select>
-                        </el-form-item>
-                      </el-col>
-                      <el-col class="el-col-4 el-col-lg-3">
-                        <el-form-item>
-                          <el-button size="large" type="primary" @click="openSignerDialog">+</el-button>
-                        </el-form-item>
-                      </el-col>
-                    </el-row>
-                    <el-form-item label="Độ ưu tiên">
-                      <el-select
-                        v-model="formData.priorityLevel"
-                        :style="{ width: '100%' }"
-                        clearable
-                        placeholder="Mức độ ưu tiên của văn bản"
-                      >
-                        <el-option
-                          v-for="item in priorityLevelOptions"
-                          :key="item.value"
-                          :label="item.label"
-                          :value="item.value"
-                        />
-                      </el-select>
-                    </el-form-item>
-                    <el-form-item label="Trạng thái">
-                      <el-select
-                        v-model="formData.status"
-                        :style="{ width: '100%' }"
-                        clearable
-                        placeholder="Trạng thái của văn bản"
-                      >
-                        <el-option
-                          v-for="(item, index) in statusOptions"
-                          :key="index"
-                          :label="item.label"
-                          :value="item.value"
-                        />
-                      </el-select>
-                    </el-form-item>
-
                     <el-form-item size="large">
-                      <el-button v-show="enableSubmitButton" type="primary" @click="submitForm">Tạo văn bản mới</el-button>
+                      <el-button v-if="formFileData.userChooseFile" type="primary" @click="uploadFile">Tải tập tin đã
+                        chọn lên hệ thống</el-button>
                     </el-form-item>
-
-                  </div>
+                    <iframe
+                      v-if="formFileData.files.length > 0"
+                      :src="formFileData.src"
+                      style="width: 100%; height: 700px"
+                    />
+                  </el-form>
                 </div>
               </div>
-            </el-col>
-          </el-row>
-        </el-col>
-      </el-row>
+            </div>
 
-    </el-form>
+          </el-col>
+          <el-col :lg="7" :sm="24">
+            <el-space :fill="true" wrap style="width: 100%">
+              <el-card v-for="d in revisions" :key="d.ID" class="box-card">
+                <template #header>
+                  <div class="card-header">
+                    <el-space :size="10" spacer="|">
+                      <el-button class="button" @click="openRevisionDetailPage(d.ID)">Xem chi tiết</el-button>
+                      <el-button class="button">Khôi phục</el-button>
+                    </el-space>
+                  </div>
+                </template>
+
+                <div v-if="d.baseId === 0">
+                  <div style="margin-bottom: 10px" class="text item">Bản gốc</div>
+                  <div style="margin-bottom: 10px" class="text item">{{ d.shortTitle }}</div>
+                  <div style="margin-bottom: 10px" class="text item">Được tạo bởi: {{ d.createdUser?.nickName || '' }}</div>
+                  <div style="margin-bottom: 10px" class="text item">Vào lúc: {{ formatDate(d.CreatedAt) }}</div>
+                </div>
+                <div v-else>
+                  <div style="margin-bottom: 10px" class="text item">{{ d.shortTitle }}</div>
+                  <div v-if="d.updatedUser && d.updatedUser.nickName" style="margin-bottom: 10px" class="text item">Chỉnh sửa bởi: {{ d.updatedUser.nickName }}</div>
+                  <div style="margin-bottom: 10px" class="text item">Vào lúc: {{ formatDate(d.CreatedAt) }}</div>
+                  <div style="margin-bottom: 10px" class="text item">Được cập nhật từ: --</div>
+                  <div style="margin-bottom: 10px" class="text item">Truy vết: --</div>
+                </div>
+
+              </el-card>
+            </el-space>
+          </el-col>
+        </el-row>
+      </el-col>
+    </el-row>
 
     <el-dialog v-model="agencyDialogFormVisible" :before-close="closeAgencyDialog" title="Thêm phòng ban nhanh">
       <el-form ref="elFormRef" :model="agencyFormData" label-position="right" label-width="120px">
@@ -638,18 +727,12 @@
       </template>
     </el-dialog>
 
-    <el-dialog
-      v-model="documentDialogFormVisible"
-      :before-close="closeDocumentDialog"
-      title="Thêm nhanh văn bản"
-    >
-      <el-form :model="documentFormData" label-position="right" label-width="150px">
+    <el-dialog v-model="documentDialogFormVisible" :before-close="closeDocumentDialog" title="Thêm nhanh văn bản">
+      <el-form :model="documentFormData" label-position="right" label-width="120px">
         <el-form-item label="Tiêu đề">
           <el-input v-model="documentFormData.title" clearable placeholder="Tiêu đề văn bản" />
-          <p>Ví dụ: Luật Giáo dục ngày 14 tháng 6 năm 2019</p>
-          <p>Hoặc: Nghị định số 69/2017/NĐ-CP ngày 25 tháng 5 năm 2017</p>
         </el-form-item>
-        <el-form-item label="Gắn thẻ người dùng">
+        <el-form-item label="Liên quan">
           <el-select
             v-model="documentFormData.relatedUsers"
             :style="{ width: '100%' }"
@@ -658,15 +741,8 @@
             multiple
             placeholder="Chọn người dùng liên quan"
           >
-            <el-option :key="0" label="Phân bổ sau" :value="0" />
-            <el-option
-              v-for="item in usersOptions"
-              :key="item.ID"
-              :label="item.nickName"
-              :value="item.ID"
-            />
+            <el-option v-for="item in usersOptions" :key="item.ID" :label="item.nickName" :value="item.ID" />
           </el-select>
-          <p>Trong trường hợp chưa xác định người dùng hoàn thiện văn bản này, vui lòng chọn "Phân bổ sau"</p>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -677,104 +753,116 @@
       </template>
     </el-dialog>
 
-    <el-dialog v-model="signerDialogFormVisible" :before-close="closeSignerDialog" title="Thêm người kí mới">
-      <el-form ref="elFormRef" :model="signerFormData" label-position="right" label-width="120px">
-        <el-form-item label="Phòng ban:">
-          <el-select
-            v-model.number="signerFormData.agencyId"
-            :style="{ width: '100%' }"
-            clearable
-            filterable
-            placeholder="Chọn phòng ban"
-          >
-            <el-option
-              v-for="item in agencyOptions"
-              :key="item.ID"
-              :label="item.name"
-              :value="item.ID"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="Chức danh:">
-          <el-select
-            v-model.number="signerFormData.title"
-            :style="{ width: '100%' }"
-            clearable
-            filterable
-            placeholder="Chức danh"
-          >
-            <el-option
-              v-for="(item, index) in signerTitleOptions"
-              :key="index"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="Họ và tên">
-          <el-input v-model="signerFormData.fullname" :clearable="true" placeholder="Họ và tên đầy đủ" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button size="small" @click="closeSignerDialog">Đóng</el-button>
-          <el-button size="small" type="primary" @click="enterSignerDialog">Thêm</el-button>
-        </div>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'DocumentCreate',
+  name: 'DocumentDetail',
 }
 </script>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { useRouter } from 'vue-router'
+
+import WarningBar from '@/components/warningBar/warningBar.vue'
 
 import { useUserStore } from '@/pinia/modules/user'
 import { getDict } from '../../utils/dictionary'
 import { createDocumentAgencies, getDocumentAgenciesList } from '../../api/documentAgencies'
 import { createDocumentCategories, getDocumentCategoriesList } from '../../api/documentCategories'
-import { createDocumentFields, getDocumentFieldsList } from '../../api/documentFields'
-import { createDraftDocument, createFullDocument, getDocumentsList } from '../../api/documents'
+import { createDocumentFields, getDocumentFieldsList, updateDocumentFields } from '../../api/documentFields'
+import { findDocuments, createDraftDocument, getDocumentFiles, getDocumentsList, updateBasicDocuments, getDocumentRevisions, updateRelatedDocuments, updateDocumentFiles } from '../../api/documents'
 import { getUserList } from '../../api/user'
 import { getAuthorityInfo } from '../../api/authority'
-import {
-  createDocumentSigners,
-  getDocumentSignersList
-} from '@/api/documentSigners'
+import { formatDate } from '../../utils/format'
 
+const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 
-const formData = ref({
+// ====================== init ref ========================
+
+const documentFileUpload = ref(null)
+
+const formBasicData = ref({
   title: '',
-  agency: null,
-  category: null,
+  agencyId: null,
+  categoryId: null,
   date_issued: null,
   date_effected: null,
   date_expiration: null,
   signNumber: null,
   signYear: null,
-  categoryReadonly: '',
-  agencyReadonly: '',
+  categoryReadonly: null,
+  agencyReadonly: null,
   fields: [],
-  createdBy: userStore.userInfo.ID || 0,
-  beResponsibleBy: userStore.userInfo.ID || 0,
-  expert: '',
-  content: '',
-  priorityLevel: null,
+  expert: null,
+  content: null,
+  signers: [],
   status: null,
+  priorityLevel: null
+})
+
+const formRelatedData = ref({
   baseDocuments: [],
   relatedDocuments: [],
   relatedAgencies: [],
   relatedUsers: [],
-  signers: [],
+})
+
+const formOwnerData = ref({
+  updatedBy: userStore.userInfo.ID,
+  beResponsibleBy: userStore.userInfo.ID
+})
+
+const formAuthorityData = ref({
+  hasValue: false,
+  view: 'admin',
+  download: 'admin',
+  edit: 'only',
+  owner: 'only',
+  viewUsers: [],
+  viewRoles: [],
+  downloadUsers: [],
+  downloadRoles: [],
+  editUsers: [],
+  editRoles: [],
+  ownerUsers: [],
+  ownerRoles: []
+})
+
+const formFileData = ref({
+  title: '',
+  buttonTitle: '',
+  canDownload: false,
+  src: '',
+  files: [],
+  userChooseFile: false
+})
+
+const document = ref(null)
+const createdUserName = ref('')
+const createdTime = ref('')
+
+const statusOptions = ref([])
+const agencyOptions = ref([])
+const priorityLevelOptions = ref([])
+const usersOptions = ref([])
+const documentsOptions = ref([])
+const fieldsOptions = ref([])
+const categoryOptions = ref([])
+const agencyLevelOptions = ref([])
+const roleOptions = ref([])
+const documentFileList = ref([])
+const revisions = ref([])
+
+const path = import.meta.env.VITE_BASE_API
+
+const searchInfo = ref({
+  ID: Number(route.params.id)
 })
 
 const agencyDialogFormVisible = ref(false)
@@ -802,56 +890,131 @@ const documentFormData = ref({
   relatedUsers: []
 })
 
-const signerDialogFormVisible = ref(false)
-const signerFormData = ref({
-  agencyId: null,
-  count: 0,
-  fullname: '',
-  title: null,
-})
-const signerTitleMap = ref({})
+// ====================== end of init ref section =========
 
-const statusOptions = ref([])
-const agencyOptions = ref([])
-const priorityLevelOptions = ref([])
-const usersOptions = ref([])
-const documentsOptions = ref([])
-const fieldsOptions = ref([])
-const categoryOptions = ref([])
-const agencyLevelOptions = ref([])
-const roleOptions = ref([])
-const signerOptions = ref([])
-const signerTitleOptions = ref([])
-const documentFileList = ref([])
-const path = import.meta.env.VITE_BASE_API
-const enableSubmitButton = ref(true)
-const hasFileAttached = ref(false)
-const documentFileUpload = ref(null)
+// ================= reactive to router params changed ====
 
-const documentRule = ref({
-  view: 'all',
-  download: 'all',
-  edit: 'only',
-  owner: 'only',
-  viewUsers: [],
-  viewRoles: [],
-  downloadUsers: [],
-  downloadRoles: [],
-  editUsers: [],
-  editRoles: [],
-  ownerUsers: [],
-  ownerRoles: []
+watch(() => route.params.id, (id) => {
+  searchInfo.value.ID = Number(id)
+  getDocument()
 })
 
-// ================= Init ref =============================
+// ========== end of reactive to router params changed ====
 
-onMounted(() => {
-  // console.log(documentFileUpload.value)
-})
+// ========== prepare data section ========================
 
-// ================= End of init ref ======================
+const getDocument = async() => {
+  if (!Number.isInteger(searchInfo.value.ID)) { return }
 
-// ================= Prepare data section =================
+  const body = await findDocuments({
+    ...searchInfo.value,
+    preloadFields: 1,
+    preloadSigners: 1,
+    preloadBasedDocs: 1,
+    preloadRelatedDocs: 1,
+    preloadRelatedUsers: 1,
+    preloadRelatedAgencies: 1,
+    preloadCreatedBy: 1,
+    preloadAuthority: 1
+  })
+
+  if (body.code === 0) {
+    document.value = body.data.document
+    const d = body.data.document
+
+    formBasicData.value = {
+      ...formBasicData.value,
+      title: d.title,
+      agencyId: d.agencyId,
+      categoryId: d.categoryId,
+      date_issued: d.dateIssued && new Date(d.dateIssued),
+      date_effected: d.effectDate && new Date(d.effectDate),
+      date_expiration: d.dateExpiration && new Date(d.dateExpiration),
+      signNumber: d.signNumber,
+      signYear: d.signYear,
+      categoryReadonly: d.signCategory,
+      agencyReadonly: d.signAgency,
+      fields: [...d.fields.map(f => f.ID * 1)],
+      signers: [...d.signers.map(f => f.ID * 1)],
+      expert: d.expert,
+      content: d.content,
+      status: d.status,
+      priorityLevel: d.priority
+    }
+
+    formRelatedData.value = {
+      ...formRelatedData.value,
+      baseDocuments: d.basedDocuments.map(f => f.ID * 1),
+      relatedDocuments: d.relatedDocuments.map(f => f.ID * 1),
+      relatedUsers: d.relatedUsers.map(f => f.ID * 1),
+      relatedAgencies: d.relatedAgencies.map(f => f.ID * 1)
+    }
+
+    createdUserName.value = d.createdUser.nickName
+    createdTime.value = formatDate(d.CreatedAt)
+
+    // authority
+    if (d.authority) {
+      formAuthorityData.value = {
+        ...formAuthorityData.value,
+        hasValue: true,
+        viewUsers: d.authority.viewLimitUsers.map(f => f.ID * 1),
+        viewRoles: d.authority.viewLimitRoles.map(f => f.authorityId * 1),
+        downloadUsers: d.authority.downloadLimitUsers.map(f => f.ID * 1),
+        downloadRoles: d.authority.downloadLimitRoles.map(f => f.authorityId * 1),
+        editUsers: d.authority.updateLimitUsers.map(f => f.ID * 1),
+        editRoles: d.authority.updateLimitRoles.map(f => f.authorityId * 1),
+        ownerUsers: d.authority.ownerLimitUsers.map(f => f.ID * 1),
+        ownerRoles: d.authority.ownerLimitRoles.map(f => f.authorityId * 1)
+      }
+
+      if (d.authority.publicToView) {
+        formAuthorityData.value.view = 'all'
+      } else {
+        if (d.authority.onlyAdminCanView) {
+          formAuthorityData.value.view = 'admin'
+        } else {
+          formAuthorityData.value.view = 'limit'
+        }
+      }
+
+      if (d.authority.publicToDownload) {
+        formAuthorityData.value.download = 'all'
+      } else {
+        if (d.authority.onlyAdminCanDownload) {
+          formAuthorityData.value.download = 'admin'
+        } else {
+          formAuthorityData.value.download = 'limit'
+        }
+      }
+    }
+  }
+}
+
+const loadAttachedFiles = async() => {
+  const data = await getDocumentFiles({ id: searchInfo.value.ID })
+
+  if (data.code === 0) {
+    formFileData.value.files = [...data.data.files]
+    formFileData.value.canDownload = data.data.canDownload
+
+    let pdfSource = ''
+    if (formFileData.value.files.length > 0) {
+      formFileData.value.title = 'Cập nhật tập tin đính kèm'
+      formFileData.value.buttonTitle = 'Chọn tập tin cập nhật'
+      pdfSource = `${path}/${data.data.files[0].url}`
+    } else {
+      formFileData.value.title = 'Bổ sung tập tin đính kèm'
+      formFileData.value.buttonTitle = 'Chọn tập tin bổ sung'
+    }
+
+    if (!data.data.canDownload) {
+      pdfSource = pdfSource + '#toolbar=0'
+    }
+
+    formFileData.value.src = pdfSource
+  }
+}
 
 const loadStatusOptions = async() => {
   const data = await getDict('documentStatuses')
@@ -911,50 +1074,49 @@ const loadRoleOptions = async() => {
   }
 }
 
-const loadSignerOptions = async() => {
-  const table = await getDocumentSignersList({ page: 1, pageSize: 1000 })
-  if (table.code === 0) {
-    signerOptions.value = table.data.list
+const loadRevisions = async() => {
+  const data = await getDocumentRevisions({ id: searchInfo.value.ID })
+
+  if (data.code === 0) {
+    revisions.value = [...data.data.revisions]
   }
 }
 
-const loadSignerTitleOptions = async() => {
-  const data = await getDict('signerTitles')
-  signerTitleOptions.value = data
-
-  signerTitleMap.value = data.reduce((acc, cur) => {
-    return {
-      ...acc,
-      [cur.value]: cur.label
-    }
-  }, {})
-}
-
-loadStatusOptions()
+getDocument()
 loadAgencyOptions()
 loadAgencyLevelOptions()
 loadCategoryOptions()
 loadFieldOptions()
-loadPriorityOptions()
 loadDocumentOptions()
 loadUserOptions()
 loadRoleOptions()
-loadSignerOptions()
-loadSignerTitleOptions()
+loadPriorityOptions()
+loadStatusOptions()
+loadAttachedFiles()
+loadRevisions()
 
-// ================= End of preparing data section =================
+// ========== end of prepare data section ==================
 
 // ================= Reactive section =================
 
+const openRevisionDetailPage = (documentId) => {
+  router.push({
+    name: 'documents-update',
+    params: {
+      id: documentId
+    }
+  })
+}
+
 const handleOnAgencyChange = (selected) => {
   if (selected) {
-    formData.value.agencyReadonly = agencyOptions.value.find(f => f.ID === selected)?.code
+    formBasicData.value.agencyReadonly = agencyOptions.value.find(f => f.ID === selected)?.code
   }
 }
 
 const handleOnCategoryChange = (selected) => {
   if (selected) {
-    formData.value.categoryReadonly = categoryOptions.value.find(f => f.ID === selected)?.code
+    formBasicData.value.categoryReadonly = categoryOptions.value.find(f => f.ID === selected)?.code
   }
 }
 
@@ -965,7 +1127,7 @@ const handleOnIssuedDateChange = (date) => {
   const mm = dateObj.getMonth()
   const yy = dateObj.getFullYear()
 
-  formData.value.date_effected = new Date(yy, mm, dd)
+  formBasicData.value.date_effected = new Date(yy, mm, dd)
 }
 
 const openAgencyDialog = () => {
@@ -1001,17 +1163,70 @@ const closeDocumentDialog = () => {
   documentDialogFormVisible.value = false
 }
 
-const openSignerDialog = () => {
-  signerDialogFormVisible.value = true
-}
-
-const closeSignerDialog = () => {
-  signerDialogFormVisible.value = false
-}
-
 // ================= End of reactive section =================
 
 // ================= Business section =================
+
+const updateBasicDocument = async() => {
+  const signNumber = formBasicData.value.signNumber < 10 ? `0${formBasicData.value.signNumber}` : formBasicData.value.signNumber.toString()
+
+  const data = await updateBasicDocuments({
+    id: searchInfo.value.ID,
+    priority: formBasicData.value.priorityLevel,
+    status: formBasicData.value.status,
+    updatedBy: formOwnerData.value.updatedBy,
+    beResponsibleBy: formOwnerData.value.beResponsibleBy,
+    signers: formBasicData.value.signers,
+    fields: formBasicData.value.fields,
+    agencyId: formBasicData.value.agencyId,
+    categoryId: formBasicData.value.categoryId,
+    signText: `${signNumber}/${formBasicData.value.signYear}/${formBasicData.value.categoryReadonly}-${formBasicData.value.agencyReadonly}`,
+    signNumber: parseInt(formBasicData.value.signNumber),
+    signYear: parseInt(formBasicData.value.signYear),
+    signCategory: formBasicData.value.categoryReadonly,
+    signAgency: formBasicData.value.agencyReadonly,
+    expirationDate: formBasicData.value.date_expiration,
+    effectDate: formBasicData.value.date_effected,
+    dateIssued: formBasicData.value.date_issued,
+    content: formBasicData.value.content,
+    expert: formBasicData.value.expert,
+    title: formBasicData.value.title
+  })
+
+  if (data.code === 0) {
+    loadRevisions()
+
+    ElMessage({
+      type: 'success',
+      message: 'Cập nhật thông tin cơ bản thành công'
+    })
+  }
+}
+
+const updateDocumentRelation = async() => {
+  const res = await updateRelatedDocuments({
+    id: searchInfo.value.ID,
+    basedDocuments: formRelatedData.value.baseDocuments,
+    relatedDocuments: formRelatedData.value.relatedDocuments,
+    relatedAgencies: formRelatedData.value.relatedAgencies,
+    relatedUsers: formRelatedData.value.relatedUsers,
+    updatedBy: formOwnerData.value.updatedBy,
+    beResponsibleBy: formOwnerData.value.beResponsibleBy,
+  })
+
+  if (res.code === 0) {
+    loadRevisions()
+
+    ElMessage({
+      type: 'success',
+      message: 'Cập nhật thông tin liên quan thành công'
+    })
+  }
+}
+
+const updateDocumentAuthority = () => {
+
+}
 
 const enterAgencyDialog = async() => {
   const res = await createDocumentAgencies(agencyFormData.value)
@@ -1110,137 +1325,54 @@ const enterDocumentDialog = async() => {
   }
 }
 
-const enterSignerDialog = async() => {
-  const response = await createDocumentSigners(signerFormData.value)
-
-  if (response.code === 0) {
-    ElMessage({
-      type: 'success',
-      message: 'Thêm nhanh người kí thành công'
-    })
-
-    signerFormData.value.agencyId = null
-    signerFormData.value.count = 0
-    signerFormData.value.fullname = ''
-    signerFormData.value.title = null
-
-    signerOptions.value = [...signerOptions.value, response.data.signer]
-    formData.value.signers = [...formData.value.signers, response.data.signer.ID]
-
-    closeSignerDialog()
-  }
-}
-
 const onBeforeUpload = () => { }
 
 const onSelectNewFile = () => {
-  hasFileAttached.value = true
+  formFileData.value.userChooseFile = true
 }
 
-const onUploadError = (error) => {
-  hasFileAttached.value = false
-
+const onUploadError = (err) => {
   ElMessage({
     type: 'error',
-    message: 'Lỗi xảy ra trong quá trình tải lên tập tin! ' + error,
+    message: 'Lỗi xảy ra trong quá trình tải lên tập tin! ' + err,
   })
 }
 
 const onRemoveFile = () => {
-  enableSubmitButton.value = true
+  formFileData.value.userChooseFile = false
 }
 
 const onUploadSuccess = async(response, uploadFile, uploadFiles) => {
-  const data = response.data
-
-  await createNewDocument({
-    name: data.file.name || '',
-    key: data.file.key || '',
-    url: data.file.url || '',
-    tag: data.file.tag || '',
-    size: uploadFile.size || '',
-    order: 0,
-    path: data.file.url || '',
-  })
-}
-
-const submitForm = () => {
-  enableSubmitButton.value = false
-
-  if (hasFileAttached.value) {
-    documentFileUpload.value.submit()
-  } else {
-    createNewDocument(null)
-  }
-}
-
-const createNewDocument = async(fileInfo) => {
-  const signNumber = formData.value.signNumber < 10 ? `0${formData.value.signNumber}` : formData.value.signNumber.toString()
-
-  const documentData = {
-    title: formData.value.title,
-    expert: formData.value.expert,
-    content: formData.value.content,
-    dateIssued: formData.value.date_issued,
-    effectDate: formData.value.date_effected,
-    stillInEffect: true,
-    expirationDate: formData.value.date_expiration,
-    signNumber: parseInt(formData.value.signNumber),
-    signYear: parseInt(formData.value.signYear),
-    signCategory: formData.value.categoryReadonly,
-    signAgency: formData.value.agencyReadonly,
-    signText: `${signNumber}/${formData.value.signYear}/${formData.value.categoryReadonly}-${formData.value.agencyReadonly}`,
-    categoryId: formData.value.category,
-    agencyId: formData.value.agency,
-    createdBy: userStore.userInfo.ID || formData.value.createdBy,
-    beResponsibleBy: formData.value.beResponsibleBy,
-    status: formData.value.status,
-    priorityId: formData.value.priorityLevel,
-    fields: [],
-    signers: [],
-    documentBaseOns: [],
-    documentReferences: [],
-    documentUsersRelated: [],
-    documentAgenciesRelated: [],
-    fileInfo: null,
-    ruleInfo: documentRule.value
-  }
-
-  documentData.fields = formData.value.fields
-  documentData.signers = formData.value.signers
-  documentData.documentBaseOns = formData.value.baseDocuments
-  documentData.documentReferences = formData.value.relatedDocuments
-  documentData.documentUsersRelated = formData.value.relatedUsers
-  documentData.documentAgenciesRelated = formData.value.relatedAgencies
-
-  if (fileInfo) {
-    documentData.fileInfo = {
-      name: fileInfo?.name || '',
-      key: fileInfo?.key || '',
-      url: fileInfo?.url || '',
-      tag: fileInfo?.tag || '',
-      size: fileInfo?.size || 0,
+  if (response.code === 0) {
+    const res = await updateDocumentFiles({
+      id: searchInfo.value.ID,
+      updatedBy: formOwnerData.value.updatedBy,
+      beResponsibleBy: formOwnerData.value.beResponsibleBy,
+      name: response.data.file.name,
+      key: response.data.file.key,
+      url: response.data.file.url,
+      tag: response.data.file.tag,
+      size: uploadFile.size,
       order: 0,
-      path: fileInfo?.url || '',
-    }
-  }
-
-  const documentResponse = await createFullDocument(documentData)
-
-  if (documentResponse.code === 0) {
-    ElMessage({
-      type: 'success',
-      message: 'Tạo văn bản thành công',
+      path: response.data.file.url
     })
 
-    setTimeout(() => {
-      router.push({
-        name: 'documents-all'
+    if (res.code === 0) {
+      const pdfSource = `${path}/${response.data.file.url}`
+
+      formFileData.value.src = pdfSource
+
+      ElMessage({
+        type: 'success',
+        message: 'Cập nhật tập tin đính kèm thành công',
       })
-    }, 5000)
+    }
   }
+}
+
+const uploadFile = () => {
+  documentFileUpload.value.submit()
 }
 
 // ================= End of business section =================
-
 </script>

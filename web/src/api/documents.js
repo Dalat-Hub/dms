@@ -97,6 +97,54 @@ export const updateDocuments = (data) => {
 }
 
 // @Tags Documents
+// @Summary update basic document information
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body documents.UpdateBasic true "update basic document information"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
+// @Router /documents/updateBasicDocuments [put]
+export const updateBasicDocuments = (data) => {
+  return service({
+    url: '/documents/updateBasicDocuments',
+    method: 'put',
+    data,
+  })
+}
+
+// @Tags Documents
+// @Summary update related document information
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body documents.UpdateRelation true "update related document information"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
+// @Router /documents/updateRelatedDocuments [put]
+export const updateRelatedDocuments = (data) => {
+  return service({
+    url: '/documents/updateRelatedDocuments',
+    method: 'put',
+    data,
+  })
+}
+
+// @Tags Documents
+// @Summary update document attached files
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body documents.UpdateFile true "update document attached files"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
+// @Router /documents/updateDocumentFiles [put]
+export const updateDocumentFiles = (data) => {
+  return service({
+    url: '/documents/updateDocumentFiles',
+    method: 'put',
+    data,
+  })
+}
+
+// @Tags Documents
 // @Summary get document by ID
 // @Security ApiKeyAuth
 // @accept application/json
@@ -124,6 +172,54 @@ export const getDocumentsList = (params) => {
   return service({
     url: '/documents/getDocumentsList',
     method: 'get',
+    params,
+  })
+}
+
+// @Tags Documents
+// @Summary get list of revisions
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data query request.GetByID true "get list of revisions"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
+// @Router /documents/getDocumentRevisions [get]
+export const getDocumentRevisions = (params) => {
+  return service({
+    url: '/documents/getDocumentRevisions',
+    method: 'get',
+    params,
+  })
+}
+
+// @Tags Documents
+// @Summary get list of attached files
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data query request.GetByID true "get list of attached files"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
+// @Router /documents/getDocumentsList [get]
+export const getDocumentFiles = (params) => {
+  return service({
+    url: '/documents/getDocumentFiles',
+    method: 'get',
+    params,
+  })
+}
+
+// @Tags Documents
+// @Summary make duplicated version of the given document
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data query request.GetByID true "make duplicated version of the given document"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
+// @Router /documents/makeDuplication [post]
+export const makeDuplication = (params) => {
+  return service({
+    url: '/documents/makeDuplication',
+    method: 'post',
     params,
   })
 }

@@ -7,7 +7,7 @@ import (
 type DocumentSignerReferences struct {
 	global.GVA_MODEL
 	DocumentId uint `json:"documentId" form:"documentId" gorm:"column:document_id;"`
-	UserId     uint `json:"userId" form:"userId" gorm:"column:user_id;"`
+	SignerId   uint `json:"signerId" form:"signerId" gorm:"column:signer_id;"`
 }
 
 func (DocumentSignerReferences) TableName() string {
