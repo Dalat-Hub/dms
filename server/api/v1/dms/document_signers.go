@@ -16,127 +16,175 @@ type DocumentSignersApi struct {
 
 var documentSignersService = service.ServiceGroupApp.DmsServiceGroup.DocumentSignersService
 
-// CreateDocumentSigners 创建DocumentSigners
+// CreateDocumentSigners create new signer
 // @Tags DocumentSigners
-// @Summary 创建DocumentSigners
+// @Summary create new signer
 // @Security ApiKeyAuth
 // @accept application/json
 // @Produce application/json
-// @Param data body dms.DocumentSigners true "创建DocumentSigners"
-// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
+// @Param data body dms.DocumentSigners true "create new signer"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
 // @Router /documentSigners/createDocumentSigners [post]
 func (documentSignersApi *DocumentSignersApi) CreateDocumentSigners(c *gin.Context) {
 	var documentSigners dms.DocumentSigners
-	_ = c.ShouldBindJSON(&documentSigners)
-	if err := documentSignersService.CreateDocumentSigners(documentSigners); err != nil {
-		global.GVA_LOG.Error("创建失败!", zap.Error(err))
-		response.FailWithMessage("创建失败", c)
+	var err error
+
+	err = c.ShouldBindJSON(&documentSigners)
+	if err != nil {
+		global.GVA_LOG.Error("provide valid data to create", zap.Error(err))
+		response.FailWithMessage("provide valid data to create", c)
+		return
+	}
+
+	if err = documentSignersService.CreateDocumentSigners(&documentSigners); err != nil {
+		global.GVA_LOG.Error("fail to create new signer", zap.Error(err))
+		response.FailWithMessage("fail to create new signer", c)
 	} else {
-		response.OkWithMessage("创建成功", c)
+		response.OkWithData(gin.H{"signer": documentSigners}, c)
 	}
 }
 
-// DeleteDocumentSigners 删除DocumentSigners
+// DeleteDocumentSigners delete signer
 // @Tags DocumentSigners
-// @Summary 删除DocumentSigners
+// @Summary delete signer
 // @Security ApiKeyAuth
 // @accept application/json
 // @Produce application/json
-// @Param data body dms.DocumentSigners true "删除DocumentSigners"
-// @Success 200 {string} string "{"success":true,"data":{},"msg":"删除成功"}"
+// @Param data body dms.DocumentSigners true "delete signer"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
 // @Router /documentSigners/deleteDocumentSigners [delete]
 func (documentSignersApi *DocumentSignersApi) DeleteDocumentSigners(c *gin.Context) {
 	var documentSigners dms.DocumentSigners
-	_ = c.ShouldBindJSON(&documentSigners)
-	if err := documentSignersService.DeleteDocumentSigners(documentSigners); err != nil {
-		global.GVA_LOG.Error("删除失败!", zap.Error(err))
-		response.FailWithMessage("删除失败", c)
+	var err error
+
+	err = c.ShouldBindJSON(&documentSigners)
+	if err != nil {
+		global.GVA_LOG.Error("provide valid data", zap.Error(err))
+		response.FailWithMessage("provide valid data", c)
+		return
+	}
+
+	if err = documentSignersService.DeleteDocumentSigners(documentSigners); err != nil {
+		global.GVA_LOG.Error("fail to delete signer", zap.Error(err))
+		response.FailWithMessage("fail to delete signer", c)
 	} else {
-		response.OkWithMessage("删除成功", c)
+		response.OkWithMessage("success", c)
 	}
 }
 
-// DeleteDocumentSignersByIds 批量删除DocumentSigners
+// DeleteDocumentSignersByIds bulk delete signers by IDs
 // @Tags DocumentSigners
-// @Summary 批量删除DocumentSigners
+// @Summary bulk delete signers by IDs
 // @Security ApiKeyAuth
 // @accept application/json
 // @Produce application/json
-// @Param data body request.IdsReq true "批量删除DocumentSigners"
-// @Success 200 {string} string "{"success":true,"data":{},"msg":"批量删除成功"}"
+// @Param data body request.IdsReq true "bulk delete signers by IDs"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
 // @Router /documentSigners/deleteDocumentSignersByIds [delete]
 func (documentSignersApi *DocumentSignersApi) DeleteDocumentSignersByIds(c *gin.Context) {
 	var IDS request.IdsReq
-	_ = c.ShouldBindJSON(&IDS)
-	if err := documentSignersService.DeleteDocumentSignersByIds(IDS); err != nil {
-		global.GVA_LOG.Error("批量删除失败!", zap.Error(err))
-		response.FailWithMessage("批量删除失败", c)
+	var err error
+
+	err = c.ShouldBindJSON(&IDS)
+	if err != nil {
+		global.GVA_LOG.Error("provide valid data", zap.Error(err))
+		response.FailWithMessage("provide valid data", c)
+		return
+	}
+
+	if err = documentSignersService.DeleteDocumentSignersByIds(IDS); err != nil {
+		global.GVA_LOG.Error("fail to bulk delete", zap.Error(err))
+		response.FailWithMessage("fail to bulk delete", c)
 	} else {
-		response.OkWithMessage("批量删除成功", c)
+		response.OkWithMessage("success", c)
 	}
 }
 
-// UpdateDocumentSigners 更新DocumentSigners
+// UpdateDocumentSigners update signer
 // @Tags DocumentSigners
-// @Summary 更新DocumentSigners
+// @Summary update signer
 // @Security ApiKeyAuth
 // @accept application/json
 // @Produce application/json
-// @Param data body dms.DocumentSigners true "更新DocumentSigners"
-// @Success 200 {string} string "{"success":true,"data":{},"msg":"更新成功"}"
+// @Param data body dms.DocumentSigners true "update signers"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
 // @Router /documentSigners/updateDocumentSigners [put]
 func (documentSignersApi *DocumentSignersApi) UpdateDocumentSigners(c *gin.Context) {
 	var documentSigners dms.DocumentSigners
-	_ = c.ShouldBindJSON(&documentSigners)
-	if err := documentSignersService.UpdateDocumentSigners(documentSigners); err != nil {
-		global.GVA_LOG.Error("更新失败!", zap.Error(err))
-		response.FailWithMessage("更新失败", c)
+	var err error
+
+	err = c.ShouldBindJSON(&documentSigners)
+	if err != nil {
+		global.GVA_LOG.Error("provide valid data", zap.Error(err))
+		response.FailWithMessage("provide valid data", c)
+		return
+	}
+
+	if err = documentSignersService.UpdateDocumentSigners(documentSigners); err != nil {
+		global.GVA_LOG.Error("fail to update", zap.Error(err))
+		response.FailWithMessage("fail to update", c)
 	} else {
-		response.OkWithMessage("更新成功", c)
+		response.OkWithMessage("success", c)
 	}
 }
 
-// FindDocumentSigners 用id查询DocumentSigners
+// FindDocumentSigners find signer
 // @Tags DocumentSigners
-// @Summary 用id查询DocumentSigners
+// @Summary find signer
 // @Security ApiKeyAuth
 // @accept application/json
 // @Produce application/json
-// @Param data query dms.DocumentSigners true "用id查询DocumentSigners"
-// @Success 200 {string} string "{"success":true,"data":{},"msg":"查询成功"}"
+// @Param data query dms.DocumentSigners true "find signer"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
 // @Router /documentSigners/findDocumentSigners [get]
 func (documentSignersApi *DocumentSignersApi) FindDocumentSigners(c *gin.Context) {
 	var documentSigners dms.DocumentSigners
-	_ = c.ShouldBindQuery(&documentSigners)
+	var err error
+
+	err = c.ShouldBindQuery(&documentSigners)
+	if err != nil {
+		global.GVA_LOG.Error("provide valid data", zap.Error(err))
+		response.FailWithMessage("provide valid data", c)
+		return
+	}
+
 	if redocumentSigners, err := documentSignersService.GetDocumentSigners(documentSigners.ID); err != nil {
-		global.GVA_LOG.Error("查询失败!", zap.Error(err))
-		response.FailWithMessage("查询失败", c)
+		global.GVA_LOG.Error("fail to find", zap.Error(err))
+		response.FailWithMessage("fail to find", c)
 	} else {
 		response.OkWithData(gin.H{"redocumentSigners": redocumentSigners}, c)
 	}
 }
 
-// GetDocumentSignersList 分页获取DocumentSigners列表
+// GetDocumentSignersList get signer list
 // @Tags DocumentSigners
-// @Summary 分页获取DocumentSigners列表
+// @Summary get signer list
 // @Security ApiKeyAuth
 // @accept application/json
 // @Produce application/json
-// @Param data query dmsReq.DocumentSignersSearch true "分页获取DocumentSigners列表"
-// @Success 200 {string} string "{"success":true,"data":{},"msg":"获取成功"}"
+// @Param data query dmsReq.DocumentSignersSearch true "get signer list"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
 // @Router /documentSigners/getDocumentSignersList [get]
 func (documentSignersApi *DocumentSignersApi) GetDocumentSignersList(c *gin.Context) {
 	var pageInfo dmsReq.DocumentSignersSearch
-	_ = c.ShouldBindQuery(&pageInfo)
+	var err error
+
+	err = c.ShouldBindQuery(&pageInfo)
+	if err != nil {
+		global.GVA_LOG.Error("provide valid data", zap.Error(err))
+		response.FailWithMessage("provide valid data", c)
+		return
+	}
+
 	if list, total, err := documentSignersService.GetDocumentSignersInfoList(pageInfo); err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
-		response.FailWithMessage("获取失败", c)
+		global.GVA_LOG.Error("fail to get list", zap.Error(err))
+		response.FailWithMessage("fail to get list", c)
 	} else {
 		response.OkWithDetailed(response.PageResult{
 			List:     list,
 			Total:    total,
 			Page:     pageInfo.Page,
 			PageSize: pageInfo.PageSize,
-		}, "获取成功", c)
+		}, "success", c)
 	}
 }

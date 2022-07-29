@@ -12,7 +12,7 @@ type DocumentSignersService struct {
 
 // CreateDocumentSigners 创建DocumentSigners记录
 // Author [piexlmax](https://github.com/piexlmax)
-func (documentSignersService *DocumentSignersService) CreateDocumentSigners(documentSigners dms.DocumentSigners) (err error) {
+func (documentSignersService *DocumentSignersService) CreateDocumentSigners(documentSigners *dms.DocumentSigners) (err error) {
 	err = global.GVA_DB.Create(&documentSigners).Error
 	return err
 }

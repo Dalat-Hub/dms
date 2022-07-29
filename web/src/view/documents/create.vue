@@ -513,23 +513,33 @@
                         />
                       </el-select>
                     </el-form-item>
-                    <el-form-item label="Danh sách cá nhân kí văn bản">
-                      <el-select
-                        v-model="formData.signers"
-                        :style="{ width: '100%' }"
-                        clearable
-                        filterable
-                        multiple
-                        placeholder="Chọn 1 hoặc nhiều cá nhân kí văn bản"
-                      >
-                        <el-option
-                          v-for="item in usersOptions"
-                          :key="item.ID"
-                          :label="item.nickName"
-                          :value="item.ID"
-                        />
-                      </el-select>
-                    </el-form-item>
+
+                    <el-row align="bottom" justify="space-between" type="flex">
+                      <el-col class="el-col-20 el-col-lg-21">
+                        <el-form-item label="Danh sách cá nhân kí văn bản">
+                          <el-select
+                            v-model="formData.signers"
+                            :style="{ width: '100%' }"
+                            clearable
+                            filterable
+                            multiple
+                            placeholder="Chọn 1 hoặc nhiều cá nhân kí văn bản"
+                          >
+                            <el-option
+                              v-for="item in signerOptions"
+                              :key="item.ID"
+                              :label="`${signerTitleMap[item.title] || ''} ${item.fullname}`"
+                              :value="item.ID"
+                            />
+                          </el-select>
+                        </el-form-item>
+                      </el-col>
+                      <el-col class="el-col-4 el-col-lg-3">
+                        <el-form-item>
+                          <el-button size="large" type="primary" @click="openSignerDialog">+</el-button>
+                        </el-form-item>
+                      </el-col>
+                    </el-row>
                     <el-form-item label="Độ ưu tiên">
                       <el-select
                         v-model="formData.priorityLevel"
@@ -662,6 +672,52 @@
         </div>
       </template>
     </el-dialog>
+
+    <el-dialog v-model="signerDialogFormVisible" :before-close="closeSignerDialog" title="Thêm người kí mới">
+      <el-form ref="elFormRef" :model="signerFormData" label-position="right" label-width="120px">
+        <el-form-item label="Phòng ban:">
+          <el-select
+            v-model.number="signerFormData.agencyId"
+            :style="{ width: '100%' }"
+            clearable
+            filterable
+            placeholder="Chọn phòng ban"
+          >
+            <el-option
+              v-for="item in agencyOptions"
+              :key="item.ID"
+              :label="item.name"
+              :value="item.ID"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="Chức danh:">
+          <el-select
+            v-model.number="signerFormData.title"
+            :style="{ width: '100%' }"
+            clearable
+            filterable
+            placeholder="Chức danh"
+          >
+            <el-option
+              v-for="(item, index) in signerTitleOptions"
+              :key="index"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="Họ và tên">
+          <el-input v-model="signerFormData.fullname" :clearable="true" placeholder="Họ và tên đầy đủ" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button size="small" @click="closeSignerDialog">Đóng</el-button>
+          <el-button size="small" type="primary" @click="enterSignerDialog">Thêm</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -684,6 +740,10 @@ import { createDocumentFields, getDocumentFieldsList } from '../../api/documentF
 import { createDraftDocument, createFullDocument, getDocumentsList } from '../../api/documents'
 import { getUserList } from '../../api/user'
 import { getAuthorityInfo } from '../../api/authority'
+import {
+  createDocumentSigners,
+  getDocumentSignersList
+} from '@/api/documentSigners'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -738,6 +798,15 @@ const documentFormData = ref({
   relatedUsers: []
 })
 
+const signerDialogFormVisible = ref(false)
+const signerFormData = ref({
+  agencyId: null,
+  count: 0,
+  fullname: '',
+  title: null,
+})
+const signerTitleMap = ref({})
+
 const statusOptions = ref([])
 const agencyOptions = ref([])
 const priorityLevelOptions = ref([])
@@ -747,6 +816,8 @@ const fieldsOptions = ref([])
 const categoryOptions = ref([])
 const agencyLevelOptions = ref([])
 const roleOptions = ref([])
+const signerOptions = ref([])
+const signerTitleOptions = ref([])
 const documentFileList = ref([])
 const path = import.meta.env.VITE_BASE_API
 const enableSubmitButton = ref(true)
@@ -836,6 +907,25 @@ const loadRoleOptions = async() => {
   }
 }
 
+const loadSignerOptions = async() => {
+  const table = await getDocumentSignersList({ page: 1, pageSize: 1000 })
+  if (table.code === 0) {
+    signerOptions.value = table.data.list
+  }
+}
+
+const loadSignerTitleOptions = async() => {
+  const data = await getDict('signerTitles')
+  signerTitleOptions.value = data
+
+  signerTitleMap.value = data.reduce((acc, cur) => {
+    return {
+      ...acc,
+      [cur.value]: cur.label
+    }
+  }, {})
+}
+
 loadStatusOptions()
 loadAgencyOptions()
 loadAgencyLevelOptions()
@@ -845,6 +935,8 @@ loadPriorityOptions()
 loadDocumentOptions()
 loadUserOptions()
 loadRoleOptions()
+loadSignerOptions()
+loadSignerTitleOptions()
 
 // ================= End of preparing data section =================
 
@@ -903,6 +995,14 @@ const openDocumentDialogForm = (type) => {
 
 const closeDocumentDialog = () => {
   documentDialogFormVisible.value = false
+}
+
+const openSignerDialog = () => {
+  signerDialogFormVisible.value = true
+}
+
+const closeSignerDialog = () => {
+  signerDialogFormVisible.value = false
 }
 
 // ================= End of reactive section =================
@@ -1003,6 +1103,27 @@ const enterDocumentDialog = async() => {
     }
 
     closeDocumentDialog()
+  }
+}
+
+const enterSignerDialog = async() => {
+  const response = await createDocumentSigners(signerFormData.value)
+
+  if (response.code === 0) {
+    ElMessage({
+      type: 'success',
+      message: 'Thêm nhanh người kí thành công'
+    })
+
+    signerFormData.value.agencyId = null
+    signerFormData.value.count = 0
+    signerFormData.value.fullname = ''
+    signerFormData.value.title = null
+
+    signerOptions.value = [...signerOptions.value, response.data.signer]
+    formData.value.signers = [...formData.value.signers, response.data.signer.ID]
+
+    closeSignerDialog()
   }
 }
 
