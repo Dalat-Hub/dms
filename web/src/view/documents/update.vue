@@ -1,10 +1,17 @@
 <template>
   <div>
     <el-row justify="center">
-      <warning-bar
-        v-if="document && document.type != 1"
-        :title="`Bạn đang xem phiên bản sao lưu của tài liệu: ${document && document.shortTitle}`"
-      />
+      <el-col :span="22">
+        <warning-bar
+          v-if="document && document.type != 1"
+          :title="`Bạn đang xem phiên bản sao lưu của tài liệu: ${document && document.shortTitle}`"
+        />
+
+        <warning-bar
+          v-if="document && document.status === 1"
+          :title="`Bạn đang cập nhật văn bản chưa hoàn chỉnh, vui lòng hoàn thiện dữ liệu và đổi trạng thái thành xuất bản`"
+        />
+      </el-col>
 
       <el-col :lg="22">
         <el-row :gutter="10">
