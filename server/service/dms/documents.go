@@ -627,6 +627,122 @@ func (documentsService *DocumentsService) UpdateBasicDocumentInformation(basic d
 	return err
 }
 
+// UpdateRelationDocumentInformation update relation document information
+func (documentsService *DocumentsService) UpdateRelationDocumentInformation(relation documents.UpdateRelation) (err error) {
+	var oldDocument dms.Documents
+	err = global.GVA_DB.Model(&dms.Documents{}).First(&oldDocument, "id = ?", relation.ID).Error
+	if err != nil {
+		return err
+	}
+
+	var revisionDocument *dms.Documents
+	revisionDocument, err = documentsService.Duplicate(oldDocument.ID, relation.UpdatedBy, dms.TYPE_REVISION)
+	if err != nil {
+		return err
+	}
+
+	oldDocument.UpdatedBy = relation.UpdatedBy
+	oldDocument.BeResponsibleBy = relation.BeResponsibleBy
+
+	if oldDocument.Path == "" {
+		oldDocument.Path = strconv.Itoa(int(revisionDocument.ID))
+	} else {
+		oldDocument.Path = strconv.Itoa(int(revisionDocument.ID)) + "/" + oldDocument.Path
+	}
+
+	oldDocument.ParentId = revisionDocument.ID
+
+	if revisionDocument.BelongTo == 0 {
+		oldDocument.BelongTo = revisionDocument.ID
+	}
+
+	referenceStuffs := make([]dms.DocumentRelationReferences, 0)
+
+	for _, documentId := range relation.BasedDocuments {
+		referenceStuffs = append(referenceStuffs, dms.DocumentRelationReferences{
+			GVA_MODEL:    global.GVA_MODEL{},
+			DocumentId:   oldDocument.ID,
+			DestId:       documentId,
+			RelationType: dms.RELATION_TYPE_DOC_BASE,
+		})
+	}
+
+	for _, documentId := range relation.RelatedDocuments {
+		referenceStuffs = append(referenceStuffs, dms.DocumentRelationReferences{
+			GVA_MODEL:    global.GVA_MODEL{},
+			DocumentId:   oldDocument.ID,
+			DestId:       documentId,
+			RelationType: dms.RELATION_TYPE_DOC_RELATION,
+		})
+	}
+
+	for _, userId := range relation.RelatedUsers {
+		referenceStuffs = append(referenceStuffs, dms.DocumentRelationReferences{
+			GVA_MODEL:    global.GVA_MODEL{},
+			DocumentId:   oldDocument.ID,
+			DestId:       userId,
+			RelationType: dms.RELATION_TYPE_USER,
+		})
+	}
+
+	for _, agencyId := range relation.RelatedAgencies {
+		referenceStuffs = append(referenceStuffs, dms.DocumentRelationReferences{
+			GVA_MODEL:    global.GVA_MODEL{},
+			DocumentId:   oldDocument.ID,
+			DestId:       agencyId,
+			RelationType: dms.RELATION_TYPE_AGENCY,
+		})
+	}
+
+	// authorizing
+	authorities := make([]dms.DocumentRules, 0)
+
+	authorities = append(authorities, dms.DocumentRules{
+		GVA_MODEL:  global.GVA_MODEL{},
+		DocumentId: revisionDocument.ID,
+		Permission: dms.PERMISSION_OWNER,
+		SubjectId:  oldDocument.CreatedBy,
+		Type:       dms.RULE_TYPE_USER,
+	})
+
+	err = global.GVA_DB.Transaction(func(tx *gorm.DB) error {
+		// update document
+		err = tx.Model(&dms.Documents{}).Where("id = ?", oldDocument.ID).Save(&oldDocument).Error
+		if err != nil {
+			return err
+		}
+
+		// clear old relations
+		err = tx.Model(&dms.DocumentRelationReferences{}).
+			Unscoped().
+			Where("document_id = ?", oldDocument.ID).
+			Delete(&dms.DocumentRelationReferences{}).
+			Error
+
+		if err != nil {
+			return err
+		}
+
+		// create new relations
+		if len(referenceStuffs) > 0 {
+			err = tx.Model(&dms.DocumentRelationReferences{}).Create(&referenceStuffs).Error
+			if err != nil {
+				return err
+			}
+		}
+
+		// add authority for the revision document
+		err = tx.Model(&dms.DocumentRules{}).Create(&authorities).Error
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	return err
+}
+
 // GetDocuments get document by Id
 func (documentsService *DocumentsService) GetDocuments(doc dmsReq.DocumentsSearch, userId uint, userUUID uuid.UUID) (documents *dms.Documents, err error) {
 	db := global.GVA_DB.Model(&dms.Documents{})

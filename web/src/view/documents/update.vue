@@ -767,7 +767,7 @@ import { getDict } from '../../utils/dictionary'
 import { createDocumentAgencies, getDocumentAgenciesList } from '../../api/documentAgencies'
 import { createDocumentCategories, getDocumentCategoriesList } from '../../api/documentCategories'
 import { createDocumentFields, getDocumentFieldsList } from '../../api/documentFields'
-import { findDocuments, createDraftDocument, getDocumentFiles, getDocumentsList, updateBasicDocuments, getDocumentRevisions } from '../../api/documents'
+import { findDocuments, createDraftDocument, getDocumentFiles, getDocumentsList, updateBasicDocuments, getDocumentRevisions, updateRelatedDocuments } from '../../api/documents'
 import { getUserList } from '../../api/user'
 import { getAuthorityInfo } from '../../api/authority'
 import { formatDate } from '../../utils/format'
@@ -1196,8 +1196,25 @@ const updateBasicDocument = async() => {
   }
 }
 
-const updateDocumentRelation = () => {
+const updateDocumentRelation = async() => {
+  const res = await updateRelatedDocuments({
+    id: searchInfo.value.ID,
+    basedDocuments: formRelatedData.value.baseDocuments,
+    relatedDocuments: formRelatedData.value.relatedDocuments,
+    relatedAgencies: formRelatedData.value.relatedAgencies,
+    relatedUsers: formRelatedData.value.relatedUsers,
+    updatedBy: formOwnerData.value.updatedBy,
+    beResponsibleBy: formOwnerData.value.beResponsibleBy,
+  })
 
+  if (res.code === 0) {
+    loadRevisions()
+
+    ElMessage({
+      type: 'success',
+      message: 'Cập nhật thông tin liên quan thành công'
+    })
+  }
 }
 
 const updateDocumentAuthority = () => {
