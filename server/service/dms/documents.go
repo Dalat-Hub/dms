@@ -946,7 +946,7 @@ func (documentsService *DocumentsService) GetDocumentsInfoList(info dmsReq.Docum
 
 	var documentss []dms.Documents
 
-	err = db.Where("type = ?", dms.TYPE_DOCUMENT).Count(&total).Error
+	err = db.Where("type = ? AND status = ?", dms.TYPE_DOCUMENT, dms.STATUS_PUBLISHED).Count(&total).Error
 	if err != nil {
 		return
 	}
