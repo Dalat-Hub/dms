@@ -1,8 +1,6 @@
 package initialize
 
 import (
-	"net/http"
-
 	_ "github.com/flipped-aurora/gin-vue-admin/server/docs"
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
 	"github.com/flipped-aurora/gin-vue-admin/server/middleware"
@@ -10,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/swaggo/gin-swagger"
 	"github.com/swaggo/gin-swagger/swaggerFiles"
+	"net/http"
 )
 
 // Initialize the master routes
@@ -55,6 +54,7 @@ func Routers() *gin.Engine {
 	{
 		systemRouter.InitBaseRouter(PublicGroup) // Register basic function routing without authentication
 		systemRouter.InitInitRouter(PublicGroup) // Automatic initialization related
+		dmsRouter.InitGoogleOAuthRouter(PublicGroup)
 	}
 
 	PrivateGroup := Router.Group("")
