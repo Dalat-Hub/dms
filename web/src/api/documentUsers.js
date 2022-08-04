@@ -95,3 +95,19 @@ export const getDocumentUsersList = (params) => {
     params
   })
 }
+
+// @Tags DocumentUsers
+// @Summary distribute tasks
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data query request.PageInfo true "distribute tasks"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
+// @Router /documentUsers/distributeTasks [get]
+export const distributeTasks = (data) => {
+  return service({
+    url: '/documentUsers/distributeTasks',
+    method: 'post',
+    data
+  })
+}

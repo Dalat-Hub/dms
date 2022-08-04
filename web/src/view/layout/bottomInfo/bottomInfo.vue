@@ -1,5 +1,5 @@
 <template>
-  <div class="bottom-info">
+  <div class="bottom-info" style="margin-top: 3rem;">
     <div>
       <span>Powered by</span>
       <span>
@@ -8,7 +8,7 @@
       <el-divider direction="vertical" />
       <span>Copyright</span>
       <span>
-        <a href="https://github.com/flipped-aurora">flipped-aurora团队</a>
+        <a href="https://github.com/flipped-aurora">{{ $GIN_VUE_ADMIN.appCoppyRight }}</a>
       </span>
     </div>
   </div>

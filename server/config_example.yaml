@@ -158,3 +158,8 @@ zap:
   max-age: 30
   show-line: true
   log-in-console: true
+googleoauth:
+  clientId:
+  clientSecret:
+  redirectUrl: http://localhost:8888/api/sessions/oauth/google
+  clientRedirectUrl: http://localhost:8080/#/login?token=

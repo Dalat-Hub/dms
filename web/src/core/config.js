@@ -3,9 +3,10 @@
  */
 
 const config = {
-  appName: 'Gin-Vue-Admin',
+  appName: 'DMS',
   appLogo: 'https://www.gin-vue-admin.com/img/logo.png',
-  showViteLogo: true
+  showViteLogo: true,
+  appCoppyRight: 'DMS'
 }
 
 export const viteLogo = (env) => {

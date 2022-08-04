@@ -26,4 +26,7 @@ type Server struct {
 
 	// 跨域配置
 	Cors CORS `mapstructure:"cors" json:"cors" yaml:"cors"`
+
+	// Google OAuth
+	GoogleOAuth GoogleOAuth `mapstructure:"googleoauth" json:"googleoauth" yaml:"googleoauth"`
 }
