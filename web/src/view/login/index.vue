@@ -13,13 +13,12 @@
         <el-form
           ref="loginForm"
           :model="loginFormData"
-          :rules="rules"
           @keyup.enter="submitForm"
         >
           <el-form-item prop="username">
             <el-input
               v-model="loginFormData.username"
-              placeholder="请输入用户名"
+              placeholder="Điền tên đăng nhập của bạn"
             >
               <template #suffix>
                 <span class="input-icon">
@@ -34,7 +33,7 @@
             <el-input
               v-model="loginFormData.password"
               :type="lock === 'lock' ? 'password' : 'text'"
-              placeholder="请输入密码"
+              placeholder="Điền mật khẩu của bạn"
             >
               <template #suffix>
                 <span class="input-icon">
@@ -52,14 +51,14 @@
             <div class="vPicBox">
               <el-input
                 v-model="loginFormData.captcha"
-                placeholder="请输入验证码"
+                placeholder="Vui lòng nhập mã bảo mật"
                 style="width: 60%"
               />
               <div class="vPic">
                 <img
                   v-if="picPath"
                   :src="picPath"
-                  alt="请输入验证码"
+                  alt="Vui lòng nhập mã bảo mật"
                   @click="loginVerify()"
                 >
               </div>
@@ -67,36 +66,47 @@
           </el-form-item>
           <el-form-item>
             <el-button
+              v-if="notYetInit"
               type="primary"
-              style="width: 46%"
+              style="width: 46%; margin-right: 8%;"
               size="large"
               @click="checkInit"
-            >前往初始化</el-button>
+            >Khởi tạo hệ thống</el-button>
             <el-button
               type="primary"
               size="large"
-              style="width: 46%; margin-left: 8%"
+              style="width: 46%;"
               @click="submitForm"
-            >登 录</el-button>
+            >Đăng nhập</el-button>
           </el-form-item>
         </el-form>
+
+        <hr>
+
+        <div>
+          <a :href="getGoogleUrl('/')" style="display: flex; align-items: center; margin-top: 1rem;">
+            <img src="@/assets/google.png" alt="Google" class="link-icon" style="width: 2rem; margin-right: 0.5rem;">
+            <span style="color: #333;">Đăng nhập với Google</span>
+          </a>
+        </div>
+
       </div>
       <div class="login_panel_right" />
       <div class="login_panel_foot">
         <div class="links">
-          <a href="http://doc.henrongyi.top/" target="_blank">
+          <a href="/" target="_blank">
             <img src="@/assets/docs.png" class="link-icon">
           </a>
-          <a href="https://support.qq.com/product/371961" target="_blank">
+          <a href="/" target="_blank">
             <img src="@/assets/kefu.png" class="link-icon">
           </a>
           <a
-            href="https://github.com/flipped-aurora/gin-vue-admin"
+            href="/"
             target="_blank"
           >
             <img src="@/assets/github.png" class="link-icon">
           </a>
-          <a href="https://space.bilibili.com/322210472" target="_blank">
+          <a href="/" target="_blank">
             <img src="@/assets/video.png" class="link-icon">
           </a>
         </div>
@@ -121,25 +131,69 @@ import BottomInfo from '@/view/layout/bottomInfo/bottomInfo.vue'
 import { reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useUserStore } from '@/pinia/modules/user'
+import { getGoogleUrl } from '@/utils/getGoogleUrl'
+
+const userStore = useUserStore()
 const router = useRouter()
-// 验证函数
+const route = useRoute()
+
+const notYetInit = ref(true)
+
+const checkLoginToken = async() => {
+  const query = route.query
+  let hasValue = false
+
+  if (query.redirect) {
+    if (!query.redirect.includes('token=')) return
+
+    const parts = query.redirect.split('token=')
+    const token = parts[1]
+
+    if (!token) return
+
+    userStore.setToken(token)
+    hasValue = true
+  }
+
+  if (query.token) {
+    userStore.setToken(query.token)
+    hasValue = true
+  }
+
+  if (hasValue) {
+    const res = await userStore.GetUserInfo()
+
+    if (res.code === 0) {
+      window.location.reload()
+    } else {
+      ElMessage({
+        type: 'error',
+        message: 'Thông tin đăng nhập không hợp lệ',
+        showClose: true,
+        duration: 5000
+      })
+    }
+  }
+}
+checkLoginToken()
+
 const checkUsername = (rule, value, callback) => {
   if (value.length < 5) {
-    return callback(new Error('请输入正确的用户名'))
+    return callback(new Error('Vui lòng điền tên đăng nhập'))
   } else {
     callback()
   }
 }
 const checkPassword = (rule, value, callback) => {
   if (value.length < 6) {
-    return callback(new Error('请输入正确的密码'))
+    return callback(new Error('Vui lòng điền mật khẩu'))
   } else {
     callback()
   }
 }
 
-// 获取验证码
 const loginVerify = () => {
   captcha({}).then((ele) => {
     rules.captcha[1].max = ele.data.captchaLength
@@ -150,7 +204,6 @@ const loginVerify = () => {
 }
 loginVerify()
 
-// 登录相关操作
 const lock = ref('lock')
 const changeLock = () => {
   lock.value = lock.value === 'lock' ? 'unlock' : 'lock'
@@ -159,8 +212,8 @@ const changeLock = () => {
 const loginForm = ref(null)
 const picPath = ref('')
 const loginFormData = reactive({
-  username: 'admin',
-  password: '123456',
+  username: '',
+  password: '',
   captcha: '',
   captchaId: '',
 })
@@ -168,15 +221,14 @@ const rules = reactive({
   username: [{ validator: checkUsername, trigger: 'blur' }],
   password: [{ validator: checkPassword, trigger: 'blur' }],
   captcha: [
-    { required: true, message: '请输入验证码', trigger: 'blur' },
+    { required: true, message: 'Vui lòng nhập mã bảo mật', trigger: 'blur' },
     {
-      message: '验证码格式不正确',
+      message: 'Mã xác thực không hợp lệ',
       trigger: 'blur',
     },
   ],
 })
 
-const userStore = useUserStore()
 const login = async() => {
   return await userStore.LoginIn(loginFormData)
 }
@@ -190,7 +242,7 @@ const submitForm = () => {
     } else {
       ElMessage({
         type: 'error',
-        message: '请正确填写登录信息',
+        message: 'Vui lòng điền đủ thông tin đăng nhập',
         showClose: true,
       })
       loginVerify()
@@ -199,7 +251,6 @@ const submitForm = () => {
   })
 }
 
-// 跳转初始化
 const checkInit = async() => {
   const res = await checkDB()
   if (res.code === 0) {
@@ -209,11 +260,22 @@ const checkInit = async() => {
     } else {
       ElMessage({
         type: 'info',
-        message: '已配置数据库信息，无法初始化',
+        message: 'Hệ thống đã được khởi tạo',
       })
     }
   }
 }
+
+const checkSystemInit = async() => {
+  const res = await checkDB()
+
+  if (res.code === 0) {
+    if (!res.data?.needInit) {
+      notYetInit.value = false
+    }
+  }
+}
+checkSystemInit()
 
 </script>
 
