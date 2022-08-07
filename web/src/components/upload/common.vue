@@ -1,13 +1,13 @@
 <template>
   <div>
     <el-upload
-        :action="`${path}/fileUploadAndDownload/upload`"
-        :before-upload="checkFile"
-        :headers="{ 'x-token': userStore.token }"
-        :on-error="uploadError"
-        :on-success="uploadSuccess"
-        :show-file-list="false"
-        class="upload-btn"
+      :action="`${path}/fileUploadAndDownload/upload`"
+      :before-upload="checkFile"
+      :headers="{ 'x-token': userStore.token }"
+      :on-error="uploadError"
+      :on-success="uploadSuccess"
+      :show-file-list="false"
+      class="upload-btn"
     >
       <el-button size="small" type="primary">普通上传</el-button>
     </el-upload>
@@ -32,11 +32,11 @@ const checkFile = (file) => {
   const isPng = file.type === 'image/png'
   const isLt2M = file.size / 1024 / 1024 < 0.5
   if (!isJPG && !isPng) {
-    ElMessage.error('上传图片只能是 jpg或png 格式!')
+    ElMessage.error('Uploaded images can only be in jpg or png format!')
     fullscreenLoading.value = false
   }
   if (!isLt2M) {
-    ElMessage.error('未压缩未见上传图片大小不能超过 500KB，请使用压缩上传')
+    ElMessage.error('The size of the uncompressed and uploaded image cannot exceed 500KB, please use compressed upload')
     fullscreenLoading.value = false
   }
   return (isPng || isJPG) && isLt2M
@@ -52,7 +52,7 @@ const uploadSuccess = (res) => {
 const uploadError = () => {
   ElMessage({
     type: 'error',
-    message: '上传失败'
+    message: 'Upload failed'
   })
   fullscreenLoading.value = false
 }
