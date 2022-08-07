@@ -40,10 +40,10 @@
       :style="{ left: left + 'px', top: top + 'px' }"
       class="contextmenu"
     >
-      <li @click="closeAll">关闭所有</li>
-      <li @click="closeLeft">关闭左侧</li>
-      <li @click="closeRight">关闭右侧</li>
-      <li @click="closeOther">关闭其他</li>
+      <li @click="closeAll">Đóng tất cả</li>
+      <li @click="closeLeft">Đóng cửa sổ bên trái</li>
+      <li @click="closeRight">Đóng cửa sổ bên phải</li>
+      <li @click="closeOther">Đóng cửa sổ còn lại</li>
     </ul>
   </div>
 </template>
@@ -105,7 +105,7 @@ const openContextMenu = (e) => {
     if (isCollapse.value) {
       width = 54
     } else {
-      width = 220
+      width = 350
     }
     if (isMobile.value) {
       width = 0
@@ -120,7 +120,7 @@ const closeAll = () => {
     {
       name: defaultRouter.value,
       meta: {
-        title: '首页',
+        title: 'Trang chủ',
       },
       query: {},
       params: {},
@@ -297,7 +297,7 @@ const initPage = () => {
     {
       name: defaultRouter.value,
       meta: {
-        title: '首页',
+        title: 'Trang chủ',
       },
       query: {},
       params: {},

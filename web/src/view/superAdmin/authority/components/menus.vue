@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="clearfix">
-      <el-button class="fl-right" size="small" type="primary" @click="relation">确 定</el-button>
+      <el-button class="fl-right" size="small" type="primary" @click="relation">Sure</el-button>
     </div>
     <el-tree
       ref="menuTree"
@@ -26,7 +26,7 @@
               :disabled="!node.checked"
               @click="() => setDefault(data)"
             >
-              {{ row.defaultRouter === data.name?"首页":"设为首页" }}
+              {{ row.defaultRouter === data.name?"Front Page":"Set as front page" }}
             </el-button>
           </span>
           <span v-if="data.menuBtn.length">
@@ -36,14 +36,14 @@
               size="small"
               @click="() => OpenBtn(data)"
             >
-              分配按钮
+              Assign Button
             </el-button>
           </span>
         </span>
       </template>
     </el-tree>
 
-    <el-dialog v-model="btnVisible" title="分配按钮" destroy-on-close>
+    <el-dialog v-model="btnVisible" title="Assign Button" destroy-on-close>
       <el-table
         ref="btnTableRef"
         :data="btnData"
@@ -51,13 +51,13 @@
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" />
-        <el-table-column label="按钮名称" prop="name" />
-        <el-table-column label="按钮备注" prop="desc" />
+        <el-table-column label="Button Name" prop="name" />
+        <el-table-column label="Button Notes" prop="desc" />
       </el-table>
       <template #footer>
         <div class="dialog-footer">
-          <el-button size="small" @click="closeDialog">取 消</el-button>
-          <el-button size="small" type="primary" @click="enterDialog">确 定</el-button>
+          <el-button size="small" @click="closeDialog">Cancel</el-button>
+          <el-button size="small" type="primary" @click="enterDialog">Create</el-button>
         </div>
       </template>
     </el-dialog>
@@ -114,7 +114,7 @@ init()
 const setDefault = async(data) => {
   const res = await updateAuthority({ authorityId: props.row.authorityId, AuthorityName: props.row.authorityName, parentId: props.row.parentId, defaultRouter: data.name })
   if (res.code === 0) {
-    ElMessage({ type: 'success', message: '设置成功' })
+    ElMessage({ type: 'success', message: 'Set successfully' })
     emit('changeRow', 'defaultRouter', res.data.authority.defaultRouter)
   }
 }
@@ -136,7 +136,7 @@ const relation = async() => {
   if (res.code === 0) {
     ElMessage({
       type: 'success',
-      message: '菜单设置成功!'
+      message: 'Menu setup successfully'
     })
   }
 }
@@ -187,7 +187,7 @@ const enterDialog = async() => {
     authorityId: props.row.authorityId
   })
   if (res.code === 0) {
-    ElMessage({ type: 'success', message: '设置成功' })
+    ElMessage({ type: 'success', message: 'Set successfully' })
     btnVisible.value = false
   }
 }
