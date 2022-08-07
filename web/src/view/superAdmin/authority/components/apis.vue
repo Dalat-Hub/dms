@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="clearfix">
-      <el-button class="fl-right" size="small" type="primary" @click="authApiEnter">确 定</el-button>
+      <el-button class="fl-right" size="small" type="primary" @click="authApiEnter">Sure</el-button>
     </div>
     <el-tree
       ref="apiTree"
@@ -86,7 +86,7 @@ const buildApiTree = (apis) => {
   for (const key in apiObj) {
     const treeNode = {
       ID: key,
-      description: key + '组',
+      description: key + 'Group',
       children: apiObj[key]
     }
     apiTree.push(treeNode)
@@ -111,7 +111,7 @@ const authApiEnter = async() => {
     casbinInfos
   })
   if (res.code === 0) {
-    ElMessage({ type: 'success', message: 'api设置成功' })
+    ElMessage({ type: 'success', message: 'API setup successfully' })
   }
 }
 

@@ -9,7 +9,7 @@
       :before-upload="beforeImageUpload"
       :multiple="false"
     >
-      <el-button size="small" type="primary">压缩上传</el-button>
+      <el-button size="small" type="primary">Compressed upload</el-button>
     </el-upload>
   </div>
 </template>
@@ -44,7 +44,7 @@ const beforeImageUpload = (file) => {
   const isJPG = file.type === 'image/jpeg'
   const isPng = file.type === 'image/png'
   if (!isJPG && !isPng) {
-    ElMessage.error('上传头像图片只能是 jpg或png 格式!')
+    ElMessage.error('The uploaded avatar image can only be in jpg or png format!')
     return false
   }
 

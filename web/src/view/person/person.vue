@@ -21,7 +21,7 @@
                 <el-icon>
                   <edit />
                 </el-icon>
-                重新上传</span>
+                Cập nhật ảnh đại diện</span>
             </div>
             <div class="user-personality">
               <p v-if="!editFlag" class="nickName">
@@ -52,21 +52,21 @@
                 <el-tooltip
                   class="item"
                   effect="light"
-                  content="北京反转极光科技有限公司-技术部-前端事业群"
+                  content="..."
                   placement="top"
                 >
                   <li>
                     <el-icon>
                       <data-analysis />
                     </el-icon>
-                    北京反转极光科技有限公司-技术部-前端事业群
+                    ...
                   </li>
                 </el-tooltip>
                 <li>
                   <el-icon>
                     <video-camera />
                   </el-icon>
-                  中国·北京市·朝阳区
+                  ...
                 </li>
                 <el-tooltip
                   class="item"
@@ -89,37 +89,37 @@
       <el-col :span="18">
         <div class="user-addcount">
           <el-tabs v-model="activeName" @tab-click="handleClick">
-            <el-tab-pane label="账号绑定" name="second">
+            <el-tab-pane label="Thông tin tài khoản" name="second">
               <ul>
                 <li>
-                  <p class="title">密保手机</p>
+                  <p class="title">Số điện thoại</p>
                   <p class="desc">
-                    已绑定手机:{{ userStore.userInfo.phone }}
-                    <a href="javascript:void(0)" @click="changePhoneFlag = true">立即修改</a>
+                    Số điện thoại: {{ userStore.userInfo.phone }}
+                    <a href="javascript:void(0)" @click="changePhoneFlag = true">Cập nhật</a>
                   </p>
                 </li>
                 <li>
-                  <p class="title">密保邮箱</p>
+                  <p class="title">Email</p>
                   <p class="desc">
-                    已绑定邮箱：{{ userStore.userInfo.email }}
-                    <a href="javascript:void(0)" @click="changeEmailFlag = true">立即修改</a>
+                    Email：{{ userStore.userInfo.email }}
+                    <a href="javascript:void(0)" @click="changeEmailFlag = true">Cập nhật</a>
                   </p>
                 </li>
                 <li>
-                  <p class="title">密保问题</p>
+                  <p class="title">Câu hỏi bảo mật</p>
                   <p class="desc">
-                    未设置密保问题
-                    <a href="javascript:void(0)">去设置</a>
+                    Chưa đặt câu hỏi bảo mật
+                    <a href="javascript:void(0)">Đi đến mục cài đặt</a>
                   </p>
                 </li>
                 <li>
-                  <p class="title">修改密码</p>
+                  <p class="title">Thay đổi mật khẩu</p>
                   <p class="desc">
-                    修改个人密码
+                    Thay đổi mật khẩu cá nhân
                     <a
                       href="javascript:void(0)"
                       @click="showPassword = true"
-                    >修改密码</a>
+                    >Thay đổi mật khẩu</a>
                   </p>
                 </li>
               </ul>
@@ -133,7 +133,7 @@
 
     <el-dialog
       v-model="showPassword"
-      title="修改密码"
+      title="Thay đổi mật khẩu cá nhân"
       width="360px"
       @close="clearPassword"
     >
@@ -143,13 +143,13 @@
         :rules="rules"
         label-width="80px"
       >
-        <el-form-item :minlength="6" label="原密码" prop="password">
+        <el-form-item :minlength="6" label="Mật khẩu cũ" prop="password">
           <el-input v-model="pwdModify.password" show-password />
         </el-form-item>
-        <el-form-item :minlength="6" label="新密码" prop="newPassword">
+        <el-form-item :minlength="6" label="Mật khẩu mới" prop="newPassword">
           <el-input v-model="pwdModify.newPassword" show-password />
         </el-form-item>
-        <el-form-item :minlength="6" label="确认密码" prop="confirmPassword">
+        <el-form-item :minlength="6" label="Nhập lại mật khẩu mới" prop="confirmPassword">
           <el-input v-model="pwdModify.confirmPassword" show-password />
         </el-form-item>
       </el-form>
@@ -158,25 +158,25 @@
           <el-button
             size="small"
             @click="showPassword = false"
-          >取 消</el-button>
+          >Huỷ</el-button>
           <el-button
             size="small"
             type="primary"
             @click="savePassword"
-          >确 定</el-button>
+          >Thay đổi</el-button>
         </div>
       </template>
     </el-dialog>
 
-    <el-dialog v-model="changePhoneFlag" title="绑定手机" width="600px">
+    <el-dialog v-model="changePhoneFlag" title="Cập nhật số điện thoại" width="600px">
       <el-form :model="phoneForm">
-        <el-form-item label="手机号" label-width="120px">
-          <el-input v-model="phoneForm.phone" placeholder="请输入手机号" autocomplete="off" />
+        <el-form-item label="Số điện thoại" label-width="120px">
+          <el-input v-model="phoneForm.phone" placeholder="Nhập số điện thoại của bạn" autocomplete="off" />
         </el-form-item>
-        <el-form-item label="验证码" label-width="120px">
+        <el-form-item label="Mã xác nhận" label-width="120px">
           <div class="code-box">
-            <el-input v-model="phoneForm.code" autocomplete="off" placeholder="请自行设计短信服务，此处为模拟随便写" style="width:300px" />
-            <el-button size="small" type="primary" :disabled="time>0" @click="getCode">{{ time>0?`(${time}s)后重新获取`:'获取验证码' }}</el-button>
+            <el-input v-model="phoneForm.code" autocomplete="off" placeholder="Mã xác nhận được gửi về SMS" style="width:300px" />
+            <el-button size="small" type="primary" :disabled="time>0" @click="getCode">{{ time>0?`(${time}s) thử lại sau`:'lấy mã' }}</el-button>
           </div>
         </el-form-item>
       </el-form>
@@ -185,25 +185,25 @@
           <el-button
             size="small"
             @click="closeChangePhone"
-          >取消</el-button>
+          >Huỷ</el-button>
           <el-button
             type="primary"
             size="small"
             @click="changePhone"
-          >更改</el-button>
+          >Cập nhật</el-button>
         </span>
       </template>
     </el-dialog>
 
-    <el-dialog v-model="changeEmailFlag" title="绑定邮箱" width="600px">
+    <el-dialog v-model="changeEmailFlag" title="Cập nhật email" width="600px">
       <el-form :model="emailForm">
-        <el-form-item label="邮箱" label-width="120px">
-          <el-input v-model="emailForm.email" placeholder="请输入邮箱" autocomplete="off" />
+        <el-form-item label="Mail" label-width="120px">
+          <el-input v-model="emailForm.email" placeholder="Nhập địa chỉ email" autocomplete="off" />
         </el-form-item>
-        <el-form-item label="验证码" label-width="120px">
+        <el-form-item label="Mã xác nhận" label-width="120px">
           <div class="code-box">
-            <el-input v-model="emailForm.code" placeholder="请自行设计邮件服务，此处为模拟随便写" autocomplete="off" style="width:300px" />
-            <el-button size="small" type="primary" :disabled="emailTime>0" @click="getEmailCode">{{ emailTime>0?`(${emailTime}s)后重新获取`:'获取验证码' }}</el-button>
+            <el-input v-model="emailForm.code" placeholder="Nhập mã xác nhận được gửi về Email" autocomplete="off" style="width:300px" />
+            <el-button size="small" type="primary" :disabled="emailTime>0" @click="getEmailCode">{{ emailTime>0?`(${emailTime}s) thử lại sau`:'nhập mã xác nhận' }}</el-button>
           </div>
         </el-form-item>
       </el-form>
@@ -212,12 +212,12 @@
           <el-button
             size="small"
             @click="closeChangeEmail"
-          >取消</el-button>
+          >Huỷ</el-button>
           <el-button
             type="primary"
             size="small"
             @click="changeEmail"
-          >更改</el-button>
+          >Cập nhật</el-button>
         </span>
       </template>
     </el-dialog>
@@ -241,20 +241,20 @@ const path = ref(import.meta.env.VITE_BASE_API + '/')
 const activeName = ref('second')
 const rules = reactive({
   password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '最少6个字符', trigger: 'blur' },
+    { required: true, message: 'Mật khẩu không được để trống', trigger: 'blur' },
+    { min: 6, message: 'Mật khẩu phải nhiều hơn 6 kí tự', trigger: 'blur' },
   ],
   newPassword: [
-    { required: true, message: '请输入新密码', trigger: 'blur' },
-    { min: 6, message: '最少6个字符', trigger: 'blur' },
+    { required: true, message: 'Mật khẩu mới không được để trống', trigger: 'blur' },
+    { min: 6, message: 'Mật khẩu mới phải nhiều hơn 6 kí tự', trigger: 'blur' },
   ],
   confirmPassword: [
-    { required: true, message: '请输入确认密码', trigger: 'blur' },
-    { min: 6, message: '最少6个字符', trigger: 'blur' },
+    { required: true, message: 'Xác nhận mật khẩu không được để trống', trigger: 'blur' },
+    { min: 6, message: 'Xác nhận mật khẩu phải nhiều hơn 6 kí tự', trigger: 'blur' },
     {
       validator: (rule, value, callback) => {
         if (value !== pwdModify.value.newPassword) {
-          callback(new Error('两次密码不一致'))
+          callback(new Error('Mật khẩu mới không khớp với mật khẩu xác nhận'))
         } else {
           callback()
         }
@@ -278,7 +278,7 @@ const savePassword = async() => {
         newPassword: pwdModify.value.newPassword,
       }).then((res) => {
         if (res.code === 0) {
-          ElMessage.success('修改密码成功！')
+          ElMessage.success('Mật khẩu đã được cập nhật')
         }
         showPassword.value = false
       })
@@ -308,7 +308,7 @@ const enterImg = async(url) => {
     userStore.ResetUserInfo({ headerImg: url })
     ElMessage({
       type: 'success',
-      message: '设置成功',
+      message: 'Cấu hình thành công',
     })
   }
 }
@@ -331,7 +331,7 @@ const enterEdit = async() => {
     userStore.ResetUserInfo({ nickName: nickName.value })
     ElMessage({
       type: 'success',
-      message: '设置成功',
+      message: 'Cấu hình thành công',
     })
   }
   nickName.value = ''
@@ -369,7 +369,7 @@ const closeChangePhone = () => {
 const changePhone = async() => {
   const res = await setSelfInfo({ phone: phoneForm.phone })
   if (res.code === 0) {
-    ElMessage.success('修改成功')
+    ElMessage.success('Cập nhật thành công')
     userStore.ResetUserInfo({ phone: phoneForm.phone })
     closeChangePhone()
   }
@@ -402,7 +402,7 @@ const closeChangeEmail = () => {
 const changeEmail = async() => {
   const res = await setSelfInfo({ email: emailForm.email })
   if (res.code === 0) {
-    ElMessage.success('修改成功')
+    ElMessage.success('Cập nhật thành công')
     userStore.ResetUserInfo({ email: emailForm.email })
     closeChangeEmail()
   }

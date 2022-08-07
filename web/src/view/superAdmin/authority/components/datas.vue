@@ -1,15 +1,15 @@
 <template>
   <div>
     <div class="clearfix" style="margin: 18px">
-      <el-button class="fl-right" size="small" type="primary" @click="authDataEnter">确 定</el-button>
-      <el-button class="fl-left" size="small" type="primary" @click="all">全选</el-button>
-      <el-button class="fl-left" size="small" type="primary" @click="self">本角色</el-button>
-      <el-button class="fl-left" size="small" type="primary" @click="selfAndChildren">本角色及子角色</el-button>
+      <el-button class="fl-right" size="small" type="primary" @click="authDataEnter">Sure</el-button>
+      <el-button class="fl-left" size="small" type="primary" @click="all">Select All</el-button>
+      <el-button class="fl-left" size="small" type="primary" @click="self">This Role</el-button>
+      <el-button class="fl-left" size="small" type="primary" @click="selfAndChildren">This role and subroles</el-button>
     </div>
     <el-checkbox-group v-model="dataAuthorityId" @change="selectAuthority">
       <el-checkbox v-for="(item,key) in authoritys" :key="key" :label="item">{{ item.authorityName }}</el-checkbox>
     </el-checkbox-group>
-    <warning-bar title="此功能仅用于创建角色和角色的many2many关系表，具体使用还须自己结合表实现业务，详情参考示例代码（客户示例）" />
+    <warning-bar title="This function is only used to create the many2many relationship table of roles and roles. For specific use, you must combine the tables to realize the business. For details, please refer to the sample code (customer example)" />
   </div>
 </template>
 
@@ -98,7 +98,7 @@ const getChildrenId = (row, arrBox) => {
 const authDataEnter = async() => {
   const res = await setDataAuthority(props.row)
   if (res.code === 0) {
-    ElMessage({ type: 'success', message: '资源设置成功' })
+    ElMessage({ type: 'success', message: 'Resource setup successfully' })
   }
 }
 
