@@ -977,7 +977,12 @@ func (documentsService *DocumentsService) GetDocumentsInfoList(info dmsReq.Docum
 		return
 	}
 
-	err = db.Limit(limit).Offset(offset).Find(&documentss).Error
+	if info.PageSize != -1 {
+		db = db.Limit(limit).Offset(offset)
+	}
+
+	err = db.Find(&documentss).Error
+
 	return documentss, total, err
 }
 
