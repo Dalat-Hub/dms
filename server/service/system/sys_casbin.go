@@ -33,7 +33,7 @@ func (casbinService *CasbinService) UpdateCasbin(AuthorityID uint, casbinInfos [
 	e := casbinService.Casbin()
 	success, _ := e.AddPolicies(rules)
 	if !success {
-		return errors.New("存在相同api,添加失败,请联系管理员")
+		return errors.New("the same api exists, the addition fails, please contact the administrator")
 	}
 	return nil
 }
@@ -114,7 +114,7 @@ func (casbinService *CasbinService) Casbin() *casbin.SyncedEnforcer {
 		`
 		m, err := model.NewModelFromString(text)
 		if err != nil {
-			zap.L().Error("字符串加载模型失败!", zap.Error(err))
+			zap.L().Error("string loading model failed!", zap.Error(err))
 			return
 		}
 		syncedEnforcer, _ = casbin.NewSyncedEnforcer(m, a)

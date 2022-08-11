@@ -36,12 +36,12 @@ func (o *_obs) UploadFile(file *multipart.FileHeader) (filename string, filepath
 	var client *obs.ObsClient
 	client, err = NewHuaWeiObsClient()
 	if err != nil {
-		return filepath, filename, errors.Wrap(err, "获取华为对象存储对象失败!")
+		return filepath, filename, errors.Wrap(err, "failed to get Huawei Object Storage object!")
 	}
 
 	_, err = client.PutObject(input)
 	if err != nil {
-		return filepath, filename, errors.Wrap(err, "文件上传失败!")
+		return filepath, filename, errors.Wrap(err, "file upload failed!")
 	}
 	filepath = global.GVA_CONFIG.HuaWeiObs.Path + "/" + filename
 	return filepath, filename, err
@@ -50,7 +50,7 @@ func (o *_obs) UploadFile(file *multipart.FileHeader) (filename string, filepath
 func (o *_obs) DeleteFile(key string) error {
 	client, err := NewHuaWeiObsClient()
 	if err != nil {
-		return errors.Wrap(err, "获取华为对象存储对象失败!")
+		return errors.Wrap(err, "failed to get Huawei Object Storage object!")
 	}
 	input := &obs.DeleteObjectInput{
 		Bucket: global.GVA_CONFIG.HuaWeiObs.Bucket,
@@ -59,7 +59,7 @@ func (o *_obs) DeleteFile(key string) error {
 	var output *obs.DeleteObjectOutput
 	output, err = client.DeleteObject(input)
 	if err != nil {
-		return errors.Wrapf(err, "删除对象(%s)失败!, output: %v", key, output)
+		return errors.Wrapf(err, "failed to delete object (%s)!, output: %v", key, output)
 	}
 	return nil
 }

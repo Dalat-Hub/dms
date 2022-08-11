@@ -10,6 +10,7 @@ import (
 
 type JwtApi struct{}
 
+// JsonInBlacklist
 // @Tags Jwt
 // @Summary jwt加入黑名单
 // @Security ApiKeyAuth
@@ -21,9 +22,9 @@ func (j *JwtApi) JsonInBlacklist(c *gin.Context) {
 	token := c.Request.Header.Get("x-token")
 	jwt := system.JwtBlacklist{Jwt: token}
 	if err := jwtService.JsonInBlacklist(jwt); err != nil {
-		global.GVA_LOG.Error("jwt作废失败!", zap.Error(err))
-		response.FailWithMessage("jwt作废失败", c)
+		global.GVA_LOG.Error("jwt invalidation failed!", zap.Error(err))
+		response.FailWithMessage("jwt invalidation failed", c)
 	} else {
-		response.OkWithMessage("jwt作废成功", c)
+		response.OkWithMessage("jwt voided successfully", c)
 	}
 }

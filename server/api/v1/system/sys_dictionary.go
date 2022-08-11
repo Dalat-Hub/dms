@@ -12,6 +12,7 @@ import (
 
 type DictionaryApi struct{}
 
+// CreateSysDictionary
 // @Tags SysDictionary
 // @Summary 创建SysDictionary
 // @Security ApiKeyAuth
@@ -22,15 +23,25 @@ type DictionaryApi struct{}
 // @Router /sysDictionary/createSysDictionary [post]
 func (s *DictionaryApi) CreateSysDictionary(c *gin.Context) {
 	var dictionary system.SysDictionary
-	_ = c.ShouldBindJSON(&dictionary)
+	var err error
+
+	err = c.ShouldBindJSON(&dictionary)
+
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
 	if err := dictionaryService.CreateSysDictionary(dictionary); err != nil {
-		global.GVA_LOG.Error("创建失败!", zap.Error(err))
-		response.FailWithMessage("创建失败", c)
+		global.GVA_LOG.Error("fail to create new dictionary", zap.Error(err))
+		response.FailWithMessage("fail to create new dictionary", c)
 	} else {
-		response.OkWithMessage("创建成功", c)
+		response.OkWithMessage("success", c)
 	}
 }
 
+// DeleteSysDictionary
 // @Tags SysDictionary
 // @Summary 删除SysDictionary
 // @Security ApiKeyAuth
@@ -41,15 +52,25 @@ func (s *DictionaryApi) CreateSysDictionary(c *gin.Context) {
 // @Router /sysDictionary/deleteSysDictionary [delete]
 func (s *DictionaryApi) DeleteSysDictionary(c *gin.Context) {
 	var dictionary system.SysDictionary
-	_ = c.ShouldBindJSON(&dictionary)
+	var err error
+
+	err = c.ShouldBindJSON(&dictionary)
+
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
 	if err := dictionaryService.DeleteSysDictionary(dictionary); err != nil {
-		global.GVA_LOG.Error("删除失败!", zap.Error(err))
-		response.FailWithMessage("删除失败", c)
+		global.GVA_LOG.Error("fail to delete dictionary", zap.Error(err))
+		response.FailWithMessage("fail to delete dictionary", c)
 	} else {
-		response.OkWithMessage("删除成功", c)
+		response.OkWithMessage("success", c)
 	}
 }
 
+// UpdateSysDictionary
 // @Tags SysDictionary
 // @Summary 更新SysDictionary
 // @Security ApiKeyAuth
@@ -60,15 +81,25 @@ func (s *DictionaryApi) DeleteSysDictionary(c *gin.Context) {
 // @Router /sysDictionary/updateSysDictionary [put]
 func (s *DictionaryApi) UpdateSysDictionary(c *gin.Context) {
 	var dictionary system.SysDictionary
-	_ = c.ShouldBindJSON(&dictionary)
+	var err error
+
+	err = c.ShouldBindJSON(&dictionary)
+
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
 	if err := dictionaryService.UpdateSysDictionary(&dictionary); err != nil {
-		global.GVA_LOG.Error("更新失败!", zap.Error(err))
-		response.FailWithMessage("更新失败", c)
+		global.GVA_LOG.Error("fail to update dictionary", zap.Error(err))
+		response.FailWithMessage("fail to update dictionary", c)
 	} else {
-		response.OkWithMessage("更新成功", c)
+		response.OkWithMessage("success", c)
 	}
 }
 
+// FindSysDictionary
 // @Tags SysDictionary
 // @Summary 用id查询SysDictionary
 // @Security ApiKeyAuth
@@ -79,15 +110,25 @@ func (s *DictionaryApi) UpdateSysDictionary(c *gin.Context) {
 // @Router /sysDictionary/findSysDictionary [get]
 func (s *DictionaryApi) FindSysDictionary(c *gin.Context) {
 	var dictionary system.SysDictionary
-	_ = c.ShouldBindQuery(&dictionary)
+	var err error
+
+	err = c.ShouldBindQuery(&dictionary)
+
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
 	if sysDictionary, err := dictionaryService.GetSysDictionary(dictionary.Type, dictionary.ID, dictionary.Status); err != nil {
-		global.GVA_LOG.Error("字典未创建或未开启!", zap.Error(err))
-		response.FailWithMessage("字典未创建或未开启", c)
+		global.GVA_LOG.Error("fail to get dictionary", zap.Error(err))
+		response.FailWithMessage("fail to get dictionary", c)
 	} else {
-		response.OkWithDetailed(gin.H{"resysDictionary": sysDictionary}, "查询成功", c)
+		response.OkWithDetailed(gin.H{"resysDictionary": sysDictionary}, "success", c)
 	}
 }
 
+// GetSysDictionaryList
 // @Tags SysDictionary
 // @Summary 分页获取SysDictionary列表
 // @Security ApiKeyAuth
@@ -98,20 +139,29 @@ func (s *DictionaryApi) FindSysDictionary(c *gin.Context) {
 // @Router /sysDictionary/getSysDictionaryList [get]
 func (s *DictionaryApi) GetSysDictionaryList(c *gin.Context) {
 	var pageInfo request.SysDictionarySearch
-	_ = c.ShouldBindQuery(&pageInfo)
+	var err error
+
+	err = c.ShouldBindQuery(&pageInfo)
+
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
 	if err := utils.Verify(pageInfo.PageInfo, utils.PageInfoVerify); err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
 	if list, total, err := dictionaryService.GetSysDictionaryInfoList(pageInfo); err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
-		response.FailWithMessage("获取失败", c)
+		global.GVA_LOG.Error("fail to get list of dictionaries", zap.Error(err))
+		response.FailWithMessage("fail to get list of dictionaries", c)
 	} else {
 		response.OkWithDetailed(response.PageResult{
 			List:     list,
 			Total:    total,
 			Page:     pageInfo.Page,
 			PageSize: pageInfo.PageSize,
-		}, "获取成功", c)
+		}, "success", c)
 	}
 }

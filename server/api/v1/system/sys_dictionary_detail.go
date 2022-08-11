@@ -12,6 +12,7 @@ import (
 
 type DictionaryDetailApi struct{}
 
+// CreateSysDictionaryDetail
 // @Tags SysDictionaryDetail
 // @Summary 创建SysDictionaryDetail
 // @Security ApiKeyAuth
@@ -22,15 +23,25 @@ type DictionaryDetailApi struct{}
 // @Router /sysDictionaryDetail/createSysDictionaryDetail [post]
 func (s *DictionaryDetailApi) CreateSysDictionaryDetail(c *gin.Context) {
 	var detail system.SysDictionaryDetail
-	_ = c.ShouldBindJSON(&detail)
+	var err error
+
+	err = c.ShouldBindJSON(&detail)
+
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
 	if err := dictionaryDetailService.CreateSysDictionaryDetail(detail); err != nil {
-		global.GVA_LOG.Error("创建失败!", zap.Error(err))
-		response.FailWithMessage("创建失败", c)
+		global.GVA_LOG.Error("fail to create dictionary detail", zap.Error(err))
+		response.FailWithMessage("fail to create dictionary detail", c)
 	} else {
-		response.OkWithMessage("创建成功", c)
+		response.OkWithMessage("success", c)
 	}
 }
 
+// DeleteSysDictionaryDetail
 // @Tags SysDictionaryDetail
 // @Summary 删除SysDictionaryDetail
 // @Security ApiKeyAuth
@@ -41,15 +52,25 @@ func (s *DictionaryDetailApi) CreateSysDictionaryDetail(c *gin.Context) {
 // @Router /sysDictionaryDetail/deleteSysDictionaryDetail [delete]
 func (s *DictionaryDetailApi) DeleteSysDictionaryDetail(c *gin.Context) {
 	var detail system.SysDictionaryDetail
-	_ = c.ShouldBindJSON(&detail)
+	var err error
+
+	err = c.ShouldBindJSON(&detail)
+
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
 	if err := dictionaryDetailService.DeleteSysDictionaryDetail(detail); err != nil {
-		global.GVA_LOG.Error("删除失败!", zap.Error(err))
-		response.FailWithMessage("删除失败", c)
+		global.GVA_LOG.Error("fail to delete dictionary detail", zap.Error(err))
+		response.FailWithMessage("fail to delete dictionary detail", c)
 	} else {
-		response.OkWithMessage("删除成功", c)
+		response.OkWithMessage("success", c)
 	}
 }
 
+// UpdateSysDictionaryDetail
 // @Tags SysDictionaryDetail
 // @Summary 更新SysDictionaryDetail
 // @Security ApiKeyAuth
@@ -60,15 +81,25 @@ func (s *DictionaryDetailApi) DeleteSysDictionaryDetail(c *gin.Context) {
 // @Router /sysDictionaryDetail/updateSysDictionaryDetail [put]
 func (s *DictionaryDetailApi) UpdateSysDictionaryDetail(c *gin.Context) {
 	var detail system.SysDictionaryDetail
-	_ = c.ShouldBindJSON(&detail)
+	var err error
+
+	err = c.ShouldBindJSON(&detail)
+
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
 	if err := dictionaryDetailService.UpdateSysDictionaryDetail(&detail); err != nil {
-		global.GVA_LOG.Error("更新失败!", zap.Error(err))
-		response.FailWithMessage("更新失败", c)
+		global.GVA_LOG.Error("fail to update dictionary detail", zap.Error(err))
+		response.FailWithMessage("fail to update dictionary detail", c)
 	} else {
-		response.OkWithMessage("更新成功", c)
+		response.OkWithMessage("success", c)
 	}
 }
 
+// FindSysDictionaryDetail
 // @Tags SysDictionaryDetail
 // @Summary 用id查询SysDictionaryDetail
 // @Security ApiKeyAuth
@@ -79,19 +110,29 @@ func (s *DictionaryDetailApi) UpdateSysDictionaryDetail(c *gin.Context) {
 // @Router /sysDictionaryDetail/findSysDictionaryDetail [get]
 func (s *DictionaryDetailApi) FindSysDictionaryDetail(c *gin.Context) {
 	var detail system.SysDictionaryDetail
-	_ = c.ShouldBindQuery(&detail)
+	var err error
+
+	err = c.ShouldBindQuery(&detail)
+
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
 	if err := utils.Verify(detail, utils.IdVerify); err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
 	if reSysDictionaryDetail, err := dictionaryDetailService.GetSysDictionaryDetail(detail.ID); err != nil {
-		global.GVA_LOG.Error("查询失败!", zap.Error(err))
-		response.FailWithMessage("查询失败", c)
+		global.GVA_LOG.Error("fail to get dictionary detail", zap.Error(err))
+		response.FailWithMessage("fail to get dictionary detail", c)
 	} else {
-		response.OkWithDetailed(gin.H{"reSysDictionaryDetail": reSysDictionaryDetail}, "查询成功", c)
+		response.OkWithDetailed(gin.H{"reSysDictionaryDetail": reSysDictionaryDetail}, "success", c)
 	}
 }
 
+// GetSysDictionaryDetailList
 // @Tags SysDictionaryDetail
 // @Summary 分页获取SysDictionaryDetail列表
 // @Security ApiKeyAuth
@@ -102,16 +143,25 @@ func (s *DictionaryDetailApi) FindSysDictionaryDetail(c *gin.Context) {
 // @Router /sysDictionaryDetail/getSysDictionaryDetailList [get]
 func (s *DictionaryDetailApi) GetSysDictionaryDetailList(c *gin.Context) {
 	var pageInfo request.SysDictionaryDetailSearch
-	_ = c.ShouldBindQuery(&pageInfo)
+	var err error
+
+	err = c.ShouldBindQuery(&pageInfo)
+
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
 	if list, total, err := dictionaryDetailService.GetSysDictionaryDetailInfoList(pageInfo); err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
-		response.FailWithMessage("获取失败", c)
+		global.GVA_LOG.Error("fail to get list of dictionary details", zap.Error(err))
+		response.FailWithMessage("fail to get list of dictionary details", c)
 	} else {
 		response.OkWithDetailed(response.PageResult{
 			List:     list,
 			Total:    total,
 			Page:     pageInfo.Page,
 			PageSize: pageInfo.PageSize,
-		}, "获取成功", c)
+		}, "success", c)
 	}
 }

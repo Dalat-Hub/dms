@@ -32,7 +32,15 @@ var caser = cases.Title(language.English)
 // @Router /autoCode/preview [post]
 func (autoApi *AutoCodeApi) PreviewTemp(c *gin.Context) {
 	var a system.AutoCodeStruct
-	_ = c.ShouldBindJSON(&a)
+	var err error
+	err = c.ShouldBindJSON(&a)
+
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
 	if err := utils.Verify(a, utils.AutoCodeVerify); err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
@@ -41,10 +49,10 @@ func (autoApi *AutoCodeApi) PreviewTemp(c *gin.Context) {
 	a.PackageT = caser.String(a.Package)
 	autoCode, err := autoCodeService.PreviewTemp(a)
 	if err != nil {
-		global.GVA_LOG.Error("预览失败!", zap.Error(err))
-		response.FailWithMessage("预览失败", c)
+		global.GVA_LOG.Error("fail to preview", zap.Error(err))
+		response.FailWithMessage("fail to preview", c)
 	} else {
-		response.OkWithDetailed(gin.H{"autoCode": autoCode}, "预览成功", c)
+		response.OkWithDetailed(gin.H{"autoCode": autoCode}, "success", c)
 	}
 }
 
@@ -59,7 +67,16 @@ func (autoApi *AutoCodeApi) PreviewTemp(c *gin.Context) {
 // @Router /autoCode/createTemp [post]
 func (autoApi *AutoCodeApi) CreateTemp(c *gin.Context) {
 	var a system.AutoCodeStruct
-	_ = c.ShouldBindJSON(&a)
+	var err error
+
+	err = c.ShouldBindJSON(&a)
+
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
 	if err := utils.Verify(a, utils.AutoCodeVerify); err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
@@ -68,16 +85,16 @@ func (autoApi *AutoCodeApi) CreateTemp(c *gin.Context) {
 	var apiIds []uint
 	if a.AutoCreateApiToSql {
 		if ids, err := autoCodeService.AutoCreateApi(&a); err != nil {
-			global.GVA_LOG.Error("自动化创建失败!请自行清空垃圾数据!", zap.Error(err))
+			global.GVA_LOG.Error("Automatic creation failed! Please clear the junk data yourself!", zap.Error(err))
 			c.Writer.Header().Add("success", "false")
-			c.Writer.Header().Add("msg", url.QueryEscape("自动化创建失败!请自行清空垃圾数据!"))
+			c.Writer.Header().Add("msg", url.QueryEscape("Automatic creation failed! Please clear the junk data yourself!"))
 			return
 		} else {
 			apiIds = ids
 		}
 	}
 	a.PackageT = caser.String(a.Package)
-	err := autoCodeService.CreateTemp(a, apiIds...)
+	err = autoCodeService.CreateTemp(a, apiIds...)
 	if err != nil {
 		if errors.Is(err, system.AutoMoveErr) {
 			c.Writer.Header().Add("success", "true")
@@ -107,10 +124,10 @@ func (autoApi *AutoCodeApi) CreateTemp(c *gin.Context) {
 func (autoApi *AutoCodeApi) GetDB(c *gin.Context) {
 	dbs, err := autoCodeService.Database().GetDB()
 	if err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
-		response.FailWithMessage("获取失败", c)
+		global.GVA_LOG.Error("fail to get db", zap.Error(err))
+		response.FailWithMessage("fail to get db", c)
 	} else {
-		response.OkWithDetailed(gin.H{"dbs": dbs}, "获取成功", c)
+		response.OkWithDetailed(gin.H{"dbs": dbs}, "success", c)
 	}
 }
 
@@ -126,10 +143,10 @@ func (autoApi *AutoCodeApi) GetTables(c *gin.Context) {
 	dbName := c.DefaultQuery("dbName", global.GVA_CONFIG.Mysql.Dbname)
 	tables, err := autoCodeService.Database().GetTables(dbName)
 	if err != nil {
-		global.GVA_LOG.Error("查询table失败!", zap.Error(err))
-		response.FailWithMessage("查询table失败", c)
+		global.GVA_LOG.Error("fail to get table", zap.Error(err))
+		response.FailWithMessage("fail to get table", c)
 	} else {
-		response.OkWithDetailed(gin.H{"tables": tables}, "获取成功", c)
+		response.OkWithDetailed(gin.H{"tables": tables}, "success", c)
 	}
 }
 
@@ -146,10 +163,10 @@ func (autoApi *AutoCodeApi) GetColumn(c *gin.Context) {
 	tableName := c.Query("tableName")
 	columns, err := autoCodeService.Database().GetColumn(tableName, dbName)
 	if err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
-		response.FailWithMessage("获取失败", c)
+		global.GVA_LOG.Error("fail to get column", zap.Error(err))
+		response.FailWithMessage("fail to get column", c)
 	} else {
-		response.OkWithDetailed(gin.H{"columns": columns}, "获取成功", c)
+		response.OkWithDetailed(gin.H{"columns": columns}, "success", c)
 	}
 }
 
@@ -164,17 +181,27 @@ func (autoApi *AutoCodeApi) GetColumn(c *gin.Context) {
 // @Router /autoCode/createPackage [post]
 func (autoApi *AutoCodeApi) CreatePackage(c *gin.Context) {
 	var a system.SysAutoCode
-	_ = c.ShouldBindJSON(&a)
+	var err error
+
+	err = c.ShouldBindJSON(&a)
+
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
 	if err := utils.Verify(a, utils.AutoPackageVerify); err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	err := autoCodeService.CreateAutoCode(&a)
+
+	err = autoCodeService.CreateAutoCode(&a)
 	if err != nil {
-		global.GVA_LOG.Error("创建成功!", zap.Error(err))
-		response.FailWithMessage("创建失败", c)
+		global.GVA_LOG.Error("fail to create new package", zap.Error(err))
+		response.FailWithMessage("fail to create new package", c)
 	} else {
-		response.OkWithMessage("创建成功", c)
+		response.OkWithMessage("success", c)
 	}
 }
 
@@ -189,10 +216,10 @@ func (autoApi *AutoCodeApi) CreatePackage(c *gin.Context) {
 func (autoApi *AutoCodeApi) GetPackage(c *gin.Context) {
 	pkgs, err := autoCodeService.GetPackage()
 	if err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
-		response.FailWithMessage("获取失败", c)
+		global.GVA_LOG.Error("fail to get package", zap.Error(err))
+		response.FailWithMessage("fail to get package", c)
 	} else {
-		response.OkWithDetailed(gin.H{"pkgs": pkgs}, "获取成功", c)
+		response.OkWithDetailed(gin.H{"pkgs": pkgs}, "success", c)
 	}
 }
 
@@ -207,13 +234,22 @@ func (autoApi *AutoCodeApi) GetPackage(c *gin.Context) {
 // @Router /autoCode/delPackage [post]
 func (autoApi *AutoCodeApi) DelPackage(c *gin.Context) {
 	var a system.SysAutoCode
-	_ = c.ShouldBindJSON(&a)
-	err := autoCodeService.DelPackage(a)
+	var err error
+
+	err = c.ShouldBindJSON(&a)
+
 	if err != nil {
-		global.GVA_LOG.Error("删除失败!", zap.Error(err))
-		response.FailWithMessage("删除失败", c)
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
+	err = autoCodeService.DelPackage(a)
+	if err != nil {
+		global.GVA_LOG.Error("fail to delete package", zap.Error(err))
+		response.FailWithMessage("fail to delete package", c)
 	} else {
-		response.OkWithMessage("删除成功", c)
+		response.OkWithMessage("success", c)
 	}
 }
 
@@ -228,13 +264,23 @@ func (autoApi *AutoCodeApi) DelPackage(c *gin.Context) {
 // @Router /autoCode/createPlug [post]
 func (autoApi *AutoCodeApi) AutoPlug(c *gin.Context) {
 	var a system.AutoPlugReq
-	_ = c.ShouldBindJSON(&a)
+	var err error
+
+	err = c.ShouldBindJSON(&a)
+
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
 	a.Snake = strings.ToLower(a.PlugName)
 	a.NeedModel = a.HasRequest || a.HasResponse
-	err := autoCodeService.CreatePlug(a)
+
+	err = autoCodeService.CreatePlug(a)
 	if err != nil {
-		global.GVA_LOG.Error("预览失败!", zap.Error(err))
-		response.FailWithMessage("预览失败", c)
+		global.GVA_LOG.Error("fail to create plug", zap.Error(err))
+		response.FailWithMessage("fail to create plug", c)
 	} else {
 		response.Ok(c)
 	}
@@ -247,13 +293,13 @@ func (autoApi *AutoCodeApi) InstallPlugin(c *gin.Context) {
 		return
 	}
 	web, server, err := autoCodeService.InstallPlugin(header)
-	webStr := "web插件安装成功"
-	serverStr := "server插件安装成功"
+	webStr := "web plugin installed successfully"
+	serverStr := "server plugin installed successfully"
 	if web == -1 {
-		webStr = "web端插件未成功安装，请按照文档自行解压安装，如果为纯后端插件请忽略此条提示"
+		webStr = "the web-side plug-in is not successfully installed, please decompress and install it according to the documentation. If it is a pure back-end plug-in, please ignore this prompt"
 	}
 	if server == -1 {
-		serverStr = "server端插件未成功安装，请按照文档自行解压安装，如果为纯前端插件请忽略此条提示"
+		serverStr = "the server-side plug-in is not successfully installed, please decompress and install it according to the documentation. If it is a pure front-end plug-in, please ignore this prompt"
 	}
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)

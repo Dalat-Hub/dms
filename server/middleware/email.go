@@ -49,9 +49,9 @@ func ErrorToEmail() gin.HandlerFunc {
 		latency := time.Since(now)
 		status := c.Writer.Status()
 		record.ErrorMessage = c.Errors.ByType(gin.ErrorTypePrivate).String()
-		str := "接收到的请求为" + record.Body + "\n" + "请求方式为" + record.Method + "\n" + "报错信息如下" + record.ErrorMessage + "\n" + "耗时" + latency.String() + "\n"
+		str := "The received request is " + record.Body + "\n" + "The request method is " + record.Method + "\n" + "The error message is " + record.ErrorMessage + "\n" + "Time consuming " + latency.String() + "\n"
 		if status != 200 {
-			subject := username + "" + record.Ip + "调用了" + record.Path + "报错了"
+			subject := username + "" + record.Ip + " called" + record.Path + " reported an error"
 			if err := utils.ErrorToEmail(subject, str); err != nil {
 				global.GVA_LOG.Error("ErrorToEmail Failed, err:", zap.Error(err))
 			}

@@ -36,7 +36,7 @@ func (baseMenuService *BaseMenuService) DeleteBaseMenu(id int) (err error) {
 			}
 		}
 	} else {
-		return errors.New("此菜单存在子菜单不可删除")
+		return errors.New("this menu has submenus and cannot be deleted")
 	}
 	return err
 }
@@ -66,8 +66,8 @@ func (baseMenuService *BaseMenuService) UpdateBaseMenu(menu system.SysBaseMenu) 
 		db := tx.Where("id = ?", menu.ID).Find(&oldMenu)
 		if oldMenu.Name != menu.Name {
 			if !errors.Is(tx.Where("id <> ? AND name = ?", menu.ID, menu.Name).First(&system.SysBaseMenu{}).Error, gorm.ErrRecordNotFound) {
-				global.GVA_LOG.Debug("存在相同name修改失败")
-				return errors.New("存在相同name修改失败")
+				global.GVA_LOG.Debug("failed to modify the same name")
+				return errors.New("failed to modify the same name")
 			}
 		}
 		txErr := tx.Unscoped().Delete(&system.SysBaseMenuParameter{}, "sys_base_menu_id = ?", menu.ID).Error

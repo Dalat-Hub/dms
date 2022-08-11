@@ -454,37 +454,37 @@ func (autoCodeService *AutoCodeService) AutoCreateApi(a *system.AutoCodeStruct) 
 	apiList := []system.SysApi{
 		{
 			Path:        "/" + a.Abbreviation + "/" + "create" + a.StructName,
-			Description: "新增" + a.Description,
+			Description: "Create " + a.Description,
 			ApiGroup:    a.Abbreviation,
 			Method:      "POST",
 		},
 		{
 			Path:        "/" + a.Abbreviation + "/" + "delete" + a.StructName,
-			Description: "删除" + a.Description,
+			Description: "Delete " + a.Description,
 			ApiGroup:    a.Abbreviation,
 			Method:      "DELETE",
 		},
 		{
 			Path:        "/" + a.Abbreviation + "/" + "delete" + a.StructName + "ByIds",
-			Description: "批量删除" + a.Description,
+			Description: "Batch delete " + a.Description,
 			ApiGroup:    a.Abbreviation,
 			Method:      "DELETE",
 		},
 		{
 			Path:        "/" + a.Abbreviation + "/" + "update" + a.StructName,
-			Description: "更新" + a.Description,
+			Description: "Update " + a.Description,
 			ApiGroup:    a.Abbreviation,
 			Method:      "PUT",
 		},
 		{
 			Path:        "/" + a.Abbreviation + "/" + "find" + a.StructName,
-			Description: "根据ID获取" + a.Description,
+			Description: "Get by ID " + a.Description,
 			ApiGroup:    a.Abbreviation,
 			Method:      "GET",
 		},
 		{
 			Path:        "/" + a.Abbreviation + "/" + "get" + a.StructName + "List",
-			Description: "获取" + a.Description + "列表",
+			Description: "Get list of " + a.Description,
 			ApiGroup:    a.Abbreviation,
 			Method:      "GET",
 		},
@@ -893,8 +893,8 @@ func (autoCodeService *AutoCodeService) InstallPlugin(file *multipart.FileHeader
 		}
 	}
 	if webIndex == -1 && serverIndex == -1 {
-		zap.L().Error("非标准插件，请按照文档自动迁移使用")
-		return webIndex, serverIndex, errors.New("非标准插件，请按照文档自动迁移使用")
+		zap.L().Error("Non-standard plugins, please follow the documentation to automatically migrate and use")
+		return webIndex, serverIndex, errors.New("Non-standard plugins, please follow the documentation to automatically migrate and use")
 	}
 
 	if webIndex != -1 {
@@ -922,8 +922,8 @@ func installation(path string, formPath string, toPath string) error {
 	var to = filepath.ToSlash(global.GVA_CONFIG.AutoCode.Root + toPath + "/plugin/")
 	_, err := os.Stat(to + name)
 	if err == nil {
-		zap.L().Error("autoPath 已存在同名插件，请自行手动安装", zap.String("to", to))
-		return errors.New(toPath + "已存在同名插件，请自行手动安装")
+		zap.L().Error("A plugin with the same name already exists in autoPath, please install it manually", zap.String("to", to))
+		return errors.New(toPath + "A plugin with the same name already exists, please install it manually")
 	}
 	return cp.Copy(form, to, cp.Options{Skip: skipMacSpecialDocument})
 }

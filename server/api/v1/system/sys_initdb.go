@@ -20,22 +20,22 @@ type DBApi struct{}
 // @Router /init/initdb [post]
 func (i *DBApi) InitDB(c *gin.Context) {
 	if global.GVA_DB != nil {
-		global.GVA_LOG.Error("已存在数据库配置!")
-		response.FailWithMessage("已存在数据库配置", c)
+		global.GVA_LOG.Error("database configuration already exists!")
+		response.FailWithMessage("database configuration already exists!", c)
 		return
 	}
 	var dbInfo request.InitDB
 	if err := c.ShouldBindJSON(&dbInfo); err != nil {
-		global.GVA_LOG.Error("参数校验不通过!", zap.Error(err))
-		response.FailWithMessage("参数校验不通过", c)
+		global.GVA_LOG.Error("parameter verification failed!", zap.Error(err))
+		response.FailWithMessage("parameter verification failed!", c)
 		return
 	}
 	if err := initDBService.InitDB(dbInfo); err != nil {
-		global.GVA_LOG.Error("自动创建数据库失败!", zap.Error(err))
-		response.FailWithMessage("自动创建数据库失败，请查看后台日志，检查后在进行初始化", c)
+		global.GVA_LOG.Error("automatic database creation failed!", zap.Error(err))
+		response.FailWithMessage("failed to create database automatically, please check the background log and initialize after checking", c)
 		return
 	}
-	response.OkWithMessage("自动创建数据库成功", c)
+	response.OkWithMessage("automatic database creation succeeded", c)
 }
 
 // CheckDB
@@ -46,12 +46,12 @@ func (i *DBApi) InitDB(c *gin.Context) {
 // @Router /init/checkdb [post]
 func (i *DBApi) CheckDB(c *gin.Context) {
 	var (
-		message  = "前往初始化数据库"
+		message  = "go to initialize database"
 		needInit = true
 	)
 
 	if global.GVA_DB != nil {
-		message = "数据库无需初始化"
+		message = "the database does not need to be initialized"
 		needInit = false
 	}
 	global.GVA_LOG.Info(message)
