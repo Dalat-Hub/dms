@@ -19,6 +19,8 @@ import (
 type DocumentsService struct {
 }
 
+// ===================== EXPORTED METHODS SECTION ========================
+
 // CreateDocuments create new document
 func (documentsService *DocumentsService) CreateDocuments(documents dms.Documents) (err error) {
 	err = global.GVA_DB.Create(&documents).Error
@@ -480,6 +482,35 @@ func (documentsService *DocumentsService) CreateFullDocument(full dmsReq.FullDoc
 		err = tx.Model(&dms.DocumentRules{}).Create(&authorities).Error
 		if err != nil {
 			return err
+		}
+
+		// update category count
+		err = tx.Model(&dms.DocumentCategories{}).
+			Where("id = ?", category.ID).
+			Update("count", gorm.Expr("count + ?", 1)).Error
+
+		if err != nil {
+			return err
+		}
+
+		// update agency count
+		err = tx.Model(&dms.DocumentAgencies{}).
+			Where("id = ?", agency.ID).
+			Update("count", gorm.Expr("count + ?", 1)).Error
+
+		if err != nil {
+			return err
+		}
+
+		// update field count
+		for _, fieldId := range full.ReqFields {
+			err = tx.Model(&dms.DocumentFields{}).
+				Where("id = ?", fieldId).
+				Update("count", gorm.Expr("count + ?", 1)).Error
+
+			if err != nil {
+				return err
+			}
 		}
 
 		return nil
