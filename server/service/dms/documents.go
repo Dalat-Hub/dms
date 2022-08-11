@@ -981,7 +981,7 @@ func (documentsService *DocumentsService) GetDocumentsInfoList(info dmsReq.Docum
 		db = db.Limit(limit).Offset(offset)
 	}
 
-	err = db.Find(&documentss).Error
+	err = db.Order("created_at desc").Find(&documentss).Error
 
 	return documentss, total, err
 }
