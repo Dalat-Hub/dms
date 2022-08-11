@@ -80,9 +80,9 @@ func SetLimitWithTime(key string, limit int, expiration time.Duration) error {
 		} else {
 			if times >= limit {
 				if t, err := global.GVA_REDIS.PTTL(context.Background(), key).Result(); err != nil {
-					return errors.New("请求太过频繁，请稍后再试")
+					return errors.New("too frequent requests, please try again later")
 				} else {
-					return errors.New("请求太过频繁, 请 " + t.String() + " 秒后尝试")
+					return errors.New("requests are too frequent, please " + t.String() + " try in seconds")
 				}
 			} else {
 				return global.GVA_REDIS.Incr(context.Background(), key).Err()

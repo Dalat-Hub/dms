@@ -22,13 +22,22 @@ type AutoCodeHistoryApi struct{}
 // @Router /autoCode/getMeta [post]
 func (a *AutoCodeHistoryApi) First(c *gin.Context) {
 	var info request.GetById
-	_ = c.ShouldBindJSON(&info)
+	var err error
+
+	err = c.ShouldBindJSON(&info)
+
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
 	data, err := autoCodeHistoryService.First(&info)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	response.OkWithDetailed(gin.H{"meta": data}, "获取成功", c)
+	response.OkWithDetailed(gin.H{"meta": data}, "success", c)
 }
 
 // Delete
@@ -42,14 +51,23 @@ func (a *AutoCodeHistoryApi) First(c *gin.Context) {
 // @Router /autoCode/delSysHistory [post]
 func (a *AutoCodeHistoryApi) Delete(c *gin.Context) {
 	var info request.GetById
-	_ = c.ShouldBindJSON(&info)
-	err := autoCodeHistoryService.Delete(&info)
+	var err error
+
+	err = c.ShouldBindJSON(&info)
+
 	if err != nil {
-		global.GVA_LOG.Error("删除失败!", zap.Error(err))
-		response.FailWithMessage("删除失败", c)
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
 		return
 	}
-	response.OkWithMessage("删除成功", c)
+
+	err = autoCodeHistoryService.Delete(&info)
+	if err != nil {
+		global.GVA_LOG.Error("fail to delete autocode history", zap.Error(err))
+		response.FailWithMessage("fail to delete autocode history", c)
+		return
+	}
+	response.OkWithMessage("success", c)
 }
 
 // RollBack
@@ -63,12 +81,21 @@ func (a *AutoCodeHistoryApi) Delete(c *gin.Context) {
 // @Router /autoCode/rollback [post]
 func (a *AutoCodeHistoryApi) RollBack(c *gin.Context) {
 	var info systemReq.RollBack
-	_ = c.ShouldBindJSON(&info)
+	var err error
+
+	err = c.ShouldBindJSON(&info)
+
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
 	if err := autoCodeHistoryService.RollBack(&info); err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	response.OkWithMessage("回滚成功", c)
+	response.OkWithMessage("success", c)
 }
 
 // GetList
@@ -82,11 +109,20 @@ func (a *AutoCodeHistoryApi) RollBack(c *gin.Context) {
 // @Router /autoCode/getSysHistory [post]
 func (a *AutoCodeHistoryApi) GetList(c *gin.Context) {
 	var search systemReq.SysAutoHistory
-	_ = c.ShouldBindJSON(&search)
+	var err error
+
+	err = c.ShouldBindJSON(&search)
+
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
 	list, total, err := autoCodeHistoryService.GetList(search.PageInfo)
 	if err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
-		response.FailWithMessage("获取失败", c)
+		global.GVA_LOG.Error("fail to get list", zap.Error(err))
+		response.FailWithMessage("fail to get list", c)
 		return
 	}
 	response.OkWithDetailed(response.PageResult{
@@ -94,5 +130,5 @@ func (a *AutoCodeHistoryApi) GetList(c *gin.Context) {
 		Total:    total,
 		Page:     search.Page,
 		PageSize: search.PageSize,
-	}, "获取成功", c)
+	}, "success", c)
 }

@@ -79,8 +79,8 @@ func loadPlugin(path string, f fs.FileInfo) error {
 			fmt.Println("loadPlugin err ", err)
 			return err
 		} else if _, ok := v.(Plugin); !ok {
-			fmt.Println("loadPlugin err ", fmt.Sprintf("path:%s 没有实现 %s 接口", filepath.Base(fPath), OnlyFuncName))
-			return errors.New("没有实现指定接口")
+			fmt.Println("loadPlugin err ", fmt.Sprintf("path:%s does not implement %s interface", filepath.Base(fPath), OnlyFuncName))
+			return errors.New("does not implement interface")
 		} else {
 			// todo
 			fmt.Println("todo...")

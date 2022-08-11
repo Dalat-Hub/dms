@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var ErrRoleExistence = errors.New("存在相同角色id")
+var ErrRoleExistence = errors.New("same role id exists")
 
 //@author: [piexlmax](https://github.com/piexlmax)
 //@function: CreateAuthority
@@ -103,16 +103,16 @@ func (authorityService *AuthorityService) UpdateAuthority(auth system.SysAuthori
 
 func (authorityService *AuthorityService) DeleteAuthority(auth *system.SysAuthority) (err error) {
 	if errors.Is(global.GVA_DB.Debug().Preload("Users").First(&auth).Error, gorm.ErrRecordNotFound) {
-		return errors.New("该角色不存在")
+		return errors.New("the role does not exist")
 	}
 	if len(auth.Users) != 0 {
-		return errors.New("此角色有用户正在使用禁止删除")
+		return errors.New("there are users in this role that are not allowed to delete")
 	}
 	if !errors.Is(global.GVA_DB.Where("authority_id = ?", auth.AuthorityId).First(&system.SysUser{}).Error, gorm.ErrRecordNotFound) {
-		return errors.New("此角色有用户正在使用禁止删除")
+		return errors.New("there are users in this role that are not allowed to delete")
 	}
 	if !errors.Is(global.GVA_DB.Where("parent_id = ?", auth.AuthorityId).First(&system.SysAuthority{}).Error, gorm.ErrRecordNotFound) {
-		return errors.New("此角色存在子角色不允许删除")
+		return errors.New("subroles exist in this role and deletion is not allowed")
 	}
 	db := global.GVA_DB.Preload("SysBaseMenus").Where("authority_id = ?", auth.AuthorityId).First(auth)
 	err = db.Unscoped().Delete(auth).Error

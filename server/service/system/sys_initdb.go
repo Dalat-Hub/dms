@@ -88,7 +88,7 @@ type InitDBService struct{}
 func (initDBService *InitDBService) InitDB(conf request.InitDB) (err error) {
 	ctx := context.TODO()
 	if len(initializers) == 0 {
-		return errors.New("无可用初始化过程，请检查初始化是否已执行完成")
+		return errors.New("no initialization process available, please check whether the initialization is completed")
 	}
 	sort.Sort(&initializers) // 保证有依赖的 initializer 排在后面执行
 	// Note: 若 initializer 只有单一依赖，可以写为 B=A+1, C=A+1; 由于 BC 之间没有依赖关系，所以谁先谁后并不影响初始化

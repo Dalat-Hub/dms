@@ -13,6 +13,7 @@ import (
 
 type OperationRecordApi struct{}
 
+// CreateSysOperationRecord
 // @Tags SysOperationRecord
 // @Summary 创建SysOperationRecord
 // @Security ApiKeyAuth
@@ -23,15 +24,25 @@ type OperationRecordApi struct{}
 // @Router /sysOperationRecord/createSysOperationRecord [post]
 func (s *OperationRecordApi) CreateSysOperationRecord(c *gin.Context) {
 	var sysOperationRecord system.SysOperationRecord
-	_ = c.ShouldBindJSON(&sysOperationRecord)
+	var err error
+
+	err = c.ShouldBindJSON(&sysOperationRecord)
+
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
 	if err := operationRecordService.CreateSysOperationRecord(sysOperationRecord); err != nil {
-		global.GVA_LOG.Error("创建失败!", zap.Error(err))
-		response.FailWithMessage("创建失败", c)
+		global.GVA_LOG.Error("fail to create operation record", zap.Error(err))
+		response.FailWithMessage("fail to create operation record", c)
 	} else {
-		response.OkWithMessage("创建成功", c)
+		response.OkWithMessage("success", c)
 	}
 }
 
+// DeleteSysOperationRecord
 // @Tags SysOperationRecord
 // @Summary 删除SysOperationRecord
 // @Security ApiKeyAuth
@@ -42,15 +53,25 @@ func (s *OperationRecordApi) CreateSysOperationRecord(c *gin.Context) {
 // @Router /sysOperationRecord/deleteSysOperationRecord [delete]
 func (s *OperationRecordApi) DeleteSysOperationRecord(c *gin.Context) {
 	var sysOperationRecord system.SysOperationRecord
-	_ = c.ShouldBindJSON(&sysOperationRecord)
+	var err error
+
+	err = c.ShouldBindJSON(&sysOperationRecord)
+
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
 	if err := operationRecordService.DeleteSysOperationRecord(sysOperationRecord); err != nil {
-		global.GVA_LOG.Error("删除失败!", zap.Error(err))
-		response.FailWithMessage("删除失败", c)
+		global.GVA_LOG.Error("fail to delete operation record", zap.Error(err))
+		response.FailWithMessage("fail to delete operation record", c)
 	} else {
-		response.OkWithMessage("删除成功", c)
+		response.OkWithMessage("success", c)
 	}
 }
 
+// DeleteSysOperationRecordByIds
 // @Tags SysOperationRecord
 // @Summary 批量删除SysOperationRecord
 // @Security ApiKeyAuth
@@ -61,15 +82,25 @@ func (s *OperationRecordApi) DeleteSysOperationRecord(c *gin.Context) {
 // @Router /sysOperationRecord/deleteSysOperationRecordByIds [delete]
 func (s *OperationRecordApi) DeleteSysOperationRecordByIds(c *gin.Context) {
 	var IDS request.IdsReq
-	_ = c.ShouldBindJSON(&IDS)
+	var err error
+
+	err = c.ShouldBindJSON(&IDS)
+
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
 	if err := operationRecordService.DeleteSysOperationRecordByIds(IDS); err != nil {
-		global.GVA_LOG.Error("批量删除失败!", zap.Error(err))
-		response.FailWithMessage("批量删除失败", c)
+		global.GVA_LOG.Error("fail to delete operation record", zap.Error(err))
+		response.FailWithMessage("fail to delete operation record", c)
 	} else {
-		response.OkWithMessage("批量删除成功", c)
+		response.OkWithMessage("success", c)
 	}
 }
 
+// FindSysOperationRecord
 // @Tags SysOperationRecord
 // @Summary 用id查询SysOperationRecord
 // @Security ApiKeyAuth
@@ -80,19 +111,29 @@ func (s *OperationRecordApi) DeleteSysOperationRecordByIds(c *gin.Context) {
 // @Router /sysOperationRecord/findSysOperationRecord [get]
 func (s *OperationRecordApi) FindSysOperationRecord(c *gin.Context) {
 	var sysOperationRecord system.SysOperationRecord
-	_ = c.ShouldBindQuery(&sysOperationRecord)
+	var err error
+
+	err = c.ShouldBindQuery(&sysOperationRecord)
+
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
 	if err := utils.Verify(sysOperationRecord, utils.IdVerify); err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
 	if reSysOperationRecord, err := operationRecordService.GetSysOperationRecord(sysOperationRecord.ID); err != nil {
-		global.GVA_LOG.Error("查询失败!", zap.Error(err))
-		response.FailWithMessage("查询失败", c)
+		global.GVA_LOG.Error("fail to get operation record", zap.Error(err))
+		response.FailWithMessage("fail to get operation record", c)
 	} else {
-		response.OkWithDetailed(gin.H{"reSysOperationRecord": reSysOperationRecord}, "查询成功", c)
+		response.OkWithDetailed(gin.H{"reSysOperationRecord": reSysOperationRecord}, "success", c)
 	}
 }
 
+// GetSysOperationRecordList
 // @Tags SysOperationRecord
 // @Summary 分页获取SysOperationRecord列表
 // @Security ApiKeyAuth
@@ -103,16 +144,25 @@ func (s *OperationRecordApi) FindSysOperationRecord(c *gin.Context) {
 // @Router /sysOperationRecord/getSysOperationRecordList [get]
 func (s *OperationRecordApi) GetSysOperationRecordList(c *gin.Context) {
 	var pageInfo systemReq.SysOperationRecordSearch
-	_ = c.ShouldBindQuery(&pageInfo)
+	var err error
+
+	err = c.ShouldBindQuery(&pageInfo)
+
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
 	if list, total, err := operationRecordService.GetSysOperationRecordInfoList(pageInfo); err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
-		response.FailWithMessage("获取失败", c)
+		global.GVA_LOG.Error("fail to get operation record list", zap.Error(err))
+		response.FailWithMessage("fail to get operation record list", c)
 	} else {
 		response.OkWithDetailed(response.PageResult{
 			List:     list,
 			Total:    total,
 			Page:     pageInfo.Page,
 			PageSize: pageInfo.PageSize,
-		}, "获取成功", c)
+		}, "success", c)
 	}
 }

@@ -51,18 +51,18 @@
                             <el-dropdown-menu class="dropdown-group">
                               <el-dropdown-item>
                                 <span style="font-weight: 600;">
-                                  当前角色：{{ userStore.userInfo.authority.authorityName }}
+                                  Vai trò hiện tại：{{ userStore.userInfo.authority.authorityName }}
                                 </span>
                               </el-dropdown-item>
                               <template v-if="userStore.userInfo.authorities">
                                 <el-dropdown-item v-for="item in userStore.userInfo.authorities.filter(i=>i.authorityId!==userStore.userInfo.authorityId)" :key="item.authorityId" @click="changeUserAuth(item.authorityId)">
                                   <span>
-                                    切换为：{{ item.authorityName }}
+                                    Chuyển vai trò：{{ item.authorityName }}
                                   </span>
                                 </el-dropdown-item>
                               </template>
-                              <el-dropdown-item icon="avatar" @click="toPerson">个人信息</el-dropdown-item>
-                              <el-dropdown-item icon="reading-lamp" @click="userStore.LoginOut">登 出</el-dropdown-item>
+                              <el-dropdown-item icon="avatar" @click="toPerson">Thông tin cá nhân</el-dropdown-item>
+                              <el-dropdown-item icon="reading-lamp" @click="userStore.LoginOut">Đăng xuất</el-dropdown-item>
                             </el-dropdown-menu>
                           </template>
                         </el-dropdown>
@@ -82,7 +82,7 @@
           v-if="reloadFlag"
           v-slot="{ Component }"
           v-loading="loadingFlag"
-          element-loading-text="正在加载中"
+          element-loading-text="Đang tải dữ liệu..."
           class="admin-box"
         >
           <div>

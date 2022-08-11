@@ -10,6 +10,7 @@ import (
 
 type AuthorityBtnApi struct{}
 
+// GetAuthorityBtn get button
 // @Tags AuthorityBtn
 // @Summary 获取权限按钮
 // @Security ApiKeyAuth
@@ -20,15 +21,24 @@ type AuthorityBtnApi struct{}
 // @Router /authorityBtn/getAuthorityBtn [post]
 func (a *AuthorityBtnApi) GetAuthorityBtn(c *gin.Context) {
 	var req request.SysAuthorityBtnReq
-	_ = c.ShouldBindJSON(&req)
+	var err error
+
+	err = c.ShouldBindJSON(&req)
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
 	if res, err := authorityBtnService.GetAuthorityBtn(req); err != nil {
-		global.GVA_LOG.Error("查询失败!", zap.Error(err))
-		response.FailWithMessage("查询失败", c)
+		global.GVA_LOG.Error("fail to get button", zap.Error(err))
+		response.FailWithMessage("fail to get button", c)
 	} else {
-		response.OkWithDetailed(res, "查询成功", c)
+		response.OkWithDetailed(res, "success", c)
 	}
 }
 
+// SetAuthorityBtn set button
 // @Tags AuthorityBtn
 // @Summary 设置权限按钮
 // @Security ApiKeyAuth
@@ -39,15 +49,24 @@ func (a *AuthorityBtnApi) GetAuthorityBtn(c *gin.Context) {
 // @Router /authorityBtn/setAuthorityBtn [post]
 func (a *AuthorityBtnApi) SetAuthorityBtn(c *gin.Context) {
 	var req request.SysAuthorityBtnReq
-	_ = c.ShouldBindJSON(&req)
+	var err error
+
+	err = c.ShouldBindJSON(&req)
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
 	if err := authorityBtnService.SetAuthorityBtn(req); err != nil {
-		global.GVA_LOG.Error("分配失败!", zap.Error(err))
-		response.FailWithMessage("分配失败", c)
+		global.GVA_LOG.Error("fail to get authority button", zap.Error(err))
+		response.FailWithMessage("fail to get authority button", c)
 	} else {
-		response.OkWithMessage("分配成功", c)
+		response.OkWithMessage("success", c)
 	}
 }
 
+// CanRemoveAuthorityBtn
 // @Tags AuthorityBtn
 // @Summary 设置权限按钮
 // @Security ApiKeyAuth
@@ -58,9 +77,9 @@ func (a *AuthorityBtnApi) SetAuthorityBtn(c *gin.Context) {
 func (a *AuthorityBtnApi) CanRemoveAuthorityBtn(c *gin.Context) {
 	id := c.Query("id")
 	if err := authorityBtnService.CanRemoveAuthorityBtn(id); err != nil {
-		global.GVA_LOG.Error("删除失败!", zap.Error(err))
+		global.GVA_LOG.Error("fail to remove authority button", zap.Error(err))
 		response.FailWithMessage(err.Error(), c)
 	} else {
-		response.OkWithMessage("删除成功", c)
+		response.OkWithMessage("success", c)
 	}
 }

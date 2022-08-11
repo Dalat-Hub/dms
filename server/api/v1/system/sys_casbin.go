@@ -12,6 +12,7 @@ import (
 
 type CasbinApi struct{}
 
+// UpdateCasbin
 // @Tags Casbin
 // @Summary 更新角色api权限
 // @Security ApiKeyAuth
@@ -22,19 +23,29 @@ type CasbinApi struct{}
 // @Router /casbin/UpdateCasbin [post]
 func (cas *CasbinApi) UpdateCasbin(c *gin.Context) {
 	var cmr request.CasbinInReceive
-	_ = c.ShouldBindJSON(&cmr)
+	var err error
+
+	err = c.ShouldBindJSON(&cmr)
+
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
 	if err := utils.Verify(cmr, utils.AuthorityIdVerify); err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
 	if err := casbinService.UpdateCasbin(cmr.AuthorityId, cmr.CasbinInfos); err != nil {
-		global.GVA_LOG.Error("更新失败!", zap.Error(err))
-		response.FailWithMessage("更新失败", c)
+		global.GVA_LOG.Error("fail to update", zap.Error(err))
+		response.FailWithMessage("fail to update", c)
 	} else {
-		response.OkWithMessage("更新成功", c)
+		response.OkWithMessage("success", c)
 	}
 }
 
+// GetPolicyPathByAuthorityId
 // @Tags Casbin
 // @Summary 获取权限列表
 // @Security ApiKeyAuth
@@ -45,11 +56,20 @@ func (cas *CasbinApi) UpdateCasbin(c *gin.Context) {
 // @Router /casbin/getPolicyPathByAuthorityId [post]
 func (cas *CasbinApi) GetPolicyPathByAuthorityId(c *gin.Context) {
 	var casbin request.CasbinInReceive
-	_ = c.ShouldBindJSON(&casbin)
+	var err error
+
+	err = c.ShouldBindJSON(&casbin)
+
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
 	if err := utils.Verify(casbin, utils.AuthorityIdVerify); err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
 	paths := casbinService.GetPolicyPathByAuthorityId(casbin.AuthorityId)
-	response.OkWithDetailed(systemRes.PolicyPathResponse{Paths: paths}, "获取成功", c)
+	response.OkWithDetailed(systemRes.PolicyPathResponse{Paths: paths}, "success", c)
 }

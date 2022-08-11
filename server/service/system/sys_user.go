@@ -22,7 +22,7 @@ type UserService struct{}
 func (userService *UserService) Register(u system.SysUser) (userInter system.SysUser, err error) {
 	var user system.SysUser
 	if !errors.Is(global.GVA_DB.Where("username = ?", u.Username).First(&user).Error, gorm.ErrRecordNotFound) { // 判断用户名是否注册
-		return userInter, errors.New("用户名已注册")
+		return userInter, errors.New("username is registered")
 	}
 	// 否则 附加uuid 密码hash加密 注册
 	u.Password = utils.BcryptHash(u.Password)
@@ -46,7 +46,7 @@ func (userService *UserService) Login(u *system.SysUser) (userInter *system.SysU
 	err = global.GVA_DB.Where("username = ?", u.Username).Preload("Authorities").Preload("Authority").First(&user).Error
 	if err == nil {
 		if ok := utils.BcryptCheck(u.Password, user.Password); !ok {
-			return nil, errors.New("密码错误")
+			return nil, errors.New("wrong password")
 		}
 
 		var SysAuthorityMenus []system.SysAuthorityMenu
@@ -83,7 +83,7 @@ func (userService *UserService) ChangePassword(u *system.SysUser, newPassword st
 		return nil, err
 	}
 	if ok := utils.BcryptCheck(u.Password, user.Password); !ok {
-		return nil, errors.New("原密码错误")
+		return nil, errors.New("the original password is wrong")
 	}
 	user.Password = utils.BcryptHash(newPassword)
 	err = global.GVA_DB.Save(&user).Error
@@ -119,7 +119,7 @@ func (userService *UserService) GetUserInfoList(info request.PageInfo) (list int
 func (userService *UserService) SetUserAuthority(id uint, authorityId uint) (err error) {
 	assignErr := global.GVA_DB.Where("sys_user_id = ? AND sys_authority_authority_id = ?", id, authorityId).First(&system.SysUserAuthority{}).Error
 	if errors.Is(assignErr, gorm.ErrRecordNotFound) {
-		return errors.New("该用户无此角色")
+		return errors.New("this user does not have this role")
 	}
 	err = global.GVA_DB.Where("id = ?", id).First(&system.SysUser{}).Update("authority_id", authorityId).Error
 	return err
@@ -236,7 +236,7 @@ func (userService *UserService) FindUserById(id int) (user *system.SysUser, err 
 func (userService *UserService) FindUserByUuid(uuid string) (user *system.SysUser, err error) {
 	var u system.SysUser
 	if err = global.GVA_DB.Where("`uuid` = ?", uuid).First(&u).Error; err != nil {
-		return &u, errors.New("用户不存在")
+		return &u, errors.New("user does not exist")
 	}
 	return &u, nil
 }
