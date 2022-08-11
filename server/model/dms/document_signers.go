@@ -3,6 +3,7 @@ package dms
 
 import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	sysModel "github.com/flipped-aurora/gin-vue-admin/server/model/system"
 )
 
 // DocumentSigners 结构体

@@ -60,6 +60,8 @@ func (documentSignersService *DocumentSignersService) GetDocumentSignersInfoList
 		return
 	}
 
+	db = db.Preload("Agency")
+
 	err = db.Limit(limit).Offset(offset).Find(&documentSignerss).Error
 	if err != nil {
 		return
