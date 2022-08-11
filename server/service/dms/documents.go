@@ -484,35 +484,6 @@ func (documentsService *DocumentsService) CreateFullDocument(full dmsReq.FullDoc
 			return err
 		}
 
-		// update category count
-		err = tx.Model(&dms.DocumentCategories{}).
-			Where("id = ?", category.ID).
-			Update("count", gorm.Expr("count + ?", 1)).Error
-
-		if err != nil {
-			return err
-		}
-
-		// update agency count
-		err = tx.Model(&dms.DocumentAgencies{}).
-			Where("id = ?", agency.ID).
-			Update("count", gorm.Expr("count + ?", 1)).Error
-
-		if err != nil {
-			return err
-		}
-
-		// update field count
-		for _, fieldId := range full.ReqFields {
-			err = tx.Model(&dms.DocumentFields{}).
-				Where("id = ?", fieldId).
-				Update("count", gorm.Expr("count + ?", 1)).Error
-
-			if err != nil {
-				return err
-			}
-		}
-
 		return nil
 	})
 
