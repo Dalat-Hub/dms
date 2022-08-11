@@ -5,6 +5,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/dms"
 	dmsReq "github.com/flipped-aurora/gin-vue-admin/server/model/dms/request"
+	sysModel "github.com/flipped-aurora/gin-vue-admin/server/model/system"
 )
 
 type DocumentSignersService struct {
@@ -71,5 +72,37 @@ func (documentSignersService *DocumentSignersService) GetDocumentSignersInfoList
 		return
 	}
 
+	err = documentSignersService.attachSignerTitle(documentSignerss)
+	if err != nil {
+		return
+	}
+
 	return documentSignerss, total, err
+}
+
+func (documentSignersService *DocumentSignersService) attachSignerTitle(signers []*dms.DocumentSigners) (err error) {
+	var sysDictionary sysModel.SysDictionary
+
+	err = global.GVA_DB.Model(&sysModel.SysDictionary{}).
+		Where("type = ?", "signerTitles").
+		Preload("SysDictionaryDetails").
+		First(&sysDictionary).Error
+
+	if err != nil {
+		return err
+	}
+
+	detailMap := make(map[int]sysModel.SysDictionaryDetail)
+
+	for _, v := range sysDictionary.SysDictionaryDetails {
+		detailMap[v.Value] = v
+	}
+
+	for _, s := range signers {
+		if val, ok := detailMap[s.Title]; ok {
+			s.SignerTitle = val
+		}
+	}
+
+	return nil
 }

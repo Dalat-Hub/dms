@@ -12,6 +12,9 @@ type DocumentSigners struct {
 	Count    int    `json:"count" form:"count" gorm:"column:count;comment:;size:10;"`
 	Fullname string `json:"fullname" form:"fullname" gorm:"column:fullname;comment:;"`
 	Title    int    `json:"title" form:"title" gorm:"column:title;comment:;size:10;"`
+
+	Agency      DocumentAgencies             `json:"agency" gorm:"foreignKey:AgencyId"`
+	SignerTitle sysModel.SysDictionaryDetail `json:"signerTitle" gorm:"-"`
 }
 
 // TableName DocumentSigners 表名
