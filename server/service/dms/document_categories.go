@@ -47,7 +47,7 @@ func (documentCategoriesService *DocumentCategoriesService) GetDocumentCategorie
 
 	db := global.GVA_DB.Model(&dms.DocumentCategories{})
 
-	var documentCategoriess []dms.DocumentCategories
+	var documentCategoriess []*dms.DocumentCategories
 
 	err = db.Count(&total).Error
 	if err != nil {
@@ -55,5 +55,46 @@ func (documentCategoriesService *DocumentCategoriesService) GetDocumentCategorie
 	}
 
 	err = db.Limit(limit).Offset(offset).Find(&documentCategoriess).Error
+	if err != nil {
+		return
+	}
+
+	err = documentCategoriesService.attachDocumentCount(documentCategoriess)
+	if err != nil {
+		return
+	}
+
 	return documentCategoriess, total, err
+}
+
+type categoryStats struct {
+	CategoryId uint `json:"category_id"`
+	Count      uint `json:"count"`
+}
+
+func (documentCategoriesService *DocumentCategoriesService) attachDocumentCount(categories []*dms.DocumentCategories) (err error) {
+	results := make([]categoryStats, 0)
+
+	err = global.GVA_DB.Model(&dms.Documents{}).
+		Select("category_id, count(id) as count").
+		Where("type = ? AND status = ?", dms.TYPE_DOCUMENT, dms.STATUS_PUBLISHED).
+		Group("category_id").
+		Find(&results).Error
+
+	if err != nil {
+		return err
+	}
+
+	resultsAsMap := map[uint]uint{}
+	for _, stat := range results {
+		resultsAsMap[stat.CategoryId] = stat.Count
+	}
+
+	for _, category := range categories {
+		if val, ok := resultsAsMap[category.ID]; ok {
+			category.Count = int(val)
+		}
+	}
+
+	return nil
 }
