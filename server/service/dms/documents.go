@@ -952,10 +952,10 @@ func (documentsService *DocumentsService) GetDocuments(doc dmsReq.DocumentsSearc
 	}
 
 	// update view count
-	viewCount := document.ViewCount
-	viewCount += 1
+	err = global.GVA_DB.Model(&dms.Documents{}).
+		Where("id = ?", document.ID).
+		Update("view_count", gorm.Expr("view_count + ?", 1)).Error
 
-	err = global.GVA_DB.Model(&dms.Documents{}).Where("id = ?", document.ID).Update("view_count", viewCount).Error
 	if err != nil {
 		return nil, err
 	}
