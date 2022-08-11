@@ -52,12 +52,24 @@ func (documentSignersService *DocumentSignersService) GetDocumentSignersInfoList
 	offset := info.PageSize * (info.Page - 1)
 	// 创建db
 	db := global.GVA_DB.Model(&dms.DocumentSigners{})
-	var documentSignerss []dms.DocumentSigners
+	var documentSignerss []*dms.DocumentSigners
 	// 如果有条件搜索 下方会自动创建搜索语句
 	err = db.Count(&total).Error
 	if err != nil {
 		return
 	}
+
 	err = db.Limit(limit).Offset(offset).Find(&documentSignerss).Error
+	if err != nil {
+		return
+	}
+
+	service := new(DocumentSignerReferencesService)
+
+	err = service.AttachDocumentCount(documentSignerss)
+	if err != nil {
+		return
+	}
+
 	return documentSignerss, total, err
 }
