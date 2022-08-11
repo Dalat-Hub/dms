@@ -15,6 +15,7 @@ import (
 
 type AuthorityApi struct{}
 
+// CreateAuthority create new authority
 // @Tags Authority
 // @Summary 创建角色
 // @Security ApiKeyAuth
@@ -25,21 +26,30 @@ type AuthorityApi struct{}
 // @Router /authority/createAuthority [post]
 func (a *AuthorityApi) CreateAuthority(c *gin.Context) {
 	var authority system.SysAuthority
-	_ = c.ShouldBindJSON(&authority)
+	var err error
+
+	err = c.ShouldBindJSON(&authority)
+	if err != nil {
+		global.GVA_LOG.Error("provide valid data", zap.Error(err))
+		response.FailWithMessage("provide valid data"+err.Error(), c)
+		return
+	}
+
 	if err := utils.Verify(authority, utils.AuthorityVerify); err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
 	if authBack, err := authorityService.CreateAuthority(authority); err != nil {
-		global.GVA_LOG.Error("创建失败!", zap.Error(err))
-		response.FailWithMessage("创建失败"+err.Error(), c)
+		global.GVA_LOG.Error("fail to create new authority", zap.Error(err))
+		response.FailWithMessage("fail to create new authority"+err.Error(), c)
 	} else {
 		_ = menuService.AddMenuAuthority(systemReq.DefaultMenu(), authority.AuthorityId)
 		_ = casbinService.UpdateCasbin(authority.AuthorityId, systemReq.DefaultCasbin())
-		response.OkWithDetailed(systemRes.SysAuthorityResponse{Authority: authBack}, "创建成功", c)
+		response.OkWithDetailed(systemRes.SysAuthorityResponse{Authority: authBack}, "success", c)
 	}
 }
 
+// CopyAuthority copy authority
 // @Tags Authority
 // @Summary 拷贝角色
 // @Security ApiKeyAuth
@@ -50,7 +60,15 @@ func (a *AuthorityApi) CreateAuthority(c *gin.Context) {
 // @Router /authority/copyAuthority [post]
 func (a *AuthorityApi) CopyAuthority(c *gin.Context) {
 	var copyInfo systemRes.SysAuthorityCopyResponse
-	_ = c.ShouldBindJSON(&copyInfo)
+	var err error
+
+	err = c.ShouldBindJSON(&copyInfo)
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data"+err.Error(), c)
+		return
+	}
+
 	if err := utils.Verify(copyInfo, utils.OldAuthorityVerify); err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
@@ -60,13 +78,14 @@ func (a *AuthorityApi) CopyAuthority(c *gin.Context) {
 		return
 	}
 	if authBack, err := authorityService.CopyAuthority(copyInfo); err != nil {
-		global.GVA_LOG.Error("拷贝失败!", zap.Error(err))
-		response.FailWithMessage("拷贝失败"+err.Error(), c)
+		global.GVA_LOG.Error("fail to copy authority", zap.Error(err))
+		response.FailWithMessage("fail to copy authority"+err.Error(), c)
 	} else {
-		response.OkWithDetailed(systemRes.SysAuthorityResponse{Authority: authBack}, "拷贝成功", c)
+		response.OkWithDetailed(systemRes.SysAuthorityResponse{Authority: authBack}, "success", c)
 	}
 }
 
+// DeleteAuthority delete authority
 // @Tags Authority
 // @Summary 删除角色
 // @Security ApiKeyAuth
@@ -77,19 +96,28 @@ func (a *AuthorityApi) CopyAuthority(c *gin.Context) {
 // @Router /authority/deleteAuthority [post]
 func (a *AuthorityApi) DeleteAuthority(c *gin.Context) {
 	var authority system.SysAuthority
-	_ = c.ShouldBindJSON(&authority)
+	var err error
+
+	err = c.ShouldBindJSON(&authority)
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data"+err.Error(), c)
+		return
+	}
+
 	if err := utils.Verify(authority, utils.AuthorityIdVerify); err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
 	if err := authorityService.DeleteAuthority(&authority); err != nil { // 删除角色之前需要判断是否有用户正在使用此角色
-		global.GVA_LOG.Error("删除失败!", zap.Error(err))
-		response.FailWithMessage("删除失败"+err.Error(), c)
+		global.GVA_LOG.Error("fail to delete authority", zap.Error(err))
+		response.FailWithMessage("fail to delete authority"+err.Error(), c)
 	} else {
-		response.OkWithMessage("删除成功", c)
+		response.OkWithMessage("success", c)
 	}
 }
 
+// UpdateAuthority update authority
 // @Tags Authority
 // @Summary 更新角色信息
 // @Security ApiKeyAuth
@@ -100,19 +128,28 @@ func (a *AuthorityApi) DeleteAuthority(c *gin.Context) {
 // @Router /authority/updateAuthority [post]
 func (a *AuthorityApi) UpdateAuthority(c *gin.Context) {
 	var auth system.SysAuthority
-	_ = c.ShouldBindJSON(&auth)
+	var err error
+
+	err = c.ShouldBindJSON(&auth)
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data"+err.Error(), c)
+		return
+	}
+
 	if err := utils.Verify(auth, utils.AuthorityVerify); err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
 	if authority, err := authorityService.UpdateAuthority(auth); err != nil {
-		global.GVA_LOG.Error("更新失败!", zap.Error(err))
-		response.FailWithMessage("更新失败"+err.Error(), c)
+		global.GVA_LOG.Error("fail to update authority", zap.Error(err))
+		response.FailWithMessage("fail to update authority"+err.Error(), c)
 	} else {
-		response.OkWithDetailed(systemRes.SysAuthorityResponse{Authority: authority}, "更新成功", c)
+		response.OkWithDetailed(systemRes.SysAuthorityResponse{Authority: authority}, "success", c)
 	}
 }
 
+// GetAuthorityList get list of authorities
 // @Tags Authority
 // @Summary 分页获取角色列表
 // @Security ApiKeyAuth
@@ -123,21 +160,29 @@ func (a *AuthorityApi) UpdateAuthority(c *gin.Context) {
 // @Router /authority/getAuthorityList [post]
 func (a *AuthorityApi) GetAuthorityList(c *gin.Context) {
 	var pageInfo request.PageInfo
-	_ = c.ShouldBindJSON(&pageInfo)
+	var err error
+
+	err = c.ShouldBindJSON(&pageInfo)
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data"+err.Error(), c)
+		return
+	}
+
 	if err := utils.Verify(pageInfo, utils.PageInfoVerify); err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
 	if list, total, err := authorityService.GetAuthorityInfoList(pageInfo); err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
-		response.FailWithMessage("获取失败"+err.Error(), c)
+		global.GVA_LOG.Error("fail to get list of authorities", zap.Error(err))
+		response.FailWithMessage("fail to get list of authorities"+err.Error(), c)
 	} else {
 		response.OkWithDetailed(response.PageResult{
 			List:     list,
 			Total:    total,
 			Page:     pageInfo.Page,
 			PageSize: pageInfo.PageSize,
-		}, "获取成功", c)
+		}, "success", c)
 	}
 }
 
@@ -149,6 +194,7 @@ func (a *AuthorityApi) GetAuthorityInfo(c *gin.Context) {
 	if err != nil {
 		global.GVA_LOG.Error("provide valid data", zap.Error(err))
 		response.FailWithMessage("provide valid data"+err.Error(), c)
+		return
 	}
 
 	if res, err := authorityService.GetAuthorityInfo(auth); err != nil {
@@ -159,6 +205,7 @@ func (a *AuthorityApi) GetAuthorityInfo(c *gin.Context) {
 	}
 }
 
+// SetDataAuthority set authority
 // @Tags Authority
 // @Summary 设置角色资源权限
 // @Security ApiKeyAuth
@@ -169,15 +216,23 @@ func (a *AuthorityApi) GetAuthorityInfo(c *gin.Context) {
 // @Router /authority/setDataAuthority [post]
 func (a *AuthorityApi) SetDataAuthority(c *gin.Context) {
 	var auth system.SysAuthority
-	_ = c.ShouldBindJSON(&auth)
+	var err error
+
+	err = c.ShouldBindJSON(&auth)
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data"+err.Error(), c)
+		return
+	}
+
 	if err := utils.Verify(auth, utils.AuthorityIdVerify); err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
 	if err := authorityService.SetDataAuthority(auth); err != nil {
-		global.GVA_LOG.Error("设置失败!", zap.Error(err))
-		response.FailWithMessage("设置失败"+err.Error(), c)
+		global.GVA_LOG.Error("fail to set authority", zap.Error(err))
+		response.FailWithMessage("fail to set authority"+err.Error(), c)
 	} else {
-		response.OkWithMessage("设置成功", c)
+		response.OkWithMessage("success", c)
 	}
 }

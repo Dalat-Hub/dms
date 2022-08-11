@@ -19,7 +19,7 @@ type DictionaryService struct{}
 
 func (dictionaryService *DictionaryService) CreateSysDictionary(sysDictionary system.SysDictionary) (err error) {
 	if (!errors.Is(global.GVA_DB.First(&system.SysDictionary{}, "type = ?", sysDictionary.Type).Error, gorm.ErrRecordNotFound)) {
-		return errors.New("存在相同的type，不允许创建")
+		return errors.New("the same type exists, creation is not allowed")
 	}
 	err = global.GVA_DB.Create(&sysDictionary).Error
 	return err
@@ -34,7 +34,7 @@ func (dictionaryService *DictionaryService) CreateSysDictionary(sysDictionary sy
 func (dictionaryService *DictionaryService) DeleteSysDictionary(sysDictionary system.SysDictionary) (err error) {
 	err = global.GVA_DB.Where("id = ?", sysDictionary.ID).Preload("SysDictionaryDetails").First(&sysDictionary).Error
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		return errors.New("请不要搞事")
+		return errors.New("please don't make trouble")
 	}
 	if err != nil {
 		return err
@@ -67,7 +67,7 @@ func (dictionaryService *DictionaryService) UpdateSysDictionary(sysDictionary *s
 	db := global.GVA_DB.Where("id = ?", sysDictionary.ID).First(&dict)
 	if dict.Type != sysDictionary.Type {
 		if !errors.Is(global.GVA_DB.First(&system.SysDictionary{}, "type = ?", sysDictionary.Type).Error, gorm.ErrRecordNotFound) {
-			return errors.New("存在相同的type，不允许创建")
+			return errors.New("the same type exists, creation is not allowed")
 		}
 	}
 	err = db.Updates(sysDictionaryMap).Error

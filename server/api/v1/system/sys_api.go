@@ -15,6 +15,7 @@ import (
 
 type SystemApiApi struct{}
 
+// CreateApi create new API
 // @Tags SysApi
 // @Summary 创建基础api
 // @Security ApiKeyAuth
@@ -25,19 +26,28 @@ type SystemApiApi struct{}
 // @Router /api/createApi [post]
 func (s *SystemApiApi) CreateApi(c *gin.Context) {
 	var api system.SysApi
-	_ = c.ShouldBindJSON(&api)
+	var err error
+
+	err = c.ShouldBindJSON(&api)
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
 	if err := utils.Verify(api, utils.ApiVerify); err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
 	if err := apiService.CreateApi(api); err != nil {
-		global.GVA_LOG.Error("创建失败!", zap.Error(err))
-		response.FailWithMessage("创建失败", c)
+		global.GVA_LOG.Error("fail to create new api record", zap.Error(err))
+		response.FailWithMessage("fail to create new api record", c)
 	} else {
-		response.OkWithMessage("创建成功", c)
+		response.OkWithMessage("create new api record success", c)
 	}
 }
 
+// DeleteApi delete api
 // @Tags SysApi
 // @Summary 删除api
 // @Security ApiKeyAuth
@@ -48,19 +58,28 @@ func (s *SystemApiApi) CreateApi(c *gin.Context) {
 // @Router /api/deleteApi [post]
 func (s *SystemApiApi) DeleteApi(c *gin.Context) {
 	var api system.SysApi
-	_ = c.ShouldBindJSON(&api)
+	var err error
+
+	err = c.ShouldBindJSON(&api)
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
 	if err := utils.Verify(api.GVA_MODEL, utils.IdVerify); err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
 	if err := apiService.DeleteApi(api); err != nil {
-		global.GVA_LOG.Error("删除失败!", zap.Error(err))
-		response.FailWithMessage("删除失败", c)
+		global.GVA_LOG.Error("fail to delete api record", zap.Error(err))
+		response.FailWithMessage("fail to delete api record", c)
 	} else {
-		response.OkWithMessage("删除成功", c)
+		response.OkWithMessage("delete api record successfully", c)
 	}
 }
 
+// GetApiList get api list
 // @Tags SysApi
 // @Summary 分页获取API列表
 // @Security ApiKeyAuth
@@ -71,24 +90,33 @@ func (s *SystemApiApi) DeleteApi(c *gin.Context) {
 // @Router /api/getApiList [post]
 func (s *SystemApiApi) GetApiList(c *gin.Context) {
 	var pageInfo systemReq.SearchApiParams
-	_ = c.ShouldBindJSON(&pageInfo)
+	var err error
+
+	err = c.ShouldBindJSON(&pageInfo)
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
 	if err := utils.Verify(pageInfo.PageInfo, utils.PageInfoVerify); err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
 	if list, total, err := apiService.GetAPIInfoList(pageInfo.SysApi, pageInfo.PageInfo, pageInfo.OrderKey, pageInfo.Desc); err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
-		response.FailWithMessage("获取失败", c)
+		global.GVA_LOG.Error("fail to get api list", zap.Error(err))
+		response.FailWithMessage("fail to get api list", c)
 	} else {
 		response.OkWithDetailed(response.PageResult{
 			List:     list,
 			Total:    total,
 			Page:     pageInfo.Page,
 			PageSize: pageInfo.PageSize,
-		}, "获取成功", c)
+		}, "get api list successfully", c)
 	}
 }
 
+// GetApiById get api by ID
 // @Tags SysApi
 // @Summary 根据id获取api
 // @Security ApiKeyAuth
@@ -99,20 +127,29 @@ func (s *SystemApiApi) GetApiList(c *gin.Context) {
 // @Router /api/getApiById [post]
 func (s *SystemApiApi) GetApiById(c *gin.Context) {
 	var idInfo request.GetById
-	_ = c.ShouldBindJSON(&idInfo)
+	var err error
+
+	err = c.ShouldBindJSON(&idInfo)
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
 	if err := utils.Verify(idInfo, utils.IdVerify); err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
 	api, err := apiService.GetApiById(idInfo.ID)
 	if err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
-		response.FailWithMessage("获取失败", c)
+		global.GVA_LOG.Error("fail to get api by ID", zap.Error(err))
+		response.FailWithMessage("fail to get api by ID", c)
 	} else {
-		response.OkWithDetailed(systemRes.SysAPIResponse{Api: api}, "获取成功", c)
+		response.OkWithDetailed(systemRes.SysAPIResponse{Api: api}, "success", c)
 	}
 }
 
+// UpdateApi update api
 // @Tags SysApi
 // @Summary 修改基础api
 // @Security ApiKeyAuth
@@ -123,19 +160,28 @@ func (s *SystemApiApi) GetApiById(c *gin.Context) {
 // @Router /api/updateApi [post]
 func (s *SystemApiApi) UpdateApi(c *gin.Context) {
 	var api system.SysApi
-	_ = c.ShouldBindJSON(&api)
+	var err error
+
+	err = c.ShouldBindJSON(&api)
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
 	if err := utils.Verify(api, utils.ApiVerify); err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
 	if err := apiService.UpdateApi(api); err != nil {
-		global.GVA_LOG.Error("修改失败!", zap.Error(err))
-		response.FailWithMessage("修改失败", c)
+		global.GVA_LOG.Error("fail to update api", zap.Error(err))
+		response.FailWithMessage("fail to update api", c)
 	} else {
-		response.OkWithMessage("修改成功", c)
+		response.OkWithMessage("success", c)
 	}
 }
 
+// GetAllApis get all apis
 // @Tags SysApi
 // @Summary 获取所有的Api 不分页
 // @Security ApiKeyAuth
@@ -145,13 +191,14 @@ func (s *SystemApiApi) UpdateApi(c *gin.Context) {
 // @Router /api/getAllApis [post]
 func (s *SystemApiApi) GetAllApis(c *gin.Context) {
 	if apis, err := apiService.GetAllApis(); err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
-		response.FailWithMessage("获取失败", c)
+		global.GVA_LOG.Error("fail to get all api", zap.Error(err))
+		response.FailWithMessage("fail to get all api", c)
 	} else {
-		response.OkWithDetailed(systemRes.SysAPIListResponse{Apis: apis}, "获取成功", c)
+		response.OkWithDetailed(systemRes.SysAPIListResponse{Apis: apis}, "success", c)
 	}
 }
 
+// DeleteApisByIds bulk delete API
 // @Tags SysApi
 // @Summary 删除选中Api
 // @Security ApiKeyAuth
@@ -162,11 +209,19 @@ func (s *SystemApiApi) GetAllApis(c *gin.Context) {
 // @Router /api/deleteApisByIds [delete]
 func (s *SystemApiApi) DeleteApisByIds(c *gin.Context) {
 	var ids request.IdsReq
-	_ = c.ShouldBindJSON(&ids)
+	var err error
+
+	err = c.ShouldBindJSON(&ids)
+	if err != nil {
+		global.GVA_LOG.Error("provide valid data", zap.Error(err))
+		response.FailWithMessage("provide valid data", c)
+		return
+	}
+
 	if err := apiService.DeleteApisByIds(ids); err != nil {
-		global.GVA_LOG.Error("删除失败!", zap.Error(err))
-		response.FailWithMessage("删除失败", c)
+		global.GVA_LOG.Error("fail to bulk delete api by IDs", zap.Error(err))
+		response.FailWithMessage("fail to bulk delete api by IDs", c)
 	} else {
-		response.OkWithMessage("删除成功", c)
+		response.OkWithMessage("success", c)
 	}
 }

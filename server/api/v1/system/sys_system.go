@@ -13,6 +13,7 @@ import (
 
 type SystemApi struct{}
 
+// GetSystemConfig
 // @Tags System
 // @Summary 获取配置文件内容
 // @Security ApiKeyAuth
@@ -21,13 +22,14 @@ type SystemApi struct{}
 // @Router /system/getSystemConfig [post]
 func (s *SystemApi) GetSystemConfig(c *gin.Context) {
 	if config, err := systemConfigService.GetSystemConfig(); err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
-		response.FailWithMessage("获取失败", c)
+		global.GVA_LOG.Error("fail to get system config", zap.Error(err))
+		response.FailWithMessage("fail to get system config", c)
 	} else {
-		response.OkWithDetailed(systemRes.SysConfigResponse{Config: config}, "获取成功", c)
+		response.OkWithDetailed(systemRes.SysConfigResponse{Config: config}, "success", c)
 	}
 }
 
+// SetSystemConfig
 // @Tags System
 // @Summary 设置配置文件内容
 // @Security ApiKeyAuth
@@ -37,15 +39,25 @@ func (s *SystemApi) GetSystemConfig(c *gin.Context) {
 // @Router /system/setSystemConfig [post]
 func (s *SystemApi) SetSystemConfig(c *gin.Context) {
 	var sys system.System
-	_ = c.ShouldBindJSON(&sys)
+	var err error
+
+	err = c.ShouldBindJSON(&sys)
+
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
 	if err := systemConfigService.SetSystemConfig(sys); err != nil {
-		global.GVA_LOG.Error("设置失败!", zap.Error(err))
-		response.FailWithMessage("设置失败", c)
+		global.GVA_LOG.Error("fail to set system config", zap.Error(err))
+		response.FailWithMessage("fail to set system config", c)
 	} else {
-		response.OkWithMessage("设置成功", c)
+		response.OkWithMessage("success", c)
 	}
 }
 
+// ReloadSystem
 // @Tags System
 // @Summary 重启系统
 // @Security ApiKeyAuth
@@ -55,13 +67,14 @@ func (s *SystemApi) SetSystemConfig(c *gin.Context) {
 func (s *SystemApi) ReloadSystem(c *gin.Context) {
 	err := utils.Reload()
 	if err != nil {
-		global.GVA_LOG.Error("重启系统失败!", zap.Error(err))
-		response.FailWithMessage("重启系统失败", c)
+		global.GVA_LOG.Error("fail to reload system", zap.Error(err))
+		response.FailWithMessage("fail to reload system", c)
 	} else {
-		response.OkWithMessage("重启系统成功", c)
+		response.OkWithMessage("success", c)
 	}
 }
 
+// GetServerInfo
 // @Tags System
 // @Summary 获取服务器信息
 // @Security ApiKeyAuth
@@ -70,9 +83,9 @@ func (s *SystemApi) ReloadSystem(c *gin.Context) {
 // @Router /system/getServerInfo [post]
 func (s *SystemApi) GetServerInfo(c *gin.Context) {
 	if server, err := systemConfigService.GetServerInfo(); err != nil {
-		global.GVA_LOG.Error("获取失败!", zap.Error(err))
-		response.FailWithMessage("获取失败", c)
+		global.GVA_LOG.Error("fail to get server info", zap.Error(err))
+		response.FailWithMessage("fail to get server info", c)
 	} else {
-		response.OkWithDetailed(gin.H{"server": server}, "获取成功", c)
+		response.OkWithDetailed(gin.H{"server": server}, "success", c)
 	}
 }
