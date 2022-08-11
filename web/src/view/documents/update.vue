@@ -1074,7 +1074,7 @@ const loadUserOptions = async() => {
 }
 
 const loadRoleOptions = async() => {
-  const table = await getAuthorityInfo({ authorityId: 100 })
+  const table = await getAuthorityInfo({ authorityId: 1 })
 
   if (table.code === 0) {
     roleOptions.value = table.data.authority.children
