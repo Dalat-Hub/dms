@@ -989,6 +989,10 @@ func (documentsService *DocumentsService) GetDocumentsPublic(doc dmsReq.Document
 		return nil, err
 	}
 
+	if !document.PublicToView {
+		return nil, errors.New("bạn không có quyền xem văn bản này")
+	}
+
 	if doc.PreloadBasedDocs == 1 {
 		if err, panicErr := documentsService.attachBaseDocuments(&document); panicErr {
 			return nil, err
