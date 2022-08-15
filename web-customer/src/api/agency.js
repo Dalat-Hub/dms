@@ -2,7 +2,7 @@ import service from "@/utils/request";
 
 export const getDocumentAgencyList = (params) => {
   return service({
-    url: "public/documentAgencies/getDocumentAgencyList",
+    url: "api/v1/agencies",
     method: "get",
     params,
   });

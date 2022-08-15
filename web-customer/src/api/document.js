@@ -2,7 +2,7 @@ import service from "@/utils/request";
 
 export const getDocumentList = (params) => {
   return service({
-    url: "public/documents/getDocumentList",
+    url: "api/v1/documents",
     method: "get",
     params,
   });
@@ -10,15 +10,7 @@ export const getDocumentList = (params) => {
 
 export const findDocument = (params) => {
   return service({
-    url: "public/documents/findDocument",
-    method: "get",
-    params,
-  });
-};
-
-export const getDocumentRelations = (params) => {
-  return service({
-    url: "public/documents/relations",
+    url: "api/v1/documents/find",
     method: "get",
     params,
   });

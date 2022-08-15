@@ -2,7 +2,7 @@ import service from "@/utils/request";
 
 export const getDocumentCategoryList = (params) => {
   return service({
-    url: "public/documentCategories/getDocumentCategoryList",
+    url: "api/v1/categories",
     method: "get",
     params,
   });
