@@ -34,7 +34,7 @@ func Routers() *gin.Engine {
 	// Router.Use(middleware.LoadTls())
 
 	// Cross-domain, if you need to cross-domain, you can open the comment below
-	// Router.Use(middleware.Cors()) // Directly release all cross-domain requests
+	Router.Use(middleware.Cors()) // Directly release all cross-domain requests
 
 	//Router.Use(middleware.CorsByRules()) // Release cross-origin requests according to the configured rules
 	//global.GVA_LOG.Info("use middleware cors")
