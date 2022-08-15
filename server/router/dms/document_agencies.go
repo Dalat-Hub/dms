@@ -9,6 +9,14 @@ import (
 type DocumentAgenciesRouter struct {
 }
 
+func (s *DocumentAgenciesRouter) InitDocumentAgenciesPublicRouter(Router *gin.RouterGroup) {
+	documentAgenciesRouterWithoutRecord := Router.Group("agencies")
+	var documentAgenciesApi = v1.ApiGroupApp.DmsApiGroup.DocumentAgenciesApi
+	{
+		documentAgenciesRouterWithoutRecord.GET("", documentAgenciesApi.GetDocumentAgenciesList)
+	}
+}
+
 // InitDocumentAgenciesRouter Initialize DocumentAgencies routing information
 func (s *DocumentAgenciesRouter) InitDocumentAgenciesRouter(Router *gin.RouterGroup) {
 	documentAgenciesRouter := Router.Group("documentAgencies").Use(middleware.OperationRecord())

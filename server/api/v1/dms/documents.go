@@ -300,6 +300,24 @@ func (documentsApi *DocumentsApi) FindDocuments(c *gin.Context) {
 	}
 }
 
+func (documentsApi *DocumentsApi) FindDocumentsPublic(c *gin.Context) {
+	var documents dmsReq.DocumentsSearch
+	var err error
+
+	err = c.ShouldBindQuery(&documents)
+	if err != nil {
+		global.GVA_LOG.Error("provide valid ID", zap.Error(err))
+		response.FailWithMessage("provide valid ID", c)
+	}
+
+	if redocuments, err := documentsService.GetDocumentsPublic(documents); err != nil {
+		global.GVA_LOG.Error("fail to find document", zap.Error(err))
+		response.FailWithMessage("fail to find document", c)
+	} else {
+		response.OkWithData(gin.H{"document": redocuments}, c)
+	}
+}
+
 // GetDocumentsList get list of documents
 // @Tags Documents
 // @Summary get list of documents
@@ -318,6 +336,31 @@ func (documentsApi *DocumentsApi) GetDocumentsList(c *gin.Context) {
 		global.GVA_LOG.Error("provide valid search params", zap.Error(err))
 		response.FailWithMessage("provide valid search params", c)
 	}
+
+	if list, total, err := documentsService.GetDocumentsInfoList(pageInfo); err != nil {
+		global.GVA_LOG.Error("fail to get list of documents", zap.Error(err))
+		response.FailWithMessage("fail to get list of documents", c)
+	} else {
+		response.OkWithDetailed(response.PageResult{
+			List:     list,
+			Total:    total,
+			Page:     pageInfo.Page,
+			PageSize: pageInfo.PageSize,
+		}, "success", c)
+	}
+}
+
+func (documentsApi *DocumentsApi) GetDocumentsListPublic(c *gin.Context) {
+	var pageInfo dmsReq.DocumentsSearch
+	var err error
+
+	err = c.ShouldBindQuery(&pageInfo)
+	if err != nil {
+		global.GVA_LOG.Error("provide valid search params", zap.Error(err))
+		response.FailWithMessage("provide valid search params", c)
+	}
+
+	pageInfo.Status = dms.STATUS_PUBLISHED
 
 	if list, total, err := documentsService.GetDocumentsInfoList(pageInfo); err != nil {
 		global.GVA_LOG.Error("fail to get list of documents", zap.Error(err))

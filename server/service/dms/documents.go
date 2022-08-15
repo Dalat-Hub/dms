@@ -963,6 +963,86 @@ func (documentsService *DocumentsService) GetDocuments(doc dmsReq.DocumentsSearc
 	return &document, nil
 }
 
+func (documentsService *DocumentsService) GetDocumentsPublic(doc dmsReq.DocumentsSearch) (documents *dms.Documents, err error) {
+	db := global.GVA_DB.Model(&dms.Documents{})
+	var document dms.Documents
+
+	if doc.PreloadAgency == 1 {
+		db = db.Preload("Agency")
+	}
+
+	if doc.PreloadCategory == 1 {
+		db = db.Preload("Category")
+	}
+
+	if doc.PreloadFields == 1 {
+		db = db.Preload("Fields")
+	}
+
+	if doc.PreloadSigners == 1 {
+		db = db.Preload("Signers")
+	}
+
+	err = db.First(&document, "id = ?", doc.ID).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	if doc.PreloadBasedDocs == 1 {
+		if err, panicErr := documentsService.attachBaseDocuments(&document); panicErr {
+			return nil, err
+		}
+	}
+
+	if doc.PreloadRelatedDocs == 1 {
+		if err, panicErr := documentsService.attachReferencesDocuments(&document); panicErr {
+			return nil, err
+		}
+	}
+
+	if doc.PreloadRelatedUsers == 1 {
+		if err, panicErr := documentsService.attachRelatedUsers(&document); panicErr {
+			return nil, err
+		}
+	}
+
+	if doc.PreloadRelatedAgencies == 1 {
+		if err, panicErr := documentsService.attachRelatedAgencies(&document); panicErr {
+			return nil, err
+		}
+	}
+
+	if doc.PreloadCreatedBy == 1 {
+		if err, panicErr := documentsService.attachCreatedUser(&document); panicErr {
+			return nil, err
+		}
+	}
+
+	if doc.PreloadUpdatedBy == 1 {
+		if err, panicErr := documentsService.attachUpdatedUser(&document); panicErr {
+			return nil, err
+		}
+	}
+
+	if doc.PreloadBeResponsibleBy == 1 {
+		if err, panicErr := documentsService.attachResponsibleUser(&document); panicErr {
+			return nil, err
+		}
+	}
+
+	// update view count
+	err = global.GVA_DB.Model(&dms.Documents{}).
+		Where("id = ?", document.ID).
+		Update("view_count", gorm.Expr("view_count + ?", 1)).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &document, nil
+}
+
 // GetDocumentsInfoList get list of documents
 func (documentsService *DocumentsService) GetDocumentsInfoList(info dmsReq.DocumentsSearch) (list interface{}, total int64, err error) {
 	limit := info.PageSize

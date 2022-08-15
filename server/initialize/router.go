@@ -57,6 +57,14 @@ func Routers() *gin.Engine {
 		dmsRouter.InitGoogleOAuthRouter(PublicGroup)
 	}
 
+	DmsPublicGroup := Router.Group("api/v1")
+	{
+		dmsRouter.InitDocumentCategoriesPublicRouter(DmsPublicGroup)
+		dmsRouter.InitDocumentAgenciesPublicRouter(DmsPublicGroup)
+		dmsRouter.InitDocumentFieldsPublicRouter(DmsPublicGroup)
+		dmsRouter.InitDocumentsPublicRouter(DmsPublicGroup)
+	}
+
 	PrivateGroup := Router.Group("")
 	PrivateGroup.Use(middleware.JWTAuth()).Use(middleware.CasbinHandler())
 	{

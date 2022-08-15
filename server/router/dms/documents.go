@@ -9,6 +9,16 @@ import (
 type DocumentsRouter struct {
 }
 
+func (s *DocumentsRouter) InitDocumentsPublicRouter(Router *gin.RouterGroup) {
+	documentsRouterWithoutRecord := Router.Group("documents")
+	var documentsApi = v1.ApiGroupApp.DmsApiGroup.DocumentsApi
+	{
+		documentsRouterWithoutRecord.GET("", documentsApi.GetDocumentsListPublic)
+		documentsRouterWithoutRecord.GET("find", documentsApi.FindDocumentsPublic)
+		documentsRouterWithoutRecord.GET("files", documentsApi.GetFileList)
+	}
+}
+
 // InitDocumentsRouter Initialize DocumentSignerReferences routing information
 func (s *DocumentsRouter) InitDocumentsRouter(Router *gin.RouterGroup) {
 	documentsRouter := Router.Group("documents").Use(middleware.OperationRecord())
