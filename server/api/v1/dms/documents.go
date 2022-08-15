@@ -340,7 +340,7 @@ func (documentsApi *DocumentsApi) GetDocumentsList(c *gin.Context) {
 		return
 	}
 
-	if list, total, err := documentsService.GetDocumentsInfoList(pageInfo); err != nil {
+	if list, total, err := documentsService.GetDocumentsInfoList(pageInfo, false); err != nil {
 		global.GVA_LOG.Error("fail to get list of documents", zap.Error(err))
 		response.FailWithMessage("fail to get list of documents", c)
 	} else {
@@ -364,9 +364,12 @@ func (documentsApi *DocumentsApi) GetDocumentsListPublic(c *gin.Context) {
 		return
 	}
 
+	// TODO: restrict me
+	// pageInfo.PublicToView = true
+
 	pageInfo.Status = dms.STATUS_PUBLISHED
 
-	if list, total, err := documentsService.GetDocumentsInfoList(pageInfo); err != nil {
+	if list, total, err := documentsService.GetDocumentsInfoList(pageInfo, false); err != nil {
 		global.GVA_LOG.Error("fail to get list of documents", zap.Error(err))
 		response.FailWithMessage("fail to get list of documents", c)
 	} else {
@@ -396,6 +399,7 @@ func (documentsApi *DocumentsApi) GetDocumentRevisions(c *gin.Context) {
 	if err != nil {
 		global.GVA_LOG.Error("provide valid search params", zap.Error(err))
 		response.FailWithMessage("provide valid search params", c)
+		return
 	}
 
 	if list, err := documentsService.GetDocumentRevisions(uint(info.ID)); err != nil {
@@ -423,6 +427,7 @@ func (documentsApi *DocumentsApi) GetFileList(c *gin.Context) {
 	if err != nil {
 		global.GVA_LOG.Error("provide valid search params", zap.Error(err))
 		response.FailWithMessage("provide valid search params", c)
+		return
 	}
 
 	canDownloadFile := true

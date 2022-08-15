@@ -989,9 +989,10 @@ func (documentsService *DocumentsService) GetDocumentsPublic(doc dmsReq.Document
 		return nil, err
 	}
 
-	if !document.PublicToView {
-		return nil, errors.New("bạn không có quyền xem văn bản này")
-	}
+	// TODO: restrict me
+	//if !document.PublicToView {
+	//	return nil, errors.New("bạn không có quyền xem văn bản này")
+	//}
 
 	if doc.PreloadBasedDocs == 1 {
 		if err, panicErr := documentsService.attachBaseDocuments(&document); panicErr {
@@ -1048,13 +1049,17 @@ func (documentsService *DocumentsService) GetDocumentsPublic(doc dmsReq.Document
 }
 
 // GetDocumentsInfoList get list of documents
-func (documentsService *DocumentsService) GetDocumentsInfoList(info dmsReq.DocumentsSearch) (list interface{}, total int64, err error) {
+func (documentsService *DocumentsService) GetDocumentsInfoList(info dmsReq.DocumentsSearch, onlyPublic bool) (list interface{}, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 
 	db := global.GVA_DB.Model(&dms.Documents{})
 
 	var documentss []dms.Documents
+
+	if onlyPublic {
+		db = db.Where("public_to_view = ?", true)
+	}
 
 	if info.SignText != "" {
 		db = db.Where("`sign_text` LIKE ?", "%"+info.SignText+"%")
