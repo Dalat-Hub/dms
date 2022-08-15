@@ -436,6 +436,25 @@ func (documentsApi *DocumentsApi) GetFileList(c *gin.Context) {
 	}
 }
 
+func (documentsApi *DocumentsApi) GetFileListPublic(c *gin.Context) {
+	var searchInfo request.GetById
+	var err error
+
+	err = c.ShouldBindQuery(&searchInfo)
+	if err != nil {
+		global.GVA_LOG.Error("provide valid search params", zap.Error(err))
+		response.FailWithMessage("provide valid search params", c)
+		return
+	}
+
+	if files, cDownload, err := documentsService.GetDocumentFilesPublic(searchInfo); err != nil {
+		global.GVA_LOG.Error("fail to get list of documents", zap.Error(err))
+		response.FailWithMessage("fail to get list of documents", c)
+	} else {
+		response.OkWithData(gin.H{"files": files, "canDownload": cDownload}, c)
+	}
+}
+
 // MakeDuplication create new duplicated version of the given document
 // @Tags Documents
 // @Summary create new duplicated version of the given document
