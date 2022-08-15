@@ -9,6 +9,15 @@ import (
 type DocumentCategoriesRouter struct {
 }
 
+// InitDocumentCategoriesPublicRouter Initialize Public Categories routing information
+func (s *DocumentCategoriesRouter) InitDocumentCategoriesPublicRouter(Router *gin.RouterGroup) {
+	documentCategoriesRouterWithoutRecord := Router.Group("categories")
+	var documentCategoriesApi = v1.ApiGroupApp.DmsApiGroup.DocumentCategoriesApi
+	{
+		documentCategoriesRouterWithoutRecord.GET("", documentCategoriesApi.GetDocumentCategoriesList)
+	}
+}
+
 // InitDocumentCategoriesRouter Initialize DocumentCategories routing information
 func (s *DocumentCategoriesRouter) InitDocumentCategoriesRouter(Router *gin.RouterGroup) {
 	documentCategoriesRouter := Router.Group("documentCategories").Use(middleware.OperationRecord())

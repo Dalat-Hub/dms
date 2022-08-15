@@ -9,6 +9,14 @@ import (
 type DocumentFieldsRouter struct {
 }
 
+func (s *DocumentFieldsRouter) InitDocumentFieldsPublicRouter(Router *gin.RouterGroup) {
+	documentFieldsRouterWithoutRecord := Router.Group("fields")
+	var documentFieldsApi = v1.ApiGroupApp.DmsApiGroup.DocumentFieldsApi
+	{
+		documentFieldsRouterWithoutRecord.GET("", documentFieldsApi.GetDocumentFieldsList)
+	}
+}
+
 // InitDocumentFieldsRouter Initialize DocumentFields routing information
 func (s *DocumentFieldsRouter) InitDocumentFieldsRouter(Router *gin.RouterGroup) {
 	documentFieldsRouter := Router.Group("documentFields").Use(middleware.OperationRecord())

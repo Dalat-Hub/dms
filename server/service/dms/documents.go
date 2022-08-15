@@ -963,8 +963,93 @@ func (documentsService *DocumentsService) GetDocuments(doc dmsReq.DocumentsSearc
 	return &document, nil
 }
 
+func (documentsService *DocumentsService) GetDocumentsPublic(doc dmsReq.DocumentsSearch) (documents *dms.Documents, err error) {
+	db := global.GVA_DB.Model(&dms.Documents{})
+	var document dms.Documents
+
+	if doc.PreloadAgency == 1 {
+		db = db.Preload("Agency")
+	}
+
+	if doc.PreloadCategory == 1 {
+		db = db.Preload("Category")
+	}
+
+	if doc.PreloadFields == 1 {
+		db = db.Preload("Fields")
+	}
+
+	if doc.PreloadSigners == 1 {
+		db = db.Preload("Signers")
+	}
+
+	err = db.First(&document, "id = ?", doc.ID).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: restrict me
+	//if !document.PublicToView {
+	//	return nil, errors.New("bạn không có quyền xem văn bản này")
+	//}
+
+	if doc.PreloadBasedDocs == 1 {
+		if err, panicErr := documentsService.attachBaseDocuments(&document); panicErr {
+			return nil, err
+		}
+	}
+
+	if doc.PreloadRelatedDocs == 1 {
+		if err, panicErr := documentsService.attachReferencesDocuments(&document); panicErr {
+			return nil, err
+		}
+	}
+
+	if doc.PreloadRelatedUsers == 1 {
+		if err, panicErr := documentsService.attachRelatedUsers(&document); panicErr {
+			return nil, err
+		}
+	}
+
+	if doc.PreloadRelatedAgencies == 1 {
+		if err, panicErr := documentsService.attachRelatedAgencies(&document); panicErr {
+			return nil, err
+		}
+	}
+
+	if doc.PreloadCreatedBy == 1 {
+		if err, panicErr := documentsService.attachCreatedUser(&document); panicErr {
+			return nil, err
+		}
+	}
+
+	if doc.PreloadUpdatedBy == 1 {
+		if err, panicErr := documentsService.attachUpdatedUser(&document); panicErr {
+			return nil, err
+		}
+	}
+
+	if doc.PreloadBeResponsibleBy == 1 {
+		if err, panicErr := documentsService.attachResponsibleUser(&document); panicErr {
+			return nil, err
+		}
+	}
+
+	// update view count
+	err = global.GVA_DB.Model(&dms.Documents{}).
+		Where("id = ?", document.ID).
+		Update("view_count", gorm.Expr("view_count + ?", 1)).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &document, nil
+}
+
 // GetDocumentsInfoList get list of documents
-func (documentsService *DocumentsService) GetDocumentsInfoList(info dmsReq.DocumentsSearch) (list interface{}, total int64, err error) {
+func (documentsService *DocumentsService) GetDocumentsInfoList(info dmsReq.DocumentsSearch, onlyPublic bool) (list interface{}, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 
@@ -972,9 +1057,8 @@ func (documentsService *DocumentsService) GetDocumentsInfoList(info dmsReq.Docum
 
 	var documentss []dms.Documents
 
-	err = db.Where("type = ?", dms.TYPE_DOCUMENT).Count(&total).Error
-	if err != nil {
-		return
+	if onlyPublic {
+		db = db.Where("public_to_view = ?", true)
 	}
 
 	if info.SignText != "" {
@@ -1007,6 +1091,27 @@ func (documentsService *DocumentsService) GetDocumentsInfoList(info dmsReq.Docum
 
 	if info.PageSize != -1 {
 		db = db.Limit(limit).Offset(offset)
+	}
+
+	if info.PreloadAgency == 1 {
+		db = db.Preload("Agency")
+	}
+
+	if info.PreloadCategory == 1 {
+		db = db.Preload("Category")
+	}
+
+	if info.PreloadFields == 1 {
+		db = db.Preload("Fields")
+	}
+
+	if info.PreloadSigners == 1 {
+		db = db.Preload("Signers")
+	}
+
+	err = db.Where("type = ?", dms.TYPE_DOCUMENT).Count(&total).Error
+	if err != nil {
+		return
 	}
 
 	err = db.Order("created_at desc").Find(&documentss).Error
@@ -1056,6 +1161,28 @@ func (documentsService *DocumentsService) GetDocumentFiles(info request.GetById,
 			canDownload = true
 		}
 	}
+
+	files := make([]dms.DocumentFiles, 0)
+
+	err = global.GVA_DB.Model(&dms.DocumentFiles{}).Where("document_id = ?", document.ID).Find(&files).Error
+	if err != nil {
+		return nil, false, err
+	}
+
+	return files, canDownload, nil
+}
+
+func (documentsService *DocumentsService) GetDocumentFilesPublic(info request.GetById) (list interface{}, canDownload bool, err error) {
+	var document dms.Documents
+	err = global.GVA_DB.Model(&dms.Documents{}).First(&document, "id = ?", info.ID).Error
+	if err != nil {
+		return nil, false, err
+	}
+
+	// TODO: restrict me
+	//if !document.PublicToView || !document.PublicToDownload {
+	//	return nil, false, errors.New("bạn không có quyền tải tập tin của văn bản này")
+	//}
 
 	files := make([]dms.DocumentFiles, 0)
 
