@@ -54,7 +54,7 @@
               background
               layout="prev, pager, next"
               :total="this.searchStats.count"
-              :page-size="2"
+              :page-size="10"
               @current-change="handlePageChanged"
             />
           </div>
@@ -142,7 +142,9 @@ export default {
       const filterBy = validMap[type] || null;
       if (!filterBy) return;
 
-      this.getDocuments({ [filterBy]: id });
+      this.getDocuments({
+        [filterBy]: id,
+      });
     },
     async getAgencies() {
       const table = await getDocumentAgencyList({ page: 1, pageSize: 1000 });
@@ -183,8 +185,12 @@ export default {
     async getDocuments(filter = {}) {
       const table = await getDocumentList({
         page: 1,
-        pageSize: 2,
+        pageSize: 10,
         ...filter,
+        preloadCategory: 1,
+        preloadAgency: 1,
+        preloadFields: 1,
+        preloadSigners: 1,
       });
 
       if (table.data.code === 0) {
