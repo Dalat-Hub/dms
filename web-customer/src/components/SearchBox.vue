@@ -24,7 +24,7 @@
 
       <el-col :sm="6">
         <el-button
-          type="secondary"
+          type="info"
           class="w-full"
           @click="
             () => (this.openAdvancedSearchBox = !this.openAdvancedSearchBox)
