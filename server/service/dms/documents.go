@@ -1167,6 +1167,28 @@ func (documentsService *DocumentsService) GetDocumentFiles(info request.GetById,
 	return files, canDownload, nil
 }
 
+func (documentsService *DocumentsService) GetDocumentFilesPublic(info request.GetById) (list interface{}, canDownload bool, err error) {
+	var document dms.Documents
+	err = global.GVA_DB.Model(&dms.Documents{}).First(&document, "id = ?", info.ID).Error
+	if err != nil {
+		return nil, false, err
+	}
+
+	// TODO: restrict me
+	//if !document.PublicToView || !document.PublicToDownload {
+	//	return nil, false, errors.New("bạn không có quyền tải tập tin của văn bản này")
+	//}
+
+	files := make([]dms.DocumentFiles, 0)
+
+	err = global.GVA_DB.Model(&dms.DocumentFiles{}).Where("document_id = ?", document.ID).Find(&files).Error
+	if err != nil {
+		return nil, false, err
+	}
+
+	return files, canDownload, nil
+}
+
 // Duplicate create new copy of the document
 func (documentsService *DocumentsService) Duplicate(documentId uint, loginUserId uint, docType int) (revision *dms.Documents, err error) {
 	// 1. get old document
