@@ -283,6 +283,7 @@ func (documentsApi *DocumentsApi) FindDocuments(c *gin.Context) {
 	if err != nil {
 		global.GVA_LOG.Error("provide valid ID", zap.Error(err))
 		response.FailWithMessage("provide valid ID", c)
+		return
 	}
 
 	user := utils.GetUserInfo(c)
@@ -308,11 +309,12 @@ func (documentsApi *DocumentsApi) FindDocumentsPublic(c *gin.Context) {
 	if err != nil {
 		global.GVA_LOG.Error("provide valid ID", zap.Error(err))
 		response.FailWithMessage("provide valid ID", c)
+		return
 	}
 
 	if redocuments, err := documentsService.GetDocumentsPublic(documents); err != nil {
 		global.GVA_LOG.Error("fail to find document", zap.Error(err))
-		response.FailWithMessage("fail to find document", c)
+		response.FailWithMessage(err.Error(), c)
 	} else {
 		response.OkWithData(gin.H{"document": redocuments}, c)
 	}
@@ -335,6 +337,7 @@ func (documentsApi *DocumentsApi) GetDocumentsList(c *gin.Context) {
 	if err != nil {
 		global.GVA_LOG.Error("provide valid search params", zap.Error(err))
 		response.FailWithMessage("provide valid search params", c)
+		return
 	}
 
 	if list, total, err := documentsService.GetDocumentsInfoList(pageInfo); err != nil {
@@ -358,6 +361,7 @@ func (documentsApi *DocumentsApi) GetDocumentsListPublic(c *gin.Context) {
 	if err != nil {
 		global.GVA_LOG.Error("provide valid search params", zap.Error(err))
 		response.FailWithMessage("provide valid search params", c)
+		return
 	}
 
 	pageInfo.Status = dms.STATUS_PUBLISHED
@@ -472,6 +476,7 @@ func (documentsApi *DocumentsApi) MakeDuplication(c *gin.Context) {
 	if err != nil {
 		global.GVA_LOG.Error("provide valid search params", zap.Error(err))
 		response.FailWithMessage("provide valid search params", c)
+		return
 	}
 
 	user := utils.GetUserInfo(c)
