@@ -1052,11 +1052,6 @@ func (documentsService *DocumentsService) GetDocumentsInfoList(info dmsReq.Docum
 
 	var documentss []dms.Documents
 
-	err = db.Where("type = ?", dms.TYPE_DOCUMENT).Count(&total).Error
-	if err != nil {
-		return
-	}
-
 	if info.SignText != "" {
 		db = db.Where("`sign_text` LIKE ?", "%"+info.SignText+"%")
 	}
@@ -1087,6 +1082,27 @@ func (documentsService *DocumentsService) GetDocumentsInfoList(info dmsReq.Docum
 
 	if info.PageSize != -1 {
 		db = db.Limit(limit).Offset(offset)
+	}
+
+	if info.PreloadAgency == 1 {
+		db = db.Preload("Agency")
+	}
+
+	if info.PreloadCategory == 1 {
+		db = db.Preload("Category")
+	}
+
+	if info.PreloadFields == 1 {
+		db = db.Preload("Fields")
+	}
+
+	if info.PreloadSigners == 1 {
+		db = db.Preload("Signers")
+	}
+
+	err = db.Where("type = ?", dms.TYPE_DOCUMENT).Count(&total).Error
+	if err != nil {
+		return
 	}
 
 	err = db.Order("created_at desc").Find(&documentss).Error
