@@ -14,9 +14,13 @@
       <router-link :to="this.linkTo(item)">
         {{ item.shortTitle || item.title }}
 
-        <span class="document-date">
+        <span v-if="this.displayCreatedAt" class="document-date">
           {{ this.getCreatedDate(item) }}
         </span>
+
+        <el-tag v-if="this.displayCounter" class="ml-2" type="success">{{
+          item.viewCount
+        }}</el-tag>
       </router-link>
     </div>
   </el-card>
@@ -27,7 +31,7 @@ import { getDateFormatted } from "@/utils/date";
 
 export default {
   name: "SideContent",
-  props: ["title", "items"],
+  props: ["title", "items", "displayCounter", "displayCreatedAt"],
   methods: {
     linkTo(item) {
       return `/van-ban/${item.ID}`;

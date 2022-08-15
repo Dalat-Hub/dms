@@ -61,21 +61,28 @@
         </div>
       </el-col>
       <el-col :sm="7" :lg="6">
-        <SideContent title="Văn bản mới" :items="document.items"></SideContent>
+        <SideContent
+          title="Văn bản mới"
+          :items="document.items"
+          :displayCreatedAt="true"
+        ></SideContent>
 
         <SideContent
           title="Xem nhiều trong ngày"
           :items="document.items"
+          :displayCounter="true"
         ></SideContent>
 
         <SideContent
           title="Xem nhiều trong tuần"
           :items="document.items"
+          :displayCounter="true"
         ></SideContent>
 
         <SideContent
           title="Xem nhiều trong tháng"
           :items="document.items"
+          :displayCounter="true"
         ></SideContent>
       </el-col>
     </el-row>
