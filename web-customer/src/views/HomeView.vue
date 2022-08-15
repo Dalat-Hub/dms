@@ -2,8 +2,8 @@
   <div class="home-view">
     <BreadCrumb />
 
-    <el-row :gutter="10">
-      <el-col :sm="8" :lg="6">
+    <el-row :gutter="16">
+      <el-col :sm="7" :lg="6">
         <SideMenu
           :title="this.agency.title"
           :items="this.agency.items"
@@ -20,7 +20,7 @@
           param="linh-vuc"
         />
       </el-col>
-      <el-col :sm="16" :lg="18">
+      <el-col :sm="10" :lg="12">
         <SearchBox
           :agencies="this.agency.items"
           :categories="this.category.items"
@@ -60,6 +60,24 @@
           </div>
         </div>
       </el-col>
+      <el-col :sm="7" :lg="6">
+        <SideContent title="Văn bản mới" :items="document.items"></SideContent>
+
+        <SideContent
+          title="Xem nhiều trong ngày"
+          :items="document.items"
+        ></SideContent>
+
+        <SideContent
+          title="Xem nhiều trong tuần"
+          :items="document.items"
+        ></SideContent>
+
+        <SideContent
+          title="Xem nhiều trong tháng"
+          :items="document.items"
+        ></SideContent>
+      </el-col>
     </el-row>
   </div>
 </template>
@@ -69,6 +87,7 @@ import BreadCrumb from "@/components/BreadCrumb";
 import SearchBox from "@/components/SearchBox";
 import DocumentCard from "@/components/DocumentCard";
 import SideMenu from "@/components/SideMenu";
+import SideContent from "@/components/SideContent";
 import SearchStat from "@/components/SearchStat";
 
 import { getDocumentCategoryList } from "@/api/category";
@@ -109,6 +128,7 @@ export default {
     DocumentCard,
     SideMenu,
     SearchStat,
+    SideContent,
   },
   created() {
     this.$watch(
