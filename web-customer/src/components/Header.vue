@@ -76,6 +76,7 @@ export default {
         title: "Lĩnh vực",
         items: [],
       },
+      activeIndex: "1",
     };
   },
   mounted() {
@@ -120,6 +121,7 @@ export default {
         });
       }
     },
+    handleSelect() {},
   },
 };
 </script>
