@@ -3,15 +3,19 @@ package dms
 
 import (
 	"github.com/flipped-aurora/gin-vue-admin/server/global"
+	sysModel "github.com/flipped-aurora/gin-vue-admin/server/model/system"
 )
 
 // DocumentSigners 结构体
 type DocumentSigners struct {
 	global.GVA_MODEL
-	AgencyId *int   `json:"agencyId" form:"agencyId" gorm:"column:agency_id;comment:;size:19;"`
-	Count    *int   `json:"count" form:"count" gorm:"column:count;comment:;size:10;"`
+	AgencyId int    `json:"agencyId" form:"agencyId" gorm:"column:agency_id;comment:;size:19;"`
+	Count    int    `json:"count" form:"count" gorm:"column:count;comment:;size:10;"`
 	Fullname string `json:"fullname" form:"fullname" gorm:"column:fullname;comment:;"`
-	Title    *int   `json:"title" form:"title" gorm:"column:title;comment:;size:10;"`
+	Title    int    `json:"title" form:"title" gorm:"column:title;comment:;size:10;"`
+
+	Agency      DocumentAgencies             `json:"agency" gorm:"foreignKey:AgencyId"`
+	SignerTitle sysModel.SysDictionaryDetail `json:"signerTitle" gorm:"-"`
 }
 
 // TableName DocumentSigners 表名

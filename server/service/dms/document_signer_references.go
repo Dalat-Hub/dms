@@ -57,3 +57,50 @@ func (documentSignerReferencesService *DocumentSignerReferencesService) GetDocum
 	err = db.Limit(limit).Offset(offset).Find(&documentSignerReferencess).Error
 	return documentSignerReferencess, total, err
 }
+
+type signerStats struct {
+	SignerId uint `json:"signer_id"`
+	Count    uint `json:"count"`
+}
+
+func (documentSignerReferencesService *DocumentSignerReferencesService) AttachDocumentCount(signers []*dms.DocumentSigners) (err error) {
+	documents := make([]dms.Documents, 0)
+
+	err = global.GVA_DB.Model(&dms.Documents{}).
+		Where("type = ? AND status = ?", dms.TYPE_DOCUMENT, dms.STATUS_PUBLISHED).
+		Find(&documents).Error
+
+	if err != nil {
+		return err
+	}
+
+	documentIds := make([]uint, 0)
+	for _, v := range documents {
+		documentIds = append(documentIds, v.ID)
+	}
+
+	results := make([]signerStats, 0)
+
+	err = global.GVA_DB.Model(&dms.DocumentSignerReferences{}).
+		Select("signer_id, count(id) as count").
+		Where("document_id IN ?", documentIds).
+		Group("signer_id").
+		Find(&results).Error
+
+	if err != nil {
+		return err
+	}
+
+	resultsAsMap := map[uint]uint{}
+	for _, stat := range results {
+		resultsAsMap[stat.SignerId] = stat.Count
+	}
+
+	for _, signer := range signers {
+		if val, ok := resultsAsMap[signer.ID]; ok {
+			signer.Count = int(val)
+		}
+	}
+
+	return nil
+}

@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard-line-box">
     <div class="dashboard-line-title">
-      访问趋势
+      Số lượng
     </div>
     <div
       ref="echart"
@@ -14,24 +14,12 @@ import * as echarts from 'echarts'
 import { nextTick, onMounted, onUnmounted, ref, shallowRef } from 'vue'
 // import 'echarts/theme/macarons'
 
+import {
+  getDocumentCategoriesList
+} from '@/api/documentCategories'
+
 var dataAxis = []
-for (var i = 1; i < 13; i++) {
-  dataAxis.push(`${i}月`)
-}
-var data = [
-  220,
-  182,
-  191,
-  234,
-  290,
-  330,
-  310,
-  123,
-  442,
-  321,
-  90,
-  149,
-]
+var data = []
 var yMax = 500
 var dataShadow = []
 
@@ -43,7 +31,7 @@ for (var i = 0; i < data.length; i++) {
 const chart = shallowRef(null)
 const echart = ref(null)
 const initChart = () => {
-  chart.value = echarts.init(echart.value, /*'macarons'*/)
+  chart.value = echarts.init(echart.value /* 'macarons'*/)
   setOptions()
 }
 const setOptions = () => {
@@ -103,7 +91,16 @@ const setOptions = () => {
 
 onMounted(async() => {
   await nextTick()
-  initChart()
+  const agencyResponse = await getDocumentCategoriesList()
+
+  if (agencyResponse.code === 0) {
+    agencyResponse.data.list.forEach((element) => {
+      dataAxis.push(element.code)
+      data.push(element.count)
+    })
+
+    initChart()
+  }
 })
 
 onUnmounted(() => {
