@@ -156,6 +156,28 @@
               </p>
             </div>
           </el-card>
+          <el-card
+            class="box-card margin-bottom-1-rem card-info"
+            style="margin-bottom: 1rem"
+            v-if="this.file.files.length > 0"
+          >
+            <template #header>
+              <div class="card-header">
+                <h2 class="card-title">{{ this.file.title }}</h2>
+
+                <el-button type="success" @click="this.handleFileDownload"
+                  >Tải tập tin</el-button
+                >
+              </div>
+            </template>
+            <div>
+              <iframe
+                :src="this.getPdfSource(this.file.files[0])"
+                frameborder="0"
+                style="width: 100%; height: 700px"
+              ></iframe>
+            </div>
+          </el-card>
         </div>
       </el-col>
     </el-row>
@@ -171,7 +193,9 @@ import { getDateFormatted } from "@/utils/date";
 import { getDocumentCategoryList } from "@/api/category";
 import { getDocumentFieldList } from "@/api/field";
 import { getDocumentAgencyList } from "@/api/agency";
-import { findDocument } from "@/api/document";
+import { findDocument, getAttachedFiles } from "@/api/document";
+
+const path = process.env.VUE_APP_BASE_URL;
 
 export default {
   name: "DocumentView",
@@ -202,6 +226,11 @@ export default {
         title: "Văn bản liên quan",
         items: [],
       },
+      file: {
+        title: "Tập tin đính kèm",
+        canDownload: false,
+        files: [],
+      },
     };
   },
   created() {
@@ -209,6 +238,7 @@ export default {
       () => this.$route.params,
       () => {
         this.getDocument();
+        this.getFiles();
       }
     );
   },
@@ -217,6 +247,7 @@ export default {
     this.getFields();
     this.getAgencies();
     this.getDocument();
+    this.getFiles();
   },
   methods: {
     getFileURL() {
@@ -292,14 +323,23 @@ export default {
         };
       }
     },
-    // async getDocumentRelation() {
-    //   const res = await getDocumentRelations({ ID: this.$route.params.id });
+    async getFiles() {
+      const res = await getAttachedFiles({
+        id: this.$route.params.id,
+      });
 
-    //   if (res.data.code === 0) {
-    //     this.baseDocuments.items = res.data.data.list.base_on || [];
-    //     this.relatedDocuments.items = res.data.data.list.related_docs || [];
-    //   }
-    // },
+      if (res.data.code === 0) {
+        this.file.files = res.data.data.files;
+        this.file.canDownload = res.data.data.canDownload;
+      }
+    },
+    getPdfSource(file) {
+      return `${path}/${file.url}#toolbar=0`;
+    },
+    handleFileDownload() {
+      const url = `${path}/${this.file.files[0].url}`;
+      window.open(url);
+    },
   },
 };
 </script>

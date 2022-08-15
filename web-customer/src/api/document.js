@@ -15,3 +15,11 @@ export const findDocument = (params) => {
     params,
   });
 };
+
+export const getAttachedFiles = (params) => {
+  return service({
+    url: "api/v1/documents/files",
+    method: "get",
+    params,
+  });
+};
