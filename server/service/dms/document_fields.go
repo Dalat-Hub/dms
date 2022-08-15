@@ -47,7 +47,7 @@ func (documentFieldsService *DocumentFieldsService) GetDocumentFieldsInfoList(in
 
 	db := global.GVA_DB.Model(&dms.DocumentFields{})
 
-	var documentFieldss []dms.DocumentFields
+	var documentFieldss []*dms.DocumentFields
 
 	err = db.Count(&total).Error
 	if err != nil {
@@ -55,5 +55,16 @@ func (documentFieldsService *DocumentFieldsService) GetDocumentFieldsInfoList(in
 	}
 
 	err = db.Limit(limit).Offset(offset).Find(&documentFieldss).Error
+	if err != nil {
+		return
+	}
+
+	service := new(DocumentFieldReferencesService)
+
+	err = service.AttachDocumentCount(documentFieldss)
+	if err != nil {
+		return
+	}
+
 	return documentFieldss, total, err
 }

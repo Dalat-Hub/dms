@@ -1,7 +1,7 @@
 <template>
   <div class="commit-table">
     <div class="commit-table-title">
-      更新日志
+      Gần đây
     </div>
     <div class="log">
       <div v-for="(item,key) in dataTimeline" :key="key" class="log-item">
@@ -19,27 +19,41 @@ export default {
 }
 </script>
 <script setup>
-import { Commits } from '@/api/github'
 import { formatTimeToStr } from '@/utils/date.js'
+import {
+  getDocumentsList,
+} from '@/api/documents'
 import { ref } from 'vue'
 
 const loading = ref(true)
 const dataTimeline = ref([])
 
 const loadCommits = () => {
-  Commits(0).then(({ data }) => {
+  getDocumentsList({ page: 1, pageSize: 10 }).then(({ data }) => {
     loading.value = false
-    data.forEach((element, index) => {
-      if (element.commit.message && index < 10) {
-        dataTimeline.value.push({
-          from: formatTimeToStr(element.commit.author.date, 'yyyy-MM-dd'),
-          title: element.commit.author.name,
-          showDayAndMonth: true,
-          message: element.commit.message,
-        })
-      }
+    data.list.forEach((element, index) => {
+      dataTimeline.value.push({
+        from: formatTimeToStr(element.CreatedAt, 'dd-MM-yyyy'),
+        title: element.shortTitle,
+        showDayAndMonth: true,
+        message: element.shortTitle
+      })
     })
   })
+
+  // Commits(0).then(({ data }) => {
+  //   loading.value = false
+  //   data.forEach((element, index) => {
+  //     if (element.commit.message && index < 10) {
+  //       dataTimeline.value.push({
+  //         from: formatTimeToStr(element.commit.author.date, 'yyyy-MM-dd'),
+  //         title: element.commit.author.name,
+  //         showDayAndMonth: true,
+  //         message: element.commit.message,
+  //       })
+  //     }
+  //   })
+  // })
 }
 
 loadCommits()

@@ -31,14 +31,22 @@
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" />
-        <el-table-column align="left" label="Phòng ban" prop="agencyId" width="200" />
-        <el-table-column align="left" label="Chức danh" prop="title" width="200" />
+        <el-table-column align="left" label="Phòng ban" prop="agencyId" width="200">
+          <template #default="scope">
+            {{ scope.row.agency.name }}
+          </template>
+        </el-table-column>
+        <el-table-column align="left" label="Chức danh" prop="title" width="200">
+          <template #default="scope">
+            {{ scope.row.signerTitle.ID !== 0 && scope.row.signerTitle.label }}
+          </template>
+        </el-table-column>
         <el-table-column align="left" label="Họ tên" prop="fullname" width="200" />
         <el-table-column align="left" label="Số văn bản" prop="count" width="200" />
         <el-table-column align="left" label="Ngày tạo" width="250">
           <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
         </el-table-column>
-        <el-table-column align="left" label="Hành động">
+        <el-table-column align="left" label="Hành động" width="150" fixed="right">
           <template #default="scope">
             <el-button type="primary" link icon="edit" size="small" class="table-button" @click="updateDocumentSignersFunc(scope.row)">Sửa</el-button>
             <el-button type="primary" link icon="delete" size="small" @click="deleteRow(scope.row)">Xoá</el-button>

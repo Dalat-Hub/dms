@@ -19,6 +19,8 @@ import (
 type DocumentsService struct {
 }
 
+// ===================== EXPORTED METHODS SECTION ========================
+
 // CreateDocuments create new document
 func (documentsService *DocumentsService) CreateDocuments(documents dms.Documents) (err error) {
 	err = global.GVA_DB.Create(&documents).Error
@@ -949,6 +951,15 @@ func (documentsService *DocumentsService) GetDocuments(doc dmsReq.DocumentsSearc
 		}
 	}
 
+	// update view count
+	err = global.GVA_DB.Model(&dms.Documents{}).
+		Where("id = ?", document.ID).
+		Update("view_count", gorm.Expr("view_count + ?", 1)).Error
+
+	if err != nil {
+		return nil, err
+	}
+
 	return &document, nil
 }
 
@@ -961,12 +972,45 @@ func (documentsService *DocumentsService) GetDocumentsInfoList(info dmsReq.Docum
 
 	var documentss []dms.Documents
 
-	err = db.Where("type = ? AND status = ?", dms.TYPE_DOCUMENT, dms.STATUS_PUBLISHED).Count(&total).Error
+	err = db.Where("type = ?", dms.TYPE_DOCUMENT).Count(&total).Error
 	if err != nil {
 		return
 	}
 
-	err = db.Limit(limit).Offset(offset).Find(&documentss).Error
+	if info.SignText != "" {
+		db = db.Where("`sign_text` LIKE ?", "%"+info.SignText+"%")
+	}
+
+	if info.AgencyId > 0 {
+		db = db.Where("`agency_id` = ?", info.AgencyId)
+	}
+
+	if info.CategoryId > 0 {
+		db = db.Where("`category_id` = ?", info.CategoryId)
+	}
+
+	if info.Status > 0 {
+		db = db.Where("`status` = ?", info.Status)
+	}
+
+	if info.Priority > 0 {
+		db = db.Where("`priority` = ?", info.Priority)
+	}
+
+	if info.CreatedBy > 0 {
+		db = db.Where("`created_by` = ?", info.CreatedBy)
+	}
+
+	if info.BeResponsibleBy > 0 {
+		db = db.Where("`be_responsible_by` = ?", info.BeResponsibleBy)
+	}
+
+	if info.PageSize != -1 {
+		db = db.Limit(limit).Offset(offset)
+	}
+
+	err = db.Order("created_at desc").Find(&documentss).Error
+
 	return documentss, total, err
 }
 
