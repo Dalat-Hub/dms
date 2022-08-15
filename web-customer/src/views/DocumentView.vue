@@ -57,7 +57,7 @@
                 document?.agency?.name || "--"
               }}</el-descriptions-item>
               <el-descriptions-item label="Người ký">
-                {{ document?.signers.map((s) => s.nickName).join(", ") }}
+                {{ document?.signers.map((s) => s.fullname).join(", ") }}
               </el-descriptions-item>
 
               <el-descriptions-item label="Ngày có hiệu lực">{{
@@ -78,13 +78,18 @@
               </el-descriptions-item>
 
               <el-descriptions-item label="Tài liệu căn cứ" span="2">
-                {{ relations?.base_on?.map((d) => d.title).join(", ") || "--" }}
+                {{
+                  baseDocuments.items
+                    .map((d) => (d.shortTitle ? d.shortTitle : d.title))
+                    .join(", ") || "--"
+                }}
               </el-descriptions-item>
 
               <el-descriptions-item label="Tài liệu liên quan" span="2">
                 {{
-                  relations?.related_docs?.map((d) => d.title).join(", ") ||
-                  "--"
+                  relatedDocuments.items
+                    .map((d) => (d.shortTitle ? d.shortTitle : d.title))
+                    .join(", ") || "--"
                 }}
               </el-descriptions-item>
             </el-descriptions>
@@ -166,7 +171,7 @@ import { getDateFormatted } from "@/utils/date";
 import { getDocumentCategoryList } from "@/api/category";
 import { getDocumentFieldList } from "@/api/field";
 import { getDocumentAgencyList } from "@/api/agency";
-import { findDocument, getDocumentRelations } from "@/api/document";
+import { findDocument } from "@/api/document";
 
 export default {
   name: "DocumentView",
@@ -204,7 +209,6 @@ export default {
       () => this.$route.params,
       () => {
         this.getDocument();
-        this.getDocumentRelation();
       }
     );
   },
@@ -213,7 +217,6 @@ export default {
     this.getFields();
     this.getAgencies();
     this.getDocument();
-    this.getDocumentRelation();
   },
   methods: {
     getFileURL() {
@@ -264,20 +267,39 @@ export default {
       }
     },
     async getDocument() {
-      const res = await findDocument({ ID: this.$route.params.id });
+      const res = await findDocument({
+        ID: this.$route.params.id,
+        preloadCategory: 1,
+        preloadAgency: 1,
+        preloadFields: 1,
+        preloadSigners: 1,
+        preloadBasedDocs: 1,
+        preloadRelatedDocs: 1,
+        preloadRelatedUsers: 1,
+        preloadRelatedAgencies: 1,
+        preloadCreatedBy: 1,
+      });
 
       if (res.data.code === 0) {
-        this.document = res.data.data.redocuments;
+        this.document = res.data.data.document;
+        this.baseDocuments = {
+          ...this.baseDocuments,
+          items: res.data.data.document?.basedDocuments || [],
+        };
+        this.relatedDocuments = {
+          ...this.relatedDocuments,
+          items: res.data.data.document?.relatedDocuments || [],
+        };
       }
     },
-    async getDocumentRelation() {
-      const res = await getDocumentRelations({ ID: this.$route.params.id });
+    // async getDocumentRelation() {
+    //   const res = await getDocumentRelations({ ID: this.$route.params.id });
 
-      if (res.data.code === 0) {
-        this.baseDocuments.items = res.data.data.list.base_on || [];
-        this.relatedDocuments.items = res.data.data.list.related_docs || [];
-      }
-    },
+    //   if (res.data.code === 0) {
+    //     this.baseDocuments.items = res.data.data.list.base_on || [];
+    //     this.relatedDocuments.items = res.data.data.list.related_docs || [];
+    //   }
+    // },
   },
 };
 </script>
