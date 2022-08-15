@@ -972,9 +972,37 @@ func (documentsService *DocumentsService) GetDocumentsInfoList(info dmsReq.Docum
 
 	var documentss []dms.Documents
 
-	err = db.Where("type = ? AND status = ?", dms.TYPE_DOCUMENT, dms.STATUS_PUBLISHED).Count(&total).Error
+	err = db.Where("type = ?", dms.TYPE_DOCUMENT).Count(&total).Error
 	if err != nil {
 		return
+	}
+
+	if info.SignText != "" {
+		db = db.Where("`sign_text` LIKE ?", "%"+info.SignText+"%")
+	}
+
+	if info.AgencyId > 0 {
+		db = db.Where("`agency_id` = ?", info.AgencyId)
+	}
+
+	if info.CategoryId > 0 {
+		db = db.Where("`category_id` = ?", info.CategoryId)
+	}
+
+	if info.Status > 0 {
+		db = db.Where("`status` = ?", info.Status)
+	}
+
+	if info.Priority > 0 {
+		db = db.Where("`priority` = ?", info.Priority)
+	}
+
+	if info.CreatedBy > 0 {
+		db = db.Where("`created_by` = ?", info.CreatedBy)
+	}
+
+	if info.BeResponsibleBy > 0 {
+		db = db.Where("`be_responsible_by` = ?", info.BeResponsibleBy)
 	}
 
 	if info.PageSize != -1 {
