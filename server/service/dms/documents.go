@@ -1130,6 +1130,7 @@ func (documentsService *DocumentsService) GetDocumentsInfoListPublic(info docume
 	// TODO: restrict me later
 	// db = db.Where("public_to_view = ?", true)
 	db = db.Where("type = ?", dms.TYPE_DOCUMENT)
+	db = db.Where("status = ?", dms.STATUS_PUBLISHED)
 
 	if info.Keyword != "" {
 		searchTerm := "%" + info.Keyword + "%"
