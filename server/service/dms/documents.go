@@ -1186,7 +1186,18 @@ func (documentsService *DocumentsService) GetDocumentsInfoListPublic(info docume
 		return
 	}
 
-	err = db.Order("created_at desc").Find(&documentss).Error
+	if info.OrderBy != "" {
+		if info.OrderDirection != "" {
+			db = db.Order(info.OrderBy + " " + info.OrderDirection)
+		} else {
+			db = db.Order(info.OrderBy + " desc")
+		}
+	} else {
+		// default order
+		db = db.Order("created_at desc")
+	}
+
+	err = db.Find(&documentss).Error
 
 	return documentss, total, err
 }

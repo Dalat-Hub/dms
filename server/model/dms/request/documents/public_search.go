@@ -9,12 +9,14 @@ import (
 type PublicSearch struct {
 	request.PageInfo
 
-	Category   uint      `json:"category" form:"category"`
-	Field      uint      `json:"field" form:"field"`
-	Agency     uint      `json:"agency" form:"agency"`
-	FromDate   null.Time `json:"fromDate" form:"fromDate"`
-	ToDate     null.Time `json:"toDate" form:"toDate"`
-	StillValid null.Bool `json:"stillValid" form:"stillValid"`
+	Category       uint      `json:"category" form:"category"`
+	Field          uint      `json:"field" form:"field"`
+	Agency         uint      `json:"agency" form:"agency"`
+	FromDate       null.Time `json:"fromDate" form:"fromDate"`
+	ToDate         null.Time `json:"toDate" form:"toDate"`
+	StillValid     null.Bool `json:"stillValid" form:"stillValid"`
+	OrderBy        string    `json:"orderBy" form:"orderBy"`
+	OrderDirection string    `json:"orderDirection" form:"orderDirection"`
 
 	request2.PreloadDocument
 }
