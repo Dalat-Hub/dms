@@ -63,7 +63,7 @@
       <el-col :sm="7" :lg="6">
         <SideContent
           title="Văn bản mới"
-          :items="document.items"
+          :items="latestDocuments"
           :displayCreatedAt="true"
         ></SideContent>
 
@@ -122,6 +122,7 @@ export default {
         title: "Văn bản",
         items: [],
       },
+      latestDocuments: [],
       searchStats: {
         count: 0,
         searchBy: {},
@@ -225,6 +226,9 @@ export default {
         this.searchStats.count = table.data.data.total;
         this.searchStats.searchBy = filter;
         delete this.searchStats.searchBy.page;
+
+        if (this.latestDocuments.length === 0)
+          this.latestDocuments = table.data.data.list;
       }
     },
     handleOnDocumentViewDetailClick(document) {
