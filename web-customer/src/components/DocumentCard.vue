@@ -48,7 +48,7 @@ export default {
   emits: ["onViewDetailClick"],
   methods: {
     getDocumentTitle(document) {
-      return `${document.category.name} ${document.signText}`;
+      return `${document?.category?.name || ""} ${document?.signText}`;
     },
     getIssuedDate(date) {
       return getDateFormatted(date);
@@ -56,7 +56,7 @@ export default {
     getDocumentProps(document) {
       function getSignersAsString() {
         if (Array.isArray(document.signers) && document.signers.length > 0) {
-          return document.signers.map((s) => s.nickName).join(", ");
+          return document.signers.map((s) => s.fullname).join(", ");
         }
 
         return "--";

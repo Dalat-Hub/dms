@@ -42,7 +42,7 @@
             filterable
             clearable
             class="w-full"
-            v-model="this.form.agencyId"
+            v-model="this.form.agency"
           >
             <el-option
               v-for="agency in agencies"
@@ -58,7 +58,7 @@
             filterable
             clearable
             class="w-full"
-            v-model="this.form.categoryId"
+            v-model="this.form.category"
           >
             <el-option
               v-for="category in categories"
@@ -74,7 +74,7 @@
             filterable
             clearable
             class="w-full"
-            v-model="this.form.fieldId"
+            v-model="this.form.field"
           >
             <el-option
               v-for="field in fields"
@@ -91,6 +91,8 @@
               placeholder="Từ ngày"
               class="w-full"
               v-model="form.fromDate"
+              format="DD-MM-YYYY"
+              @change="this.handleOnFromDateChange"
             />
           </el-col>
           <el-col :span="2" class="text-center">
@@ -101,14 +103,15 @@
               type="date"
               placeholder="Đến ngày"
               class="w-full"
+              format="DD-MM-YYYY"
               v-model="form.toDate"
             />
           </el-col>
         </el-form-item>
         <el-form-item label="Tình trạng hiệu lực">
-          <el-radio-group v-model="form.stillInEffect">
-            <el-radio label="Còn hiệu lực" :value="true" />
-            <el-radio label="Hết hiệu lực" :value="false" />
+          <el-radio-group v-model="form.stillValid">
+            <el-radio :label="true">Còn hiệu lực</el-radio>
+            <el-radio :label="false">Hết hiệu lực</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item>
@@ -138,6 +141,17 @@ export default {
       form: {},
       searchTerm: "",
     };
+  },
+  methods: {
+    handleOnFromDateChange(date) {
+      const dateObj = new Date(date);
+
+      const dd = dateObj.getDate();
+      const mm = dateObj.getMonth();
+      const yy = dateObj.getFullYear();
+
+      this.form.toDate = new Date(yy, mm, dd);
+    },
   },
 };
 </script>

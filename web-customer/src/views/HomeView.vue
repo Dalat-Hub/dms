@@ -232,11 +232,27 @@ export default {
     },
     async handleOnSimpleSearchSubmit(keyword) {
       this.searchStats.signText = keyword;
-      await this.getDocuments({ signText: keyword });
+      await this.getDocuments({ keyword: keyword });
       this.searchStats.signText = "";
     },
     handleOnAdvancedSearchSubmit(form) {
-      this.getDocuments({ ...form });
+      let fromDate = "";
+      let toDate = "";
+
+      if (form.fromDate instanceof Date) {
+        fromDate = form.fromDate.setDate(form.fromDate.getDate() + 1);
+        fromDate = form.fromDate.toISOString();
+        fromDate = `"${fromDate}"`;
+      }
+
+      if (form.toDate instanceof Date) {
+        toDate = form.toDate.setDate(form.toDate.getDate() + 1);
+        toDate = form.toDate.toISOString();
+        toDate = `"${toDate}"`;
+      }
+
+      if (fromDate && toDate) this.getDocuments({ ...form, fromDate, toDate });
+      else this.getDocuments({ ...form });
     },
     handlePageChanged(page) {
       this.getDocuments({ ...this.searchStats.searchBy, page });
