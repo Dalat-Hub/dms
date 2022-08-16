@@ -50,11 +50,11 @@
 
           <div style="display: flex; justify-content: center; margin-top: 2rem">
             <el-pagination
-              v-if="this.searchStats.count > 0"
+              v-if="parseInt(this.searchStats.count / this.pageSize) > 0"
               background
               layout="prev, pager, next"
               :total="this.searchStats.count"
-              :page-size="10"
+              :page-size="this.pageSize"
               @current-change="handlePageChanged"
             />
           </div>
@@ -112,6 +112,7 @@ export default {
       },
       latestDocuments: [],
       mostViewDocuments: [],
+      pageSize: 10,
       searchStats: {
         count: 0,
         searchBy: {},
@@ -153,7 +154,7 @@ export default {
     async getDocumentByDay() {
       const response = await getDocumentList({
         page: 1,
-        pageSize: 10,
+        pageSize: 20,
         preloadCategory: 1,
         preloadAgency: 1,
         preloadFields: 1,
@@ -218,7 +219,7 @@ export default {
     async getDocuments(filter = {}) {
       const table = await getDocumentList({
         page: 1,
-        pageSize: 10,
+        pageSize: this.pageSize,
         ...filter,
         preloadCategory: 1,
         preloadAgency: 1,
@@ -264,7 +265,11 @@ export default {
       else this.getDocuments({ ...form });
     },
     handlePageChanged(page) {
-      this.getDocuments({ ...this.searchStats.searchBy, page });
+      this.getDocuments({
+        ...this.searchStats.searchBy,
+        page,
+        pageSize: this.pageSize,
+      });
     },
   },
 };
