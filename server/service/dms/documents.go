@@ -1163,8 +1163,6 @@ func (documentsService *DocumentsService) GetDocumentsInfoListPublic(info docume
 		db = db.Joins("join document_field_references on documents.id = document_field_references.document_id AND document_field_references.field_id = ?", info.Field)
 	}
 
-	db = db.Limit(limit).Offset(offset)
-
 	if info.PreloadAgency == 1 {
 		db = db.Preload("Agency")
 	}
@@ -1185,6 +1183,8 @@ func (documentsService *DocumentsService) GetDocumentsInfoListPublic(info docume
 	if err != nil {
 		return
 	}
+
+	db = db.Limit(limit).Offset(offset)
 
 	if info.OrderBy != "" {
 		if info.OrderDirection != "" {
