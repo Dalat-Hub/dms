@@ -68,20 +68,8 @@
         ></SideContent>
 
         <SideContent
-          title="Xem nhiều trong ngày"
-          :items="document.items"
-          :displayCounter="true"
-        ></SideContent>
-
-        <SideContent
-          title="Xem nhiều trong tuần"
-          :items="document.items"
-          :displayCounter="true"
-        ></SideContent>
-
-        <SideContent
-          title="Xem nhiều trong tháng"
-          :items="document.items"
+          title="Văn bản xem nhiều"
+          :items="this.mostViewDocuments"
           :displayCounter="true"
         ></SideContent>
       </el-col>
@@ -123,6 +111,7 @@ export default {
         items: [],
       },
       latestDocuments: [],
+      mostViewDocuments: [],
       searchStats: {
         count: 0,
         searchBy: {},
@@ -158,8 +147,24 @@ export default {
     this.getFields();
     this.getAgencies();
     this.getDocuments();
+    this.getDocumentByDay();
   },
   methods: {
+    async getDocumentByDay() {
+      const response = await getDocumentList({
+        page: 1,
+        pageSize: 10,
+        preloadCategory: 1,
+        preloadAgency: 1,
+        preloadFields: 1,
+        preloadSigners: 1,
+        orderBy: "view_count",
+      });
+
+      if (response.data.code === 0) {
+        this.mostViewDocuments = response.data.data.list;
+      }
+    },
     async getDocumentByFilter(type, id) {
       const validMap = {
         "co-quan-ban-hanh": "agencyId",
