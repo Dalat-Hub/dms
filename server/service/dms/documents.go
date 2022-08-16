@@ -1119,6 +1119,77 @@ func (documentsService *DocumentsService) GetDocumentsInfoList(info dmsReq.Docum
 	return documentss, total, err
 }
 
+func (documentsService *DocumentsService) GetDocumentsInfoListPublic(info documents.PublicSearch) (list interface{}, total int64, err error) {
+	limit := info.PageSize
+	offset := info.PageSize * (info.Page - 1)
+
+	db := global.GVA_DB.Model(&dms.Documents{})
+
+	var documentss []dms.Documents
+
+	// TODO: restrict me later
+	// db = db.Where("public_to_view = ?", true)
+	db = db.Where("type = ?", dms.TYPE_DOCUMENT)
+
+	if info.Keyword != "" {
+		searchTerm := "%" + info.Keyword + "%"
+		db = db.Where("`title` LIKE ? OR `sign_text` LIKE ? OR `expert` LIKE ?", searchTerm, searchTerm, searchTerm)
+	}
+
+	if info.Agency > 0 {
+		db = db.Where("`agency_id` = ?", info.Agency)
+	}
+
+	if info.Category > 0 {
+		db = db.Where("`category_id` = ?", info.Category)
+	}
+
+	if info.StillValid.Valid {
+		db = db.Where("`still_in_effect` = ?", info.StillValid.Bool)
+	}
+
+	if info.FromDate.Valid && info.ToDate.Valid {
+		fromDateReq := info.FromDate.Time
+		toDateReq := info.ToDate.Time
+
+		fromDate := time.Date(fromDateReq.Year(), fromDateReq.Month(), fromDateReq.Day(), 0, 0, 0, 0, time.Local)
+		toDate := time.Date(toDateReq.Year(), toDateReq.Month(), toDateReq.Day(), 23, 59, 59, 0, time.Local)
+
+		db = db.Where("`effect_date` >= ? AND `effect_date` <= ?", fromDate, toDate)
+	}
+
+	if info.Field > 0 {
+		db = db.Joins("join document_field_references on documents.id = document_field_references.document_id AND document_field_references.field_id = ?", info.Field)
+	}
+
+	db = db.Limit(limit).Offset(offset)
+
+	if info.PreloadAgency == 1 {
+		db = db.Preload("Agency")
+	}
+
+	if info.PreloadCategory == 1 {
+		db = db.Preload("Category")
+	}
+
+	if info.PreloadFields == 1 {
+		db = db.Preload("Fields")
+	}
+
+	if info.PreloadSigners == 1 {
+		db = db.Preload("Signers")
+	}
+
+	err = db.Count(&total).Error
+	if err != nil {
+		return
+	}
+
+	err = db.Order("created_at desc").Find(&documentss).Error
+
+	return documentss, total, err
+}
+
 // GetDocumentRevisions get list of revisions of the given documents
 func (documentsService *DocumentsService) GetDocumentRevisions(documentId uint) (list interface{}, err error) {
 	revisions := make([]*dms.Documents, 0)
