@@ -3,7 +3,7 @@
     <BreadCrumb />
 
     <el-row :gutter="16">
-      <el-col :sm="7" :lg="6">
+      <el-col :lg="6">
         <SideMenu
           :title="this.agency.title"
           :items="this.agency.items"
@@ -20,7 +20,7 @@
           param="linh-vuc"
         />
       </el-col>
-      <el-col :sm="10" :lg="12">
+      <el-col :lg="12">
         <SearchBox
           :agencies="this.agency.items"
           :categories="this.category.items"
@@ -60,7 +60,7 @@
           </div>
         </div>
       </el-col>
-      <el-col :sm="7" :lg="6">
+      <el-col :lg="6">
         <SideContent
           title="Văn bản mới"
           :items="latestDocuments"
