@@ -65,20 +65,28 @@
           label="Văn bản"
           prop="documentId"
           width="250"
-        />
+        >
+          <template #default="scope">
+            {{ scope.row.document.shortTitle }}
+          </template>
+        </el-table-column>
         <el-table-column
           align="left"
           label="Người yêu cầu"
           prop="requestUserId"
           width="200"
-        />
+        >
+          <template #default="scope">
+            {{ scope.row.requestUser.nickName }}
+          </template>
+        </el-table-column>
         <el-table-column
           align="left"
           label="Quyền"
           prop="requestPermission"
           width="100"
         />
-        <el-table-column align="left" label="Yêu cầu lúc" width="150">
+        <el-table-column align="left" label="Yêu cầu lúc" width="180">
           <template #default="scope">{{
             formatDate(scope.row.CreatedAt)
           }}</template>
@@ -88,23 +96,33 @@
           label="Người cấp"
           prop="acceptUserId"
           width="200"
-        />
+        >
+          <template #default="scope">
+            <el-tag v-if="!scope.row.acceptUser" type="danger">N/A</el-tag>
+            <span v-else>{{ scope.row.acceptUser.nickName }}</span>
+          </template>
+        </el-table-column>
         <el-table-column
           align="left"
           label="Cấp lúc"
           prop="acceptAt"
-          width="150"
-        />
-        <el-table-column width="100" align="left" label="Hành động" fixed="right">
+          width="180"
+        >
+          <template #default="scope">
+            <el-tag v-if="!scope.row.acceptAt" type="danger">N/A</el-tag>
+            <span v-else>{{ formatDate(scope.row.acceptAt) }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column width="180" align="left" label="Hành động" fixed="right">
           <template #default="scope">
             <el-button
               type="primary"
               link
-              icon="edit"
+              icon="check"
               size="small"
               class="table-button"
               @click="updateDocumentPermissionRequestFunc(scope.row)"
-            >Cấp</el-button>
+            >Phê duyệt</el-button>
             <el-button
               type="primary"
               link

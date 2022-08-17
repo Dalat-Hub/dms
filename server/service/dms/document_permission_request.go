@@ -46,6 +46,18 @@ func (documentPermissionRequestService *DocumentPermissionRequestService) GetDoc
 	if err != nil {
 		return
 	}
-	err = db.Limit(limit).Offset(offset).Find(&documentPermissionRequests).Error
+
+	db = db.Limit(limit).Offset(offset)
+
+	// preloading
+	db = db.Preload("Document")
+	db = db.Preload("RequestUser")
+	db = db.Preload("AcceptUser", "accept_user_id > ?", 0)
+
+	err = db.Find(&documentPermissionRequests).Error
+	if err != nil {
+		return
+	}
+
 	return documentPermissionRequests, total, err
 }
