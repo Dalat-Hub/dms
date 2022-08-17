@@ -264,8 +264,8 @@ export default {
     async getAgencies() {
       const table = await getDocumentAgencyList({ page: 1, pageSize: 1000 });
 
-      if (table.data.code === 0) {
-        this.agency.items = table.data.data.list.map((item) => {
+      if (table.code === 0) {
+        this.agency.items = table.data.list.map((item) => {
           return {
             ...item,
             link: "/",
@@ -276,8 +276,8 @@ export default {
     async getCategories() {
       const table = await getDocumentCategoryList({ page: 1, pageSize: 1000 });
 
-      if (table.data.code === 0) {
-        this.category.items = table.data.data.list.map((item) => {
+      if (table.code === 0) {
+        this.category.items = table.data.list.map((item) => {
           return {
             ...item,
             link: "/",
@@ -288,8 +288,8 @@ export default {
     async getFields() {
       const table = await getDocumentFieldList({ page: 1, pageSize: 1000 });
 
-      if (table.data.code === 0) {
-        this.field.items = table.data.data.list.map((item) => {
+      if (table.code === 0) {
+        this.field.items = table.data.list.map((item) => {
           return {
             ...item,
             link: "/",
@@ -311,15 +311,15 @@ export default {
         preloadCreatedBy: 1,
       });
 
-      if (res.data.code === 0) {
-        this.document = res.data.data.document;
+      if (res.code === 0) {
+        this.document = res.data.document;
         this.baseDocuments = {
           ...this.baseDocuments,
-          items: res.data.data.document?.basedDocuments || [],
+          items: res.data.document?.basedDocuments || [],
         };
         this.relatedDocuments = {
           ...this.relatedDocuments,
-          items: res.data.data.document?.relatedDocuments || [],
+          items: res.data.document?.relatedDocuments || [],
         };
       }
     },
@@ -328,9 +328,9 @@ export default {
         id: this.$route.params.id,
       });
 
-      if (res.data.code === 0) {
-        this.file.files = res.data.data.files;
-        this.file.canDownload = res.data.data.canDownload;
+      if (res.code === 0) {
+        this.file.files = res.data.files;
+        this.file.canDownload = res.data.canDownload;
       }
     },
     getPdfSource(file) {
