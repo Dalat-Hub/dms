@@ -162,6 +162,8 @@ export default {
         orderBy: "view_count",
       });
 
+      console.log(response);
+
       if (response.code === 0) {
         this.mostViewDocuments = response.data.list;
       }
