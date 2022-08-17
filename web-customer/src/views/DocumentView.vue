@@ -298,8 +298,12 @@ export default {
       }
     },
     async getDocument() {
+      const id = this.$route.params.id || 0;
+
+      if (id <= 0) return;
+
       const res = await findDocument({
-        ID: this.$route.params.id,
+        ID: id,
         preloadCategory: 1,
         preloadAgency: 1,
         preloadFields: 1,
