@@ -183,9 +183,9 @@ export default {
     },
     async getDocumentByFilter(type, id) {
       const validMap = {
-        "co-quan-ban-hanh": "agencyId",
-        "the-loai": "categoryId",
-        "linh-vuc": "fieldId",
+        "co-quan-ban-hanh": "agency",
+        "the-loai": "category",
+        "linh-vuc": "field",
       };
 
       const filterBy = validMap[type] || null;
