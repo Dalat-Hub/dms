@@ -13,8 +13,8 @@ service.interceptors.request.use(
     const userStore = useUserStore();
     config.headers = {
       "Content-Type": "application/json",
-      "x-token": userStore.token,
-      "x-user-id": userStore.userInfo.ID,
+      "x-token": userStore.token || null,
+      "x-user-id": userStore.userInfo.ID || null,
       ...config.headers,
     };
     return config;
