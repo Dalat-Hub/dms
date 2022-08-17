@@ -36,6 +36,12 @@ const routes = [
         /* webpackChunkName: "document-detail" */ "../views/DocumentView.vue"
       ),
   },
+  {
+    path: "/dang-nhap",
+    name: "dms-login",
+    component: () =>
+      import(/* webpackChunkName: "dms-login" */ "../views/LoginView.vue"),
+  },
 ];
 
 const router = createRouter({
