@@ -9,18 +9,26 @@ import (
 type DocumentPermissionRequestRouter struct {
 }
 
+func (s *DocumentPermissionRequestRouter) InitDocumentPermissionRequestPublicRouter(Router *gin.RouterGroup) {
+	documentPermissionRequestRouterWithoutRecord := Router.Group("permission-requests")
+	var documentPermissionRequestApi = v1.ApiGroupApp.DmsApiGroup.DocumentPermissionRequestApi
+	{
+		documentPermissionRequestRouterWithoutRecord.POST("", documentPermissionRequestApi.CreateDocumentPermissionRequestPublic)
+	}
+}
+
 func (s *DocumentPermissionRequestRouter) InitDocumentPermissionRequestRouter(Router *gin.RouterGroup) {
 	documentPermissionRequestRouter := Router.Group("documentPermissionRequest").Use(middleware.OperationRecord())
 	documentPermissionRequestRouterWithoutRecord := Router.Group("documentPermissionRequest")
 	var documentPermissionRequestApi = v1.ApiGroupApp.DmsApiGroup.DocumentPermissionRequestApi
 	{
-		documentPermissionRequestRouter.POST("createDocumentPermissionRequest", documentPermissionRequestApi.CreateDocumentPermissionRequest)             // 新建DocumentPermissionRequest
-		documentPermissionRequestRouter.DELETE("deleteDocumentPermissionRequest", documentPermissionRequestApi.DeleteDocumentPermissionRequest)           // 删除DocumentPermissionRequest
-		documentPermissionRequestRouter.DELETE("deleteDocumentPermissionRequestByIds", documentPermissionRequestApi.DeleteDocumentPermissionRequestByIds) // 批量删除DocumentPermissionRequest
-		documentPermissionRequestRouter.PUT("updateDocumentPermissionRequest", documentPermissionRequestApi.UpdateDocumentPermissionRequest)              // 更新DocumentPermissionRequest
+		documentPermissionRequestRouter.POST("createDocumentPermissionRequest", documentPermissionRequestApi.CreateDocumentPermissionRequest)
+		documentPermissionRequestRouter.DELETE("deleteDocumentPermissionRequest", documentPermissionRequestApi.DeleteDocumentPermissionRequest)
+		documentPermissionRequestRouter.DELETE("deleteDocumentPermissionRequestByIds", documentPermissionRequestApi.DeleteDocumentPermissionRequestByIds)
+		documentPermissionRequestRouter.PUT("updateDocumentPermissionRequest", documentPermissionRequestApi.UpdateDocumentPermissionRequest)
 	}
 	{
-		documentPermissionRequestRouterWithoutRecord.GET("findDocumentPermissionRequest", documentPermissionRequestApi.FindDocumentPermissionRequest)       // 根据ID获取DocumentPermissionRequest
-		documentPermissionRequestRouterWithoutRecord.GET("getDocumentPermissionRequestList", documentPermissionRequestApi.GetDocumentPermissionRequestList) // 获取DocumentPermissionRequest列表
+		documentPermissionRequestRouterWithoutRecord.GET("findDocumentPermissionRequest", documentPermissionRequestApi.FindDocumentPermissionRequest)
+		documentPermissionRequestRouterWithoutRecord.GET("getDocumentPermissionRequestList", documentPermissionRequestApi.GetDocumentPermissionRequestList)
 	}
 }

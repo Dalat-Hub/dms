@@ -63,6 +63,7 @@ func Routers() *gin.Engine {
 		dmsRouter.InitDocumentAgenciesPublicRouter(DmsPublicGroup)
 		dmsRouter.InitDocumentFieldsPublicRouter(DmsPublicGroup)
 		dmsRouter.InitDocumentsPublicRouter(DmsPublicGroup)
+		dmsRouter.InitDocumentPermissionRequestPublicRouter(DmsPublicGroup)
 	}
 
 	PrivateGroup := Router.Group("")

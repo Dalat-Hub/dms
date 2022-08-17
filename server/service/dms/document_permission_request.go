@@ -10,7 +10,7 @@ import (
 type DocumentPermissionRequestService struct {
 }
 
-func (documentPermissionRequestService *DocumentPermissionRequestService) CreateDocumentPermissionRequest(documentPermissionRequest dms.DocumentPermissionRequest) (err error) {
+func (documentPermissionRequestService *DocumentPermissionRequestService) CreateDocumentPermissionRequest(documentPermissionRequest *dms.DocumentPermissionRequest) (err error) {
 	err = global.GVA_DB.Create(&documentPermissionRequest).Error
 	return err
 }

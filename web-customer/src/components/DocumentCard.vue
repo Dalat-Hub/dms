@@ -31,7 +31,10 @@
           >
 
           <div style="margin: 1rem 0">
-            <el-button type="warning" plain @click="sendDocumentRequest"
+            <el-button
+              type="warning"
+              plain
+              @click="() => sendDocumentRequest(document)"
               >Yêu cầu cấp quyền</el-button
             >
           </div>
@@ -79,7 +82,12 @@ export default {
 <script setup>
 import { getDateFormatted } from "@/utils/date";
 import { useRouter } from "vue-router";
+import { useUserStore } from "@/pinia/modules/user";
+import { ElMessage } from "element-plus";
 
+import { createDocumentPermissionRequest } from "@/api/permissionRequest";
+
+const userStore = useUserStore();
 const router = useRouter();
 
 const getDocumentTitle = (document) => {
@@ -141,8 +149,20 @@ const openLoginPage = () => {
   router.push({ name: "dms-login" });
 };
 
-const sendDocumentRequest = () => {
-  alert("Sent!!!");
+const sendDocumentRequest = async (document) => {
+  if (!userStore.userInfo.uuid) return;
+
+  const response = await createDocumentPermissionRequest({
+    documentId: document?.ID || null,
+  });
+
+  if (response.code === 0) {
+    ElMessage({
+      type: "success",
+      message:
+        "Đã gửi yêu cầu cấp quyền thành công. Vui lòng đợi quản trị viên phê duyệt!!!",
+    });
+  }
 };
 </script>
 

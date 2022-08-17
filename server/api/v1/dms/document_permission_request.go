@@ -7,6 +7,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/dms"
 	dmsReq "github.com/flipped-aurora/gin-vue-admin/server/model/dms/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/service"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -37,11 +38,45 @@ func (documentPermissionRequestApi *DocumentPermissionRequestApi) CreateDocument
 		return
 	}
 
-	if err = documentPermissionRequestService.CreateDocumentPermissionRequest(documentPermissionRequest); err != nil {
+	if err = documentPermissionRequestService.CreateDocumentPermissionRequest(&documentPermissionRequest); err != nil {
 		global.GVA_LOG.Error("fail to create new permission request", zap.Error(err))
 		response.FailWithMessage("fail to create new permission request", c)
 	} else {
-		response.OkWithMessage("success", c)
+		response.OkWithData(gin.H{"request": documentPermissionRequest}, c)
+	}
+}
+
+func (documentPermissionRequestApi *DocumentPermissionRequestApi) CreateDocumentPermissionRequestPublic(c *gin.Context) {
+	var documentPermissionRequest dms.DocumentPermissionRequest
+	var err error
+
+	err = c.ShouldBindJSON(&documentPermissionRequest)
+
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
+	if documentPermissionRequest.DocumentId <= 0 {
+		response.FailWithMessage("văn bản yêu cầu không hợp lệ", c)
+		return
+	}
+
+	userInfo := utils.GetUserInfo(c)
+	if userInfo == nil {
+		response.FailWithMessage("bạn phải đăng nhập để gửi yêu cầu cấp quyền", c)
+		return
+	}
+
+	documentPermissionRequest.RequestPermission = dms.PERMISSION_VIEW
+	documentPermissionRequest.RequestUserId = userInfo.ID
+
+	if err = documentPermissionRequestService.CreateDocumentPermissionRequest(&documentPermissionRequest); err != nil {
+		global.GVA_LOG.Error("fail to create new permission request", zap.Error(err))
+		response.FailWithMessage("fail to create new permission request", c)
+	} else {
+		response.OkWithData(gin.H{"request": documentPermissionRequest}, c)
 	}
 }
 
