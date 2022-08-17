@@ -162,8 +162,8 @@ export default {
         orderBy: "view_count",
       });
 
-      if (response.data.code === 0) {
-        this.mostViewDocuments = response.data.data.list;
+      if (response.code === 0) {
+        this.mostViewDocuments = response.data.list;
       }
     },
     async getDocumentByFilter(type, id) {
@@ -183,8 +183,8 @@ export default {
     async getAgencies() {
       const table = await getDocumentAgencyList({ page: 1, pageSize: 1000 });
 
-      if (table.data.code === 0) {
-        this.agency.items = table.data.data.list.map((item) => {
+      if (table.code === 0) {
+        this.agency.items = table.data.list.map((item) => {
           return {
             ...item,
             link: "/",
@@ -195,8 +195,8 @@ export default {
     async getCategories() {
       const table = await getDocumentCategoryList({ page: 1, pageSize: 1000 });
 
-      if (table.data.code === 0) {
-        this.category.items = table.data.data.list.map((item) => {
+      if (table.code === 0) {
+        this.category.items = table.data.list.map((item) => {
           return {
             ...item,
             link: "/",
@@ -207,8 +207,8 @@ export default {
     async getFields() {
       const table = await getDocumentFieldList({ page: 1, pageSize: 1000 });
 
-      if (table.data.code === 0) {
-        this.field.items = table.data.data.list.map((item) => {
+      if (table.code === 0) {
+        this.field.items = table.data.list.map((item) => {
           return {
             ...item,
             link: "/",
@@ -227,14 +227,14 @@ export default {
         preloadSigners: 1,
       });
 
-      if (table.data.code === 0) {
-        this.document.items = table.data.data.list;
-        this.searchStats.count = table.data.data.total;
+      if (table.code === 0) {
+        this.document.items = table.data.list;
+        this.searchStats.count = table.data.total;
         this.searchStats.searchBy = filter;
         delete this.searchStats.searchBy.page;
 
         if (this.latestDocuments.length === 0)
-          this.latestDocuments = table.data.data.list;
+          this.latestDocuments = table.data.list;
       }
     },
     handleOnDocumentViewDetailClick(document) {
