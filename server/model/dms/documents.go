@@ -54,6 +54,9 @@ type Documents struct {
 	RelatedAgencies  []DocumentAgencies `json:"relatedAgencies" gorm:"-"`
 
 	Authority *response.DocumentAuthority `json:"authority" gorm:"-"`
+
+	NeedLogin         bool `json:"needLogin" gorm:"-"`
+	NeedAuthorization bool `json:"needAuthorization" gorm:"-"`
 }
 
 var (
