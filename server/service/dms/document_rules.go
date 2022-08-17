@@ -6,6 +6,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/common/request"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/dms"
 	dmsReq "github.com/flipped-aurora/gin-vue-admin/server/model/dms/request"
+	"github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	sysService "github.com/flipped-aurora/gin-vue-admin/server/service/system"
 	uuid "github.com/satori/go.uuid"
 )
@@ -58,6 +59,79 @@ func (documentRulesService *DocumentRulesService) GetDocumentRulesInfoList(info 
 
 	err = db.Limit(limit).Offset(offset).Find(&documentRuless).Error
 	return documentRuless, total, err
+}
+
+// CheckPermissionFactory check user permission
+func (documentRulesService *DocumentRulesService) CheckPermissionFactory() func(userId uint, userUuid uuid.UUID, documentId uint, permission string) (err error) {
+	userAuthority := map[uint]map[uint]string{}
+	userInfoMap := map[uint]system.SysUser{}
+
+	return func(userId uint, userUuid uuid.UUID, documentId uint, permission string) (err error) {
+		if userAuthority == nil {
+			userAuthority = map[uint]map[uint]string{}
+		}
+
+		db := global.GVA_DB.Model(&dms.DocumentRules{})
+		var documentRules []dms.DocumentRules
+
+		err = db.Where("document_id = ?", documentId).Find(&documentRules).Error
+		if err != nil {
+			return err
+		}
+
+		sysUserService := new(sysService.UserService)
+
+		if _, exist := userInfoMap[userId]; !exist {
+			u, authErr := sysUserService.GetUserInfo(userUuid)
+
+			if authErr != nil {
+				return authErr
+			}
+
+			userInfoMap[userId] = u
+		}
+
+		user := userInfoMap[userId]
+
+		if _, exist := userAuthority[userId]; !exist {
+			userAuthority[userId] = map[uint]string{}
+
+			authorityService := new(sysService.AuthorityService)
+
+			authorityMap := map[uint]string{}
+
+			for _, authority := range user.Authorities {
+				err, auMap := authorityService.GetChildrenAuthorities(authority)
+				if err != nil {
+					return err
+				}
+
+				for k, v := range auMap {
+					authorityMap[k] = v
+				}
+			}
+
+			userAuthority[userId] = authorityMap
+		}
+
+		for _, rule := range documentRules {
+			if rule.Type == dms.RULE_TYPE_USER {
+				if rule.SubjectId == user.ID {
+					if rule.Permission == dms.PERMISSION_OWNER || rule.Permission == permission {
+						return nil
+					}
+				}
+			} else if rule.Type == dms.RULE_TYPE_GROUP {
+				if _, ok := userAuthority[userId][rule.SubjectId]; ok {
+					if rule.Permission == dms.PERMISSION_OWNER || rule.Permission == permission {
+						return nil
+					}
+				}
+			}
+		}
+
+		return errors.New("not found")
+	}
 }
 
 // CheckPermission check user permission

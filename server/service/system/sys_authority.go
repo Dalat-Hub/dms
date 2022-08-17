@@ -221,3 +221,40 @@ func (authorityService *AuthorityService) findChildrenAuthority(authority *syste
 	}
 	return err
 }
+
+func (authorityService *AuthorityService) GetChildrenAuthorities(authority system.SysAuthority) (err error, authorityMap map[uint]string) {
+	authorityInfo, err := authorityService.GetAuthorityInfo(authority)
+	if err != nil {
+		return err, nil
+	}
+
+	authorityMap = map[uint]string{}
+
+	err = authorityService.getChildrenRecursive(authorityInfo, authorityMap)
+	if err != nil {
+		return err, nil
+	}
+
+	return nil, authorityMap
+}
+
+func (authorityService *AuthorityService) getChildrenRecursive(authority system.SysAuthority, authorityMap map[uint]string) (err error) {
+	authorityMap[authority.AuthorityId] = authority.AuthorityName
+
+	if len(authority.Children) > 0 {
+		for i := range authority.Children {
+			info, err := authorityService.GetAuthorityInfo(authority.Children[i])
+
+			if err != nil {
+				return err
+			}
+
+			err = authorityService.getChildrenRecursive(info, authorityMap)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return err
+}
