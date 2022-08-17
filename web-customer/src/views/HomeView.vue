@@ -149,8 +149,23 @@ export default {
     this.getAgencies();
     this.getDocuments();
     this.getDocumentByDay();
+    this.getNewestDocuments();
   },
   methods: {
+    async getNewestDocuments() {
+      const response = await getDocumentList({
+        page: 1,
+        pageSize: 20,
+        preloadCategory: 1,
+        preloadAgency: 1,
+        preloadFields: 1,
+        preloadSigners: 1,
+      });
+
+      if (response.code === 0) {
+        this.latestDocuments = response.data.list;
+      }
+    },
     async getDocumentByDay() {
       const response = await getDocumentList({
         page: 1,
@@ -161,8 +176,6 @@ export default {
         preloadSigners: 1,
         orderBy: "view_count",
       });
-
-      console.log(response);
 
       if (response.code === 0) {
         this.mostViewDocuments = response.data.list;
@@ -227,6 +240,7 @@ export default {
         preloadAgency: 1,
         preloadFields: 1,
         preloadSigners: 1,
+        attachAuthority: 1,
       });
 
       if (table.code === 0) {
@@ -234,9 +248,6 @@ export default {
         this.searchStats.count = table.data.total;
         this.searchStats.searchBy = filter;
         delete this.searchStats.searchBy.page;
-
-        if (this.latestDocuments.length === 0)
-          this.latestDocuments = table.data.list;
       }
     },
     handleOnDocumentViewDetailClick(document) {
