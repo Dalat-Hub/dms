@@ -13,4 +13,6 @@ type PreloadDocument struct {
 	PreloadRelatedUsers    int `json:"preloadRelatedUsers" form:"preloadRelatedUsers"`
 	PreloadRelatedAgencies int `json:"preloadRelatedAgencies" form:"preloadRelatedAgencies"`
 	PreloadAuthority       int `json:"preloadAuthority" form:"preloadAuthority"`
+
+	AttachAuthority int `json:"attachAuthority" form:"attachAuthority"`
 }

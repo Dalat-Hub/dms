@@ -1178,16 +1178,11 @@ func (documentsService *DocumentsService) GetDocumentsInfoListPublic(info docume
 		db = db.Preload("Signers")
 	}
 
-	err = db.Count(&total).Error
-	if err != nil {
-		return
-	}
-
-	db = db.Limit(limit).Offset(offset)
-
-	// user does not log in
-	if userInfo == nil {
-		db = db.Order("public_to_view desc")
+	if info.AttachAuthority > 0 {
+		// user does not log in
+		if userInfo == nil {
+			db = db.Order("public_to_view desc")
+		}
 	}
 
 	if info.OrderBy != "" {
@@ -1201,10 +1196,19 @@ func (documentsService *DocumentsService) GetDocumentsInfoListPublic(info docume
 		db = db.Order("created_at desc")
 	}
 
+	err = db.Count(&total).Error
+	if err != nil {
+		return
+	}
+
+	db = db.Limit(limit).Offset(offset)
+
 	err = db.Find(&documentss).Error
 
 	// attach authorized fields
-	documentsService.attachPublicAuthorization(documentss, userInfo)
+	if info.AttachAuthority > 0 {
+		documentsService.attachPublicAuthorization(documentss, userInfo)
+	}
 
 	return documentss, total, err
 }
