@@ -9,6 +9,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/dms/request/documents"
 	"github.com/flipped-aurora/gin-vue-admin/server/model/dms/response"
 	sysModel "github.com/flipped-aurora/gin-vue-admin/server/model/system"
+	request2 "github.com/flipped-aurora/gin-vue-admin/server/model/system/request"
 	uuid "github.com/satori/go.uuid"
 	"gopkg.in/guregu/null.v4"
 	"gorm.io/gorm"
@@ -1119,16 +1120,14 @@ func (documentsService *DocumentsService) GetDocumentsInfoList(info dmsReq.Docum
 	return documentss, total, err
 }
 
-func (documentsService *DocumentsService) GetDocumentsInfoListPublic(info documents.PublicSearch) (list interface{}, total int64, err error) {
+func (documentsService *DocumentsService) GetDocumentsInfoListPublic(info documents.PublicSearch, userInfo *request2.CustomClaims) (list interface{}, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 
 	db := global.GVA_DB.Model(&dms.Documents{})
 
-	var documentss []dms.Documents
+	var documentss []*dms.Documents
 
-	// TODO: restrict me later
-	// db = db.Where("public_to_view = ?", true)
 	db = db.Where("type = ?", dms.TYPE_DOCUMENT)
 	db = db.Where("status = ?", dms.STATUS_PUBLISHED)
 
@@ -1186,6 +1185,11 @@ func (documentsService *DocumentsService) GetDocumentsInfoListPublic(info docume
 
 	db = db.Limit(limit).Offset(offset)
 
+	// user does not log in
+	if userInfo == nil {
+		db = db.Order("public_to_view desc")
+	}
+
 	if info.OrderBy != "" {
 		if info.OrderDirection != "" {
 			db = db.Order(info.OrderBy + " " + info.OrderDirection)
@@ -1199,7 +1203,48 @@ func (documentsService *DocumentsService) GetDocumentsInfoListPublic(info docume
 
 	err = db.Find(&documentss).Error
 
+	// attach authorized fields
+	documentsService.attachPublicAuthorization(documentss, userInfo)
+
 	return documentss, total, err
+}
+
+func (documentsService *DocumentsService) attachPublicAuthorization(documents []*dms.Documents, userInfo *request2.CustomClaims) {
+	// user does not log in
+	if userInfo == nil {
+		for _, doc := range documents {
+			if doc.PublicToView {
+				doc.NeedLogin = false
+				doc.NeedAuthorization = false
+
+				continue
+			}
+
+			doc.NeedLogin = true
+			doc.NeedAuthorization = true
+		}
+
+		return
+	}
+
+	documentAuthorityService := new(DocumentRulesService)
+
+	var err error
+	checkPermission := documentAuthorityService.CheckPermissionFactory()
+
+	for _, doc := range documents {
+		if doc.PublicToView {
+			doc.NeedLogin = false
+			doc.NeedAuthorization = false
+
+			continue
+		}
+
+		err = checkPermission(userInfo.ID, userInfo.UUID, doc.ID, dms.PERMISSION_VIEW)
+		if err != nil {
+			doc.NeedAuthorization = true
+		}
+	}
 }
 
 // GetDocumentRevisions get list of revisions of the given documents
