@@ -17,6 +17,22 @@ export const createDocumentPermissionRequest = (data) => {
 }
 
 // @Tags DocumentPermissionRequest
+// @Summary approve permissioin request
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body model.DocumentPermissionRequest true "approve permission request"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
+// @Router /documentPermissionRequest/approvePermissionRequest [post]
+export const approvePermissionRequest = (data) => {
+  return service({
+    url: '/documentPermissionRequest/approvePermissionRequest',
+    method: 'post',
+    data
+  })
+}
+
+// @Tags DocumentPermissionRequest
 // @Summary 删除DocumentPermissionRequest
 // @Security ApiKeyAuth
 // @accept application/json
