@@ -46,6 +46,41 @@ func (documentPermissionRequestApi *DocumentPermissionRequestApi) CreateDocument
 	}
 }
 
+// ApproveDocumentPermissionRequest approve permission request for document
+// @Tags DocumentPermissionRequest
+// @Summary approve permission request for document
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data body dms.DocumentPermissionRequest true "approve permission request for document"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
+// @Router /documentPermissionRequest/approvePermissionRequest [post]
+func (documentPermissionRequestApi *DocumentPermissionRequestApi) ApproveDocumentPermissionRequest(c *gin.Context) {
+	var documentPermissionRequest dms.DocumentPermissionRequest
+	var err error
+
+	err = c.ShouldBindJSON(&documentPermissionRequest)
+
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data", zap.Error(err))
+		response.FailWithMessage("please provide valid data", c)
+		return
+	}
+
+	userInfo := utils.GetUserInfo(c)
+	if userInfo == nil {
+		response.FailWithMessage("please login to process", c)
+		return
+	}
+
+	if err = documentPermissionRequestService.ApprovePermissionRequest(&documentPermissionRequest, userInfo); err != nil {
+		global.GVA_LOG.Error("fail to approve permission request", zap.Error(err))
+		response.FailWithMessage("fail to approve permission request", c)
+	} else {
+		response.OkWithData(gin.H{"request": documentPermissionRequest}, c)
+	}
+}
+
 func (documentPermissionRequestApi *DocumentPermissionRequestApi) CreateDocumentPermissionRequestPublic(c *gin.Context) {
 	var documentPermissionRequest dms.DocumentPermissionRequest
 	var err error

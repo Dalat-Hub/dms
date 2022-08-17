@@ -121,7 +121,7 @@
               icon="check"
               size="small"
               class="table-button"
-              @click="updateDocumentPermissionRequestFunc(scope.row)"
+              @click="approvePermission(scope.row)"
             >Phê duyệt</el-button>
             <el-button
               type="primary"
@@ -214,14 +214,10 @@ import {
   updateDocumentPermissionRequest,
   findDocumentPermissionRequest,
   getDocumentPermissionRequestList,
+  approvePermissionRequest
 } from '@/api/documentPermissionRequest'
 
-import {
-  getDictFunc,
-  formatDate,
-  formatBoolean,
-  filterDict,
-} from '@/utils/format'
+import { formatDate } from '@/utils/format'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ref, reactive } from 'vue'
 
@@ -394,6 +390,18 @@ const enterDialog = async() => {
       getTableData()
     }
   })
+}
+
+const approvePermission = async(request) => {
+  const response = await approvePermissionRequest(request)
+  if (response.code === 0) {
+    ElMessage({
+      type: 'success',
+      message: 'Phê duyệt yêu cầu thành công',
+    })
+
+    getTableData()
+  }
 }
 </script>
 

@@ -23,6 +23,7 @@ func (s *DocumentPermissionRequestRouter) InitDocumentPermissionRequestRouter(Ro
 	var documentPermissionRequestApi = v1.ApiGroupApp.DmsApiGroup.DocumentPermissionRequestApi
 	{
 		documentPermissionRequestRouter.POST("createDocumentPermissionRequest", documentPermissionRequestApi.CreateDocumentPermissionRequest)
+		documentPermissionRequestRouter.POST("approvePermissionRequest", documentPermissionRequestApi.ApproveDocumentPermissionRequest)
 		documentPermissionRequestRouter.DELETE("deleteDocumentPermissionRequest", documentPermissionRequestApi.DeleteDocumentPermissionRequest)
 		documentPermissionRequestRouter.DELETE("deleteDocumentPermissionRequestByIds", documentPermissionRequestApi.DeleteDocumentPermissionRequestByIds)
 		documentPermissionRequestRouter.PUT("updateDocumentPermissionRequest", documentPermissionRequestApi.UpdateDocumentPermissionRequest)
