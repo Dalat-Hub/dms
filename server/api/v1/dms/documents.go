@@ -312,7 +312,9 @@ func (documentsApi *DocumentsApi) FindDocumentsPublic(c *gin.Context) {
 		return
 	}
 
-	if redocuments, err := documentsService.GetDocumentsPublic(documents); err != nil {
+	userInfo := utils.GetUserInfo(c)
+
+	if redocuments, err := documentsService.GetDocumentsPublic(documents, userInfo); err != nil {
 		global.GVA_LOG.Error("fail to find document", zap.Error(err))
 		response.FailWithMessage(err.Error(), c)
 	} else {

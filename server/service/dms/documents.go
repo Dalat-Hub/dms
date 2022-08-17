@@ -964,7 +964,7 @@ func (documentsService *DocumentsService) GetDocuments(doc dmsReq.DocumentsSearc
 	return &document, nil
 }
 
-func (documentsService *DocumentsService) GetDocumentsPublic(doc dmsReq.DocumentsSearch) (documents *dms.Documents, err error) {
+func (documentsService *DocumentsService) GetDocumentsPublic(doc dmsReq.DocumentsSearch, userInfo *request2.CustomClaims) (documents *dms.Documents, err error) {
 	db := global.GVA_DB.Model(&dms.Documents{})
 	var document dms.Documents
 
@@ -990,10 +990,21 @@ func (documentsService *DocumentsService) GetDocumentsPublic(doc dmsReq.Document
 		return nil, err
 	}
 
-	// TODO: restrict me
-	//if !document.PublicToView {
-	//	return nil, errors.New("bạn không có quyền xem văn bản này")
-	//}
+	// user does not log in
+	if userInfo == nil {
+		if !document.PublicToView {
+			return nil, errors.New("bạn phải đăng nhập để xem tài liệu này")
+		}
+	} else {
+		// if user logged in but did not have the right permission
+		documentAuthoritySerivce := new(DocumentRulesService)
+		checkPermission := documentAuthoritySerivce.CheckPermissionFactory()
+
+		err = checkPermission(userInfo.ID, userInfo.UUID, document.ID, dms.PERMISSION_VIEW)
+		if err != nil {
+			return nil, errors.New("bạn không có quyền để xem văn bản này")
+		}
+	}
 
 	if doc.PreloadBasedDocs == 1 {
 		if err, panicErr := documentsService.attachBaseDocuments(&document); panicErr {
