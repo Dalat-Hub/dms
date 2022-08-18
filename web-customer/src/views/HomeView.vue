@@ -4,6 +4,15 @@
 
     <el-row :gutter="16">
       <el-col :lg="6">
+        <AgencyTree
+          title="Phòng ban & Thể loại"
+          :tree="this.agencyTree"
+          @onNodeClick="this.handleOnNodeClick"
+        />
+        <AgencyTreeField
+          title="Phòng ban & Lĩnh vực"
+          @onNodeClick="this.handleOnAgencyFieldNodeClick"
+        />
         <SideMenu
           :title="this.agency.title"
           :items="this.agency.items"
@@ -18,15 +27,6 @@
           :title="this.field.title"
           :items="this.field.items"
           param="linh-vuc"
-        />
-        <AgencyTree
-          title="Phòng ban & Thể loại"
-          :tree="this.agencyTree"
-          @onNodeClick="this.handleOnNodeClick"
-        />
-        <AgencyTreeField
-          title="Phòng ban & Lĩnh vực"
-          @onNodeClick="this.handleOnAgencyFieldNodeClick"
         />
       </el-col>
       <el-col :lg="12">
@@ -249,6 +249,7 @@ export default {
         preloadAgency: 1,
         preloadFields: 1,
         preloadSigners: 1,
+        attachAuthority: 1,
         orderBy: "view_count",
       });
 
