@@ -26,16 +26,14 @@
 
       <template v-else-if="document.needAuthorization">
         <div style="padding: 2rem 0">
-          <el-tag type="warning"
-            >Bạn không có quyền truy cập văn bản này</el-tag
-          >
-
-          <div style="margin: 1rem 0">
-            <el-button
-              type="warning"
-              plain
-              @click="() => sendDocumentRequest(document)"
-              >Yêu cầu cấp quyền</el-button
+          <div style="margin-bottom: 0.5rem">
+            <el-tag type="warning"
+              >Bạn không có quyền truy cập văn bản này.</el-tag
+            >
+          </div>
+          <div>
+            <el-tag type="warning"
+              >Vui lòng liên hệ quản trị viên để được cấp quyền</el-tag
             >
           </div>
         </div>
@@ -82,12 +80,7 @@ export default {
 <script setup>
 import { getDateFormatted } from "@/utils/date";
 import { useRouter } from "vue-router";
-import { useUserStore } from "@/pinia/modules/user";
-import { ElMessage } from "element-plus";
 
-import { createDocumentPermissionRequest } from "@/api/permissionRequest";
-
-const userStore = useUserStore();
 const router = useRouter();
 
 const getDocumentTitle = (document) => {
@@ -149,21 +142,21 @@ const openLoginPage = () => {
   router.push({ name: "dms-login" });
 };
 
-const sendDocumentRequest = async (document) => {
-  if (!userStore.userInfo.uuid) return;
+// const sendDocumentRequest = async (document) => {
+//   if (!userStore.userInfo.uuid) return;
 
-  const response = await createDocumentPermissionRequest({
-    documentId: document?.ID || null,
-  });
+//   const response = await createDocumentPermissionRequest({
+//     documentId: document?.ID || null,
+//   });
 
-  if (response.code === 0) {
-    ElMessage({
-      type: "success",
-      message:
-        "Đã gửi yêu cầu cấp quyền thành công. Vui lòng đợi quản trị viên phê duyệt!!!",
-    });
-  }
-};
+//   if (response.code === 0) {
+//     ElMessage({
+//       type: "success",
+//       message:
+//         "Đã gửi yêu cầu cấp quyền thành công. Vui lòng đợi quản trị viên phê duyệt!!!",
+//     });
+//   }
+// };
 </script>
 
 <style scoped>
