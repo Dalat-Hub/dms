@@ -328,6 +328,10 @@ export default {
       }
     },
     async getFiles() {
+      const id = this.$route.params.id || 0;
+
+      if (id <= 0) return;
+
       const res = await getAttachedFiles({
         id: this.$route.params.id,
       });
