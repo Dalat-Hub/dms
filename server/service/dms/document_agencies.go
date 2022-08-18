@@ -123,6 +123,61 @@ func (documentAgenciesService *DocumentAgenciesService) GetAgencyTree() (list in
 	return results, nil
 }
 
+type agencyFieldTreeNode struct {
+	AgencyId uint                  `json:"agencyId" gorm:"agency_id"`
+	FieldId  uint                  `json:"fieldId" gorm:"fieldId"`
+	Agency   *dms.DocumentAgencies `json:"agency" gorm:"-"`
+	Field    *dms.DocumentFields   `json:"field" gorm:"-"`
+	Count    uint                  `json:"count" gorm:"count"`
+}
+
+func (documentAgenciesService *DocumentAgenciesService) GetAgencyTreeForField(pageInfo request.GetById) (list interface{}, err error) {
+	var results []*agencyFieldTreeNode
+
+	err = global.GVA_DB.Model(&dms.Documents{}).Debug().
+		Select("documents.agency_id as agency_id, document_field_references.field_id as field_id, count(documents.id) as count").
+		Where("documents.agency_id = ? AND type = ? AND status = ?", pageInfo.ID, dms.TYPE_DOCUMENT, dms.STATUS_PUBLISHED).
+		Joins("JOIN document_field_references ON documents.id = document_field_references.document_id").
+		Group("documents.agency_id, document_field_references.field_id").
+		Find(&results).Error
+
+	if results == nil {
+		return make([]*agencyFieldTreeNode, 0), nil
+	}
+
+	// attach data
+	var agencies []*dms.DocumentAgencies
+	var fields []*dms.DocumentFields
+
+	agenciesMap := map[uint]*dms.DocumentAgencies{}
+	fieldsMap := map[uint]*dms.DocumentFields{}
+
+	err = global.GVA_DB.Model(&dms.DocumentAgencies{}).Find(&agencies).Error
+	if err != nil {
+		return nil, err
+	}
+
+	err = global.GVA_DB.Model(&dms.DocumentFields{}).Find(&fields).Error
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range agencies {
+		agenciesMap[v.ID] = v
+	}
+
+	for _, v := range fields {
+		fieldsMap[v.ID] = v
+	}
+
+	for _, v := range results {
+		v.Agency = agenciesMap[v.AgencyId]
+		v.Field = fieldsMap[v.FieldId]
+	}
+
+	return results, nil
+}
+
 type agencyStats struct {
 	AgencyId uint `json:"agency_id"`
 	Count    uint `json:"count"`

@@ -15,6 +15,7 @@ func (s *DocumentAgenciesRouter) InitDocumentAgenciesPublicRouter(Router *gin.Ro
 	{
 		documentAgenciesRouterWithoutRecord.GET("", documentAgenciesApi.GetDocumentAgenciesList)
 		documentAgenciesRouterWithoutRecord.GET("tree", documentAgenciesApi.GetAgencyTree)
+		documentAgenciesRouterWithoutRecord.GET("tree/fields", documentAgenciesApi.GetAgencyTreeForField)
 	}
 }
 

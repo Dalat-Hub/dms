@@ -200,3 +200,36 @@ func (documentAgenciesApi *DocumentAgenciesApi) GetAgencyTree(c *gin.Context) {
 		response.OkWithData(gin.H{"nodes": result}, c)
 	}
 }
+
+// GetAgencyTreeForField get agency tree for field
+// @Tags DocumentAgencies
+// @Summary get agency tree for field
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data query dmsReq.DocumentAgenciesSearch true "get agency tree for field"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
+// @Router /api/v1/agencies/tree/fields [get]
+func (documentAgenciesApi *DocumentAgenciesApi) GetAgencyTreeForField(c *gin.Context) {
+	var pageInfo request.GetById
+	var err error
+
+	err = c.ShouldBindQuery(&pageInfo)
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid agency id", zap.Error(err))
+		response.FailWithMessage("please provide valid agency id", c)
+		return
+	}
+
+	if pageInfo.ID <= 0 {
+		response.FailWithMessage("please provide valid agency id", c)
+		return
+	}
+
+	if result, err := documentAgenciesService.GetAgencyTreeForField(pageInfo); err != nil {
+		global.GVA_LOG.Error("fail to get agency tree for fields", zap.Error(err))
+		response.FailWithMessage("fail to get agency tree for fields", c)
+	} else {
+		response.OkWithData(gin.H{"nodes": result}, c)
+	}
+}

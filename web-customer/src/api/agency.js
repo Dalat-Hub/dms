@@ -15,3 +15,11 @@ export const getAgenciesTree = (params) => {
     params,
   });
 };
+
+export const getAgenciesTreeForField = (params) => {
+  return service({
+    url: "api/v1/agencies/tree/fields",
+    method: "get",
+    params,
+  });
+};

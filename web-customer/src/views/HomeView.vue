@@ -24,6 +24,10 @@
           :tree="this.agencyTree"
           @onNodeClick="this.handleOnNodeClick"
         />
+        <AgencyTreeField
+          title="Phòng ban & Lĩnh vực"
+          @onNodeClick="this.handleOnAgencyFieldNodeClick"
+        />
       </el-col>
       <el-col :lg="12">
         <SearchBox
@@ -90,6 +94,7 @@ import SideMenu from "@/components/SideMenu";
 import SideContent from "@/components/SideContent";
 import SearchStat from "@/components/SearchStat";
 import AgencyTree from "@/components/AgencyTree";
+import AgencyTreeField from "@/components/AgencyTreeField";
 
 import { getDocumentCategoryList } from "@/api/category";
 import { getDocumentFieldList } from "@/api/field";
@@ -135,6 +140,7 @@ export default {
     SearchStat,
     SideContent,
     AgencyTree,
+    AgencyTreeField,
   },
   created() {
     this.$watch(
@@ -161,6 +167,14 @@ export default {
     this.getAgencyTree();
   },
   methods: {
+    handleOnAgencyFieldNodeClick(node) {
+      if (!node.agencyId || !node.fieldId) return;
+
+      this.getDocuments({
+        agency: node.agencyId,
+        field: node.fieldId,
+      });
+    },
     handleOnNodeClick(node) {
       if (node.children) return;
 
