@@ -150,9 +150,7 @@ export default {
         const type = this.$route.query["phan-loai"] || null;
         const id = this.$route.query.id || null;
 
-        if (!type || !id) {
-          this.getDocuments();
-        } else {
+        if (type || id) {
           this.getDocumentByFilter(type, id);
         }
       }
