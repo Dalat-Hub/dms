@@ -1189,12 +1189,7 @@ func (documentsService *DocumentsService) GetDocumentsInfoListPublic(info docume
 		db = db.Preload("Signers")
 	}
 
-	if info.AttachAuthority > 0 {
-		// user does not log in
-		if userInfo == nil {
-			db = db.Order("public_to_view desc")
-		}
-	}
+	db = db.Order("public_to_view desc")
 
 	if info.OrderBy != "" {
 		if info.OrderDirection != "" {
