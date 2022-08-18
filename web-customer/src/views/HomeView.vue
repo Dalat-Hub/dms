@@ -95,6 +95,7 @@ import SideContent from "@/components/SideContent";
 import SearchStat from "@/components/SearchStat";
 import AgencyTree from "@/components/AgencyTree";
 import AgencyTreeField from "@/components/AgencyTreeField";
+import { ElMessage } from "element-plus";
 
 import { getDocumentCategoryList } from "@/api/category";
 import { getDocumentFieldList } from "@/api/field";
@@ -322,6 +323,11 @@ export default {
         this.searchStats.count = table.data.total;
         this.searchStats.searchBy = filter;
         delete this.searchStats.searchBy.page;
+
+        ElMessage({
+          type: "success",
+          message: "Lấy danh sách tài liệu thành công!!!",
+        });
       }
     },
     handleOnDocumentViewDetailClick(document) {
