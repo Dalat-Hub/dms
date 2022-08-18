@@ -14,6 +14,7 @@ func (s *DocumentAgenciesRouter) InitDocumentAgenciesPublicRouter(Router *gin.Ro
 	var documentAgenciesApi = v1.ApiGroupApp.DmsApiGroup.DocumentAgenciesApi
 	{
 		documentAgenciesRouterWithoutRecord.GET("", documentAgenciesApi.GetDocumentAgenciesList)
+		documentAgenciesRouterWithoutRecord.GET("tree", documentAgenciesApi.GetAgencyTree)
 	}
 }
 

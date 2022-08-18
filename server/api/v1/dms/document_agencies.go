@@ -182,3 +182,21 @@ func (documentAgenciesApi *DocumentAgenciesApi) GetDocumentAgenciesList(c *gin.C
 		}, "list of agencies", c)
 	}
 }
+
+// GetAgencyTree get agency tree
+// @Tags DocumentAgencies
+// @Summary get agency tree
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data query dmsReq.DocumentAgenciesSearch true "get agency tree"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
+// @Router /api/v1/agencies/tree [get]
+func (documentAgenciesApi *DocumentAgenciesApi) GetAgencyTree(c *gin.Context) {
+	if result, err := documentAgenciesService.GetAgencyTree(); err != nil {
+		global.GVA_LOG.Error("fail to get agency tree", zap.Error(err))
+		response.FailWithMessage("fail to get agency tree", c)
+	} else {
+		response.OkWithData(gin.H{"nodes": result}, c)
+	}
+}

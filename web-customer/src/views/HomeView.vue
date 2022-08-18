@@ -19,6 +19,11 @@
           :items="this.field.items"
           param="linh-vuc"
         />
+        <AgencyTree
+          title="Phòng ban & Thể loại"
+          :tree="this.agencyTree"
+          @onNodeClick="this.handleOnNodeClick"
+        />
       </el-col>
       <el-col :lg="12">
         <SearchBox
@@ -84,10 +89,11 @@ import DocumentCard from "@/components/DocumentCard";
 import SideMenu from "@/components/SideMenu";
 import SideContent from "@/components/SideContent";
 import SearchStat from "@/components/SearchStat";
+import AgencyTree from "@/components/AgencyTree";
 
 import { getDocumentCategoryList } from "@/api/category";
 import { getDocumentFieldList } from "@/api/field";
-import { getDocumentAgencyList } from "@/api/agency";
+import { getAgenciesTree, getDocumentAgencyList } from "@/api/agency";
 import { getDocumentList } from "@/api/document";
 
 export default {
@@ -118,6 +124,7 @@ export default {
         searchBy: {},
         signText: "",
       },
+      agencyTree: [],
     };
   },
   components: {
@@ -127,6 +134,7 @@ export default {
     SideMenu,
     SearchStat,
     SideContent,
+    AgencyTree,
   },
   created() {
     this.$watch(
@@ -150,8 +158,60 @@ export default {
     this.getDocuments();
     this.getDocumentByDay();
     this.getNewestDocuments();
+    this.getAgencyTree();
   },
   methods: {
+    handleOnNodeClick(node) {
+      if (node.children) return;
+
+      this.getDocuments({
+        agency: node.agencyId,
+        category: node.categoryId,
+      });
+    },
+    async getAgencyTree() {
+      const response = await getAgenciesTree();
+      if (response.code === 0) {
+        const nodes = response.data.nodes.reduce((acc, cur) => {
+          if (!acc[cur.agencyId]) {
+            return {
+              ...acc,
+              [cur.agencyId]: {
+                label: cur.agency.name,
+                children: [
+                  {
+                    label: `${cur.category.name} - (${cur.count})`,
+                    agencyId: cur.agency.ID,
+                    categoryId: cur.category.ID,
+                  },
+                ],
+              },
+            };
+          }
+
+          return {
+            ...acc,
+            [cur.agencyId]: {
+              ...acc[cur.agencyId],
+              children: [
+                ...acc[cur.agencyId].children,
+                {
+                  label: `${cur.category.name} - (${cur.count})`,
+                  agencyId: cur.agency.ID,
+                  categoryId: cur.category.ID,
+                },
+              ],
+            },
+          };
+        }, {});
+
+        const tree = Object.keys(nodes).reduce((acc, cur) => {
+          return [...acc, nodes[cur]];
+        }, []);
+
+        this.agencyTree = tree;
+      }
+    },
     async getNewestDocuments() {
       const response = await getDocumentList({
         page: 1,

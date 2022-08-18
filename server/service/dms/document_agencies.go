@@ -69,6 +69,60 @@ func (documentAgenciesService *DocumentAgenciesService) GetDocumentAgenciesInfoL
 	return documentAgenciess, total, err
 }
 
+type agencyTreeNode struct {
+	AgencyId   uint                    `json:"agencyId" gorm:"agency_id"`
+	CategoryId uint                    `json:"categoryId" gorm:"category_id"`
+	Agency     *dms.DocumentAgencies   `json:"agency" gorm:"-"`
+	Category   *dms.DocumentCategories `json:"category" gorm:"-"`
+	Count      uint                    `json:"count" gorm:"count"`
+}
+
+func (documentAgenciesService *DocumentAgenciesService) GetAgencyTree() (list interface{}, err error) {
+	var results []*agencyTreeNode
+
+	err = global.GVA_DB.Model(&dms.Documents{}).Debug().
+		Select("agency_id, category_id, count(ID) as count").
+		Where("type = ? AND status = ?", dms.TYPE_DOCUMENT, dms.STATUS_PUBLISHED).
+		Group("agency_id, category_id").
+		Scan(&results).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	// attach data
+	var agencies []*dms.DocumentAgencies
+	var categories []*dms.DocumentCategories
+
+	agenciesMap := map[uint]*dms.DocumentAgencies{}
+	categoriesMap := map[uint]*dms.DocumentCategories{}
+
+	err = global.GVA_DB.Model(&dms.DocumentAgencies{}).Find(&agencies).Error
+	if err != nil {
+		return nil, err
+	}
+
+	err = global.GVA_DB.Model(&dms.DocumentCategories{}).Find(&categories).Error
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range agencies {
+		agenciesMap[v.ID] = v
+	}
+
+	for _, v := range categories {
+		categoriesMap[v.ID] = v
+	}
+
+	for _, v := range results {
+		v.Agency = agenciesMap[v.AgencyId]
+		v.Category = categoriesMap[v.CategoryId]
+	}
+
+	return results, nil
+}
+
 type agencyStats struct {
 	AgencyId uint `json:"agency_id"`
 	Count    uint `json:"count"`

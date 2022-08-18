@@ -7,3 +7,11 @@ export const getDocumentAgencyList = (params) => {
     params,
   });
 };
+
+export const getAgenciesTree = (params) => {
+  return service({
+    url: "api/v1/agencies/tree",
+    method: "get",
+    params,
+  });
+};
