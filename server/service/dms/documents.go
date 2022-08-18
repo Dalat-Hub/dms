@@ -990,19 +990,19 @@ func (documentsService *DocumentsService) GetDocumentsPublic(doc dmsReq.Document
 		return nil, err
 	}
 
-	// user does not log in
-	if userInfo == nil {
-		if !document.PublicToView {
+	if !document.PublicToView {
+		// user does not log in
+		if userInfo == nil {
 			return nil, errors.New("bạn phải đăng nhập để xem tài liệu này")
-		}
-	} else {
-		// if user logged in but did not have the right permission
-		documentAuthoritySerivce := new(DocumentRulesService)
-		checkPermission := documentAuthoritySerivce.CheckPermissionFactory()
+		} else {
+			// if user logged in but did not have the right permission
+			documentAuthoritySerivce := new(DocumentRulesService)
+			checkPermission := documentAuthoritySerivce.CheckPermissionFactory()
 
-		err = checkPermission(userInfo.ID, userInfo.UUID, document.ID, dms.PERMISSION_VIEW)
-		if err != nil {
-			return nil, errors.New("bạn không có quyền để xem văn bản này")
+			err = checkPermission(userInfo.ID, userInfo.UUID, document.ID, dms.PERMISSION_VIEW)
+			if err != nil {
+				return nil, errors.New("bạn không có quyền để xem văn bản này")
+			}
 		}
 	}
 
