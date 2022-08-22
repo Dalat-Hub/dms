@@ -8,7 +8,7 @@
     <div class="text item" style="margin-bottom: 0.5rem">
       <el-tree
         :data="this.tree"
-        :props="defaultProps"
+        :props="this.defaultProps"
         @node-click="(node) => $emit('onNodeClick', node)"
       />
     </div>
@@ -20,15 +20,16 @@ export default {
   name: "AgencyTree",
   props: ["title", "tree"],
   emits: ["onNodeClick"],
-};
-</script>
-
-<script setup>
-const defaultProps = {
-  children: "children",
-  label: "label",
-  categoryId: "categoryId",
-  agencyId: "agencyId",
+  data() {
+    return {
+      defaultProps: {
+        children: "children",
+        label: "label",
+        categoryId: "categoryId",
+        agencyId: "agencyId",
+      },
+    };
+  },
 };
 </script>
 
