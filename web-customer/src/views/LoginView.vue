@@ -35,6 +35,28 @@
           <el-button type="primary" @click="onSubmit">Đăng nhập</el-button>
         </el-form-item>
       </el-form>
+
+      <hr />
+
+      <div>
+        <a
+          :href="getGoogleUrl('/')"
+          style="
+            display: flex;
+            align-items: center;
+            margin-top: 1rem;
+            text-decoration: none;
+          "
+        >
+          <img
+            src="@/assets/google.png"
+            alt="Google"
+            class="link-icon"
+            style="width: 2rem; margin-right: 0.5rem"
+          />
+          <span style="color: #333">Đăng nhập với Google</span>
+        </a>
+      </div>
     </el-col>
   </el-row>
 </template>
@@ -50,6 +72,7 @@ import { reactive, ref } from "vue";
 import { captcha } from "@/api/user";
 import { useUserStore } from "@/pinia/modules/user";
 import router from "@/router/index";
+import { getGoogleUrl } from "@/utils/getGoogleUrl";
 
 const userStore = useUserStore();
 

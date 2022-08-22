@@ -42,6 +42,12 @@ const routes = [
     component: () =>
       import(/* webpackChunkName: "dms-login" */ "../views/LoginView.vue"),
   },
+  {
+    path: "/set-token",
+    name: "dms-set-token",
+    component: () =>
+      import(/* webpackChunkName: "dms-set-token" */ "../views/SetToken.vue"),
+  },
 ];
 
 const router = createRouter({
