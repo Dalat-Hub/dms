@@ -40,7 +40,7 @@ func Routers() *gin.Engine {
 	//global.GVA_LOG.Info("use middleware cors")
 
 	Router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	global.GVA_LOG.Info("register swagger handler")
+	global.GVA_LOG.Info("\nregister swagger handler")
 
 	// It is convenient to uniformly add routing group prefixes and use multiple servers online.
 
@@ -107,6 +107,6 @@ func Routers() *gin.Engine {
 
 	InstallPlugin(Router) // install the plugin
 
-	global.GVA_LOG.Info("router register success")
+	global.GVA_LOG.Info("\nrouter register success")
 	return Router
 }
