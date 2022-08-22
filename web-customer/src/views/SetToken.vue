@@ -15,8 +15,8 @@ const checkLoginToken = async () => {
   const query = route.query;
   let hasValue = false;
 
-  const { token } = userStore;
-  if (token) {
+  const existingToken = window.localStorage.getItem("token") || null;
+  if (existingToken) {
     router.push({
       name: "home",
     });
