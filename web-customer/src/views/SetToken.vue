@@ -5,19 +5,17 @@
 <script setup>
 import { useRoute } from "vue-router";
 import { useUserStore } from "@/pinia/modules/user";
-import { useRouter } from "vue-router";
+// import { useRouter } from "vue-router";
 import { onMounted } from "vue";
 
 const route = useRoute();
 const userStore = useUserStore();
-const router = useRouter();
+// const router = useRouter();
 
 const checkLoginToken = async () => {
   const existingToken = window.localStorage.getItem("token") || null;
   if (existingToken) {
-    router.push({
-      name: "home",
-    });
+    window.location.href = "/";
 
     return;
   }
@@ -44,8 +42,11 @@ const checkLoginToken = async () => {
 
   if (hasValue) {
     await userStore.GetUserInfo();
-    router.push({ name: "home" });
+    window.location.href = "/";
+    return;
   }
+
+  return;
 };
 
 onMounted(() => {
