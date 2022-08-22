@@ -42,11 +42,15 @@ service.interceptors.response.use(
       }
       return response.data;
     } else {
-      ElMessage({
-        showClose: true,
-        message: response.data.msg || decodeURI(response.headers.msg),
-        type: "error",
-      });
+      // TODO: fix me later, do not display error when user does not log in
+      if (!response.data.msg === "That's not even a token") {
+        ElMessage({
+          showClose: true,
+          message: response.data.msg || decodeURI(response.headers.msg),
+          type: "error",
+        });
+      }
+
       if (response.data.data && response.data.data.reload) {
         userStore.token = "";
         localStorage.clear();
