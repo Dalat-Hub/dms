@@ -16,6 +16,9 @@
       <el-col :lg="22">
         <el-row :gutter="10">
           <el-col :lg="17" :sm="24">
+
+            <!-- Document metadata section -->
+
             <div class="gva-card-box">
               <div class="el-card is-always-shadow gva-card quick-entrance">
                 <div class="el-card__body">
@@ -71,6 +74,8 @@
                 </div>
               </div>
             </div>
+
+            <!-- Document basic data section -->
 
             <div class="gva-card-box" style="margin: 1rem 0">
               <div class="el-card is-always-shadow gva-card quick-entrance">
@@ -312,6 +317,8 @@
               </div>
             </div>
 
+            <!-- Document relatedd data section -->
+
             <div class="gva-card-box" style="margin: 1rem 0">
               <div class="el-card is-always-shadow gva-card quick-entrance">
                 <div class="el-card__body">
@@ -421,6 +428,8 @@
               </div>
             </div>
 
+            <!-- Authority section -->
+
             <div v-if="formAuthorityData.hasValue" class="gva-card-box" style="margin: 1rem 0">
               <div class="el-card is-always-shadow gva-card quick-entrance">
                 <div class="el-card__body">
@@ -431,7 +440,6 @@
                     <el-form-item label="Xem văn bản">
                       <el-radio-group v-model="formAuthorityData.view">
                         <el-radio label="all" size="large">Công khai</el-radio>
-                        <el-radio label="admin" size="large">Chỉ người dùng quản trị</el-radio>
                         <el-radio label="limit" size="large">Hạn chế</el-radio>
                       </el-radio-group>
                     </el-form-item>
@@ -472,7 +480,6 @@
                     <el-form-item label="Tải tập tin đính kèm">
                       <el-radio-group v-model="formAuthorityData.download">
                         <el-radio label="all" size="large">Công khai</el-radio>
-                        <el-radio label="admin" size="large">Chỉ người dùng quản trị</el-radio>
                         <el-radio label="limit" size="large">Hạn chế</el-radio>
                       </el-radio-group>
                     </el-form-item>
@@ -602,6 +609,8 @@
               </div>
             </div>
 
+            <!-- File download section -->
+
             <div class="gva-card-box" style="margin: 1rem 0">
               <div class="el-card is-always-shadow gva-card quick-entrance">
                 <div class="el-card__body">
@@ -643,6 +652,7 @@
             </div>
 
           </el-col>
+
           <el-col :lg="7" :sm="24">
             <el-space :fill="true" wrap style="width: 100%">
               <el-card v-for="d in revisions" :key="d.ID" class="box-card">
@@ -776,7 +786,7 @@ import { getDict } from '../../utils/dictionary'
 import { createDocumentAgencies, getDocumentAgenciesList } from '../../api/documentAgencies'
 import { createDocumentCategories, getDocumentCategoriesList } from '../../api/documentCategories'
 import { createDocumentFields, getDocumentFieldsList } from '../../api/documentFields'
-import { findDocuments, createDraftDocument, getDocumentFiles, getDocumentsList, updateBasicDocuments, getDocumentRevisions, updateRelatedDocuments, updateDocumentFiles } from '../../api/documents'
+import { findDocumentsForUpdate, createDraftDocument, getDocumentFiles, getDocumentsList, updateBasicDocuments, getDocumentRevisions, updateRelatedDocuments, updateDocumentFiles } from '../../api/documents'
 import { getUserList } from '../../api/user'
 import { getAuthorityInfo } from '../../api/authority'
 import { formatDate } from '../../utils/format'
@@ -823,8 +833,8 @@ const formOwnerData = ref({
 
 const formAuthorityData = ref({
   hasValue: false,
-  view: 'admin',
-  download: 'admin',
+  view: 'only',
+  download: 'only',
   edit: 'only',
   owner: 'only',
   viewUsers: [],
@@ -913,7 +923,7 @@ watch(() => route.params.id, (id) => {
 const getDocument = async() => {
   if (!Number.isInteger(searchInfo.value.ID)) { return }
 
-  const body = await findDocuments({
+  const body = await findDocumentsForUpdate({
     ...searchInfo.value,
     preloadFields: 1,
     preloadSigners: 1,
@@ -978,21 +988,13 @@ const getDocument = async() => {
       if (d.authority.publicToView) {
         formAuthorityData.value.view = 'all'
       } else {
-        if (d.authority.onlyAdminCanView) {
-          formAuthorityData.value.view = 'admin'
-        } else {
-          formAuthorityData.value.view = 'limit'
-        }
+        formAuthorityData.value.view = 'limit'
       }
 
       if (d.authority.publicToDownload) {
         formAuthorityData.value.download = 'all'
       } else {
-        if (d.authority.onlyAdminCanDownload) {
-          formAuthorityData.value.download = 'admin'
-        } else {
-          formAuthorityData.value.download = 'limit'
-        }
+        formAuthorityData.value.download = 'limit'
       }
     }
   }
