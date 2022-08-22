@@ -19,10 +19,9 @@
           v-for="(agency, index) in agencies"
           :index="'3-' + (index + 1)"
           :key="agency.ID"
-          ><router-link
-            :to="`/van-ban?phan-loai=co-quan-ban-hanh&id=${agency.ID}`"
-            >{{ agency.name }}</router-link
-          ></el-menu-item
+          ><router-link :to="`/van-ban?co-quan-ban-hanh=${agency.ID}`">{{
+            agency.name
+          }}</router-link></el-menu-item
         >
       </el-sub-menu>
       <el-sub-menu index="4">
@@ -31,7 +30,7 @@
           v-for="(category, index) in categories"
           :index="'4-' + (index + 1)"
           :key="category.ID"
-          ><router-link :to="`/van-ban?phan-loai=the-loai&id=${category.ID}`">{{
+          ><router-link :to="`/van-ban?the-loai=${category.ID}`">{{
             category.name
           }}</router-link></el-menu-item
         >

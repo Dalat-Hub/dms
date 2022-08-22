@@ -27,7 +27,7 @@ export default {
   props: ["title", "items", "param"],
   methods: {
     linkTo(item) {
-      return `/van-ban?phan-loai=${this.param}&id=${item.ID}`;
+      return `/van-ban?${this.param}=${item.ID}`;
     },
   },
 };

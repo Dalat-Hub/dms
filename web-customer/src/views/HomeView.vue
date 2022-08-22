@@ -7,11 +7,11 @@
         <AgencyTree
           title="Phòng ban & Thể loại"
           :tree="this.agencyTree"
-          @onNodeClick="this.handleOnNodeClick"
+          @onNodeClick="handleOnTreeNodeClick"
         />
         <AgencyTreeField
           title="Phòng ban & Lĩnh vực"
-          @onNodeClick="this.handleOnAgencyFieldNodeClick"
+          @onNodeClick="handleOnAgencyFieldNodeClick"
         />
         <SideMenu
           :title="this.agency.title"
@@ -147,11 +147,20 @@ export default {
     this.$watch(
       () => this.$route.params,
       () => {
-        const type = this.$route.query["phan-loai"] || null;
-        const id = this.$route.query.id || null;
+        const agencyId = this.$route.query["co-quan-ban-hanh"] || null;
+        const fieldId = this.$route.query["linh-vuc"] || null;
+        const categoryId = this.$route.query["the-loai"] || null;
 
-        if (type || id) {
-          this.getDocumentByFilter(type, id);
+        console.log(this.$route.query);
+
+        const query = {};
+
+        if (agencyId) query.agency = agencyId;
+        if (fieldId) query.field = fieldId;
+        if (categoryId) query.category = categoryId;
+
+        if (Object.keys(query).length > 0) {
+          this.getDocuments(query);
         }
       }
     );
@@ -166,20 +175,34 @@ export default {
     this.getAgencyTree();
   },
   methods: {
-    handleOnAgencyFieldNodeClick(node) {
-      if (!node.agencyId || !node.fieldId) return;
+    handleOnTreeNodeClick(node) {
+      const agencyId = node.agencyId || null;
+      const categoryId = node.categoryId || null;
 
-      this.getDocuments({
-        agency: node.agencyId,
-        field: node.fieldId,
+      if (!agencyId || !categoryId) return;
+
+      this.$router.push({
+        path: `/`,
+        query: {
+          "co-quan-ban-hanh": agencyId,
+          "the-loai": categoryId,
+        },
+        replace: true,
       });
     },
-    handleOnNodeClick(node) {
-      if (node.children) return;
+    handleOnAgencyFieldNodeClick(node) {
+      const agencyId = node.agencyId || null;
+      const fieldId = node.fieldId || null;
 
-      this.getDocuments({
-        agency: node.agencyId,
-        category: node.categoryId,
+      if (!agencyId || !fieldId) return;
+
+      this.$router.push({
+        path: `/`,
+        query: {
+          "co-quan-ban-hanh": agencyId,
+          "linh-vuc": fieldId,
+        },
+        replace: true,
       });
     },
     async getAgencyTree() {
@@ -306,7 +329,18 @@ export default {
       }
     },
     async getDocuments(filter = {}) {
+      const agencyId = this.$route.query["co-quan-ban-hanh"] || null;
+      const fieldId = this.$route.query["linh-vuc"] || null;
+      const categoryId = this.$route.query["the-loai"] || null;
+
+      const query = {};
+
+      if (agencyId) query.agency = agencyId;
+      if (fieldId) query.field = fieldId;
+      if (categoryId) query.category = categoryId;
+
       const table = await getDocumentList({
+        ...query,
         page: 1,
         pageSize: this.pageSize,
         ...filter,
