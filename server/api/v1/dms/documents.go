@@ -301,6 +301,41 @@ func (documentsApi *DocumentsApi) FindDocuments(c *gin.Context) {
 	}
 }
 
+// FindDocumentsForUpdate find document by ID for update
+// @Tags Documents
+// @Summary find document by ID for update
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data query dms.Documents true "find document by ID for update"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
+// @Router /documents/findDocumentsForUpdate [get]
+func (documentsApi *DocumentsApi) FindDocumentsForUpdate(c *gin.Context) {
+	var documents dmsReq.DocumentsSearch
+	var err error
+
+	err = c.ShouldBindQuery(&documents)
+	if err != nil {
+		global.GVA_LOG.Error("provide valid ID", zap.Error(err))
+		response.FailWithMessage("provide valid ID", c)
+		return
+	}
+
+	user := utils.GetUserInfo(c)
+	if err = documentRulesService.CheckPermission(user.ID, user.UUID, documents.ID, dms.PERMISSION_EDIT); err != nil {
+		global.GVA_LOG.Error("you don't have permission to edit the desired document", zap.Error(err))
+		response.FailWithMessage("you don't have permission to edit the desired document", c)
+		return
+	}
+
+	if redocuments, err := documentsService.GetDocuments(documents, user.ID, user.UUID); err != nil {
+		global.GVA_LOG.Error("fail to find document", zap.Error(err))
+		response.FailWithMessage("fail to find document", c)
+	} else {
+		response.OkWithData(gin.H{"document": redocuments}, c)
+	}
+}
+
 func (documentsApi *DocumentsApi) FindDocumentsPublic(c *gin.Context) {
 	var documents dmsReq.DocumentsSearch
 	var err error
