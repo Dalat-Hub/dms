@@ -4,6 +4,15 @@
 
     <el-row :gutter="10">
       <el-col :sm="8" :lg="6">
+        <AgencyTree
+          title="Phòng ban & Thể loại"
+          :tree="this.agencyTree"
+          @onNodeClick="handleOnTreeNodeClick"
+        />
+        <AgencyTreeField
+          title="Phòng ban & Lĩnh vực"
+          @onNodeClick="handleOnAgencyFieldNodeClick"
+        />
         <SideMenu
           :title="this.agency.title"
           :items="this.agency.items"
@@ -187,6 +196,8 @@
 <script>
 import BreadCrumb from "@/components/BreadCrumb";
 import SideMenu from "@/components/SideMenu";
+import AgencyTree from "@/components/AgencyTree";
+import AgencyTreeField from "@/components/AgencyTreeField";
 
 import { getDateFormatted } from "@/utils/date";
 
@@ -195,6 +206,8 @@ import { getDocumentFieldList } from "@/api/field";
 import { getDocumentAgencyList } from "@/api/agency";
 import { findDocument, getAttachedFiles } from "@/api/document";
 
+import { getAgenciesTree } from "@/api/agency";
+
 const path = process.env.VUE_APP_BASE_URL;
 
 export default {
@@ -202,6 +215,8 @@ export default {
   components: {
     BreadCrumb,
     SideMenu,
+    AgencyTree,
+    AgencyTreeField,
   },
   data() {
     return {
@@ -231,6 +246,7 @@ export default {
         canDownload: false,
         files: [],
       },
+      agencyTree: [],
     };
   },
   created() {
@@ -248,8 +264,82 @@ export default {
     this.getAgencies();
     this.getDocument();
     this.getFiles();
+    this.getAgencyTree();
   },
   methods: {
+    handleOnTreeNodeClick(node) {
+      const agencyId = node.agencyId || null;
+      const categoryId = node.categoryId || null;
+
+      if (!agencyId || !categoryId) return;
+
+      this.$router.push({
+        path: `/`,
+        query: {
+          "co-quan-ban-hanh": agencyId,
+          "the-loai": categoryId,
+        },
+        replace: true,
+      });
+    },
+    handleOnAgencyFieldNodeClick(node) {
+      const agencyId = node.agencyId || null;
+      const fieldId = node.fieldId || null;
+
+      if (!agencyId || !fieldId) return;
+
+      this.$router.push({
+        path: `/`,
+        query: {
+          "co-quan-ban-hanh": agencyId,
+          "linh-vuc": fieldId,
+        },
+        replace: true,
+      });
+    },
+    async getAgencyTree() {
+      const response = await getAgenciesTree();
+      if (response.code === 0) {
+        const nodes = response.data.nodes.reduce((acc, cur) => {
+          if (!acc[cur.agencyId]) {
+            return {
+              ...acc,
+              [cur.agencyId]: {
+                label: cur.agency.name,
+                children: [
+                  {
+                    label: `${cur.category.name} - (${cur.count})`,
+                    agencyId: cur.agency.ID,
+                    categoryId: cur.category.ID,
+                  },
+                ],
+              },
+            };
+          }
+
+          return {
+            ...acc,
+            [cur.agencyId]: {
+              ...acc[cur.agencyId],
+              children: [
+                ...acc[cur.agencyId].children,
+                {
+                  label: `${cur.category.name} - (${cur.count})`,
+                  agencyId: cur.agency.ID,
+                  categoryId: cur.category.ID,
+                },
+              ],
+            },
+          };
+        }, {});
+
+        const tree = Object.keys(nodes).reduce((acc, cur) => {
+          return [...acc, nodes[cur]];
+        }, []);
+
+        this.agencyTree = tree;
+      }
+    },
     getFileURL() {
       return (
         process.env.VUE_APP_BASE_URL +
