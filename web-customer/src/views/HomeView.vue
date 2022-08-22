@@ -151,8 +151,6 @@ export default {
         const fieldId = this.$route.query["linh-vuc"] || null;
         const categoryId = this.$route.query["the-loai"] || null;
 
-        console.log(this.$route.query);
-
         const query = {};
 
         if (agencyId) query.agency = agencyId;
