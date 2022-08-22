@@ -1,5 +1,5 @@
 <template>
-  <h1>Hello world</h1>
+  <h1>Processing login ...</h1>
 </template>
 
 <script setup>
@@ -12,10 +12,17 @@ const userStore = useUserStore();
 const router = useRouter();
 
 const checkLoginToken = async () => {
-  debugger;
-
   const query = route.query;
   let hasValue = false;
+
+  const { token } = userStore;
+  if (token) {
+    router.push({
+      name: "home",
+    });
+
+    return;
+  }
 
   if (query.redirect) {
     if (!query.redirect.includes("token=")) return;
@@ -26,28 +33,17 @@ const checkLoginToken = async () => {
     if (!token) return;
 
     userStore.setToken(token);
-
-    // TODO: fix me later
-    window.localStorage.setItem("token", query.token);
     hasValue = true;
   }
 
   if (query.token) {
     userStore.setToken(query.token);
-
-    // TODO: fix me later
-    window.localStorage.setItem("token", query.token);
     hasValue = true;
   }
 
   if (hasValue) {
-    const res = await userStore.GetUserInfo();
-
-    if (res.code === 0) {
-      router.push({ path: "/" });
-    } else {
-      router.push({ path: "/?error=1" });
-    }
+    await userStore.GetUserInfo();
+    window.location.reload();
   }
 };
 checkLoginToken();
