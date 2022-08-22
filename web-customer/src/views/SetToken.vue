@@ -12,6 +12,8 @@ const userStore = useUserStore();
 const router = useRouter();
 
 const checkLoginToken = async () => {
+  debugger;
+
   const query = route.query;
   let hasValue = false;
 
@@ -24,11 +26,17 @@ const checkLoginToken = async () => {
     if (!token) return;
 
     userStore.setToken(token);
+
+    // TODO: fix me later
+    window.localStorage.setItem("token", query.token);
     hasValue = true;
   }
 
   if (query.token) {
     userStore.setToken(query.token);
+
+    // TODO: fix me later
+    window.localStorage.setItem("token", query.token);
     hasValue = true;
   }
 
