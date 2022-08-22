@@ -6,15 +6,13 @@
 import { useRoute } from "vue-router";
 import { useUserStore } from "@/pinia/modules/user";
 import { useRouter } from "vue-router";
+import { onMounted } from "vue";
 
 const route = useRoute();
 const userStore = useUserStore();
 const router = useRouter();
 
 const checkLoginToken = async () => {
-  const query = route.query;
-  let hasValue = false;
-
   const existingToken = window.localStorage.getItem("token") || null;
   if (existingToken) {
     router.push({
@@ -23,6 +21,9 @@ const checkLoginToken = async () => {
 
     return;
   }
+
+  const query = route.query;
+  let hasValue = false;
 
   if (query.redirect) {
     if (!query.redirect.includes("token=")) return;
@@ -43,8 +44,11 @@ const checkLoginToken = async () => {
 
   if (hasValue) {
     await userStore.GetUserInfo();
-    window.location.reload();
+    router.push({ name: "home" });
   }
 };
-checkLoginToken();
+
+onMounted(() => {
+  checkLoginToken();
+});
 </script>
