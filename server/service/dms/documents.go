@@ -1061,7 +1061,7 @@ func (documentsService *DocumentsService) GetDocumentsPublic(doc dmsReq.Document
 }
 
 // GetDocumentsInfoList get list of documents
-func (documentsService *DocumentsService) GetDocumentsInfoList(info dmsReq.DocumentsSearch, onlyPublic bool) (list interface{}, total int64, err error) {
+func (documentsService *DocumentsService) GetDocumentsInfoList(info dmsReq.DocumentsSearch, userInfo *request2.CustomClaims) (list interface{}, total int64, err error) {
 	limit := info.PageSize
 	offset := info.PageSize * (info.Page - 1)
 
@@ -1069,12 +1069,11 @@ func (documentsService *DocumentsService) GetDocumentsInfoList(info dmsReq.Docum
 
 	var documentss []dms.Documents
 
-	if onlyPublic {
-		db = db.Where("public_to_view = ?", true)
-	}
+	db = db.Where("type = ?", dms.TYPE_DOCUMENT)
 
-	if info.SignText != "" {
-		db = db.Where("`sign_text` LIKE ?", "%"+info.SignText+"%")
+	if info.Keyword != "" {
+		searchTerm := "%" + info.Keyword + "%"
+		db = db.Where("`title` LIKE ? OR `sign_text` LIKE ? OR `expert` LIKE ?", searchTerm, searchTerm, searchTerm)
 	}
 
 	if info.AgencyId > 0 {
@@ -1121,12 +1120,14 @@ func (documentsService *DocumentsService) GetDocumentsInfoList(info dmsReq.Docum
 		db = db.Preload("Signers")
 	}
 
-	err = db.Where("type = ?", dms.TYPE_DOCUMENT).Count(&total).Error
+	db = db.Order("created_at desc")
+
+	err = db.Count(&total).Error
 	if err != nil {
 		return
 	}
 
-	err = db.Order("created_at desc").Find(&documentss).Error
+	err = db.Find(&documentss).Error
 
 	return documentss, total, err
 }

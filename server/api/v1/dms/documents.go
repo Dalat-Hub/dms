@@ -377,7 +377,9 @@ func (documentsApi *DocumentsApi) GetDocumentsList(c *gin.Context) {
 		return
 	}
 
-	if list, total, err := documentsService.GetDocumentsInfoList(pageInfo, false); err != nil {
+	userInfo := utils.GetUserInfo(c)
+
+	if list, total, err := documentsService.GetDocumentsInfoList(pageInfo, userInfo); err != nil {
 		global.GVA_LOG.Error("fail to get list of documents", zap.Error(err))
 		response.FailWithMessage("fail to get list of documents", c)
 	} else {
