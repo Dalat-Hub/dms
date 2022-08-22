@@ -160,6 +160,14 @@ export const findDocuments = (params) => {
   })
 }
 
+export const findDocumentsForUpdate = (params) => {
+  return service({
+    url: '/documents/findDocumentsForUpdate',
+    method: 'get',
+    params,
+  })
+}
+
 // @Tags Documents
 // @Summary get list of documents
 // @Security ApiKeyAuth
