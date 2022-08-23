@@ -438,7 +438,7 @@
                         />
                       </el-select>
                     </el-form-item>
-                    <el-form-item v-if="documentRule.edit === 'limit'" label="Nhóm sở hữu tập tin">
+                    <el-form-item v-if="documentRule.owner === 'limit'" label="Nhóm sở hữu tập tin">
                       <el-select
                         v-model="documentRule.ownerRoles"
                         :style="{ width: '100%' }"
