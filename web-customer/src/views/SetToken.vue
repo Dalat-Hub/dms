@@ -1,52 +1,38 @@
 <template>
-  <h1>Processing login ...</h1>
+  <h1>Tiến hành đăng nhập</h1>
+
+  <div>
+    <h1>Đăng nhập thành công, nhấn vào đây để quay về trang chủ</h1>
+  </div>
 </template>
 
 <script setup>
 import { useRoute } from "vue-router";
 import { useUserStore } from "@/pinia/modules/user";
-// import { useRouter } from "vue-router";
+import { useRouter } from "vue-router";
 import { onMounted } from "vue";
 
 const route = useRoute();
 const userStore = useUserStore();
-// const router = useRouter();
+const router = useRouter();
 
 const checkLoginToken = async () => {
-  const existingToken = window.localStorage.getItem("token") || null;
+  const existingToken = userStore.token || null;
   if (existingToken) {
-    window.location.href = "/";
-
+    router.push({ name: "home" });
     return;
   }
 
-  const query = route.query;
-  let hasValue = false;
-
-  if (query.redirect) {
-    if (!query.redirect.includes("token=")) return;
-
-    const parts = query.redirect.split("token=");
-    const token = parts[1];
-
-    if (!token) return;
-
-    userStore.setToken(token);
-    hasValue = true;
-  }
-
-  if (query.token) {
-    userStore.setToken(query.token);
-    hasValue = true;
-  }
-
-  if (hasValue) {
-    await userStore.GetUserInfo();
-    window.location.href = "/";
+  const token = route.query.token || null;
+  if (!token) {
+    router.push({ name: "dms-login" });
     return;
   }
 
-  return;
+  userStore.setToken(route.query.token);
+  await userStore.GetUserInfo();
+
+  router.push({ name: "home" });
 };
 
 onMounted(() => {
