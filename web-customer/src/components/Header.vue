@@ -68,10 +68,12 @@ export default {
 import { getDocumentCategoryList } from "@/api/category";
 import { getDocumentAgencyList } from "@/api/agency";
 import { useUserStore } from "@/pinia/modules/user";
+import { useRoute } from "vue-router";
 
 import { ref } from "vue";
 
 const userStore = useUserStore();
+const route = useRoute();
 
 const agencies = ref([]);
 const categories = ref([]);
@@ -79,6 +81,8 @@ const categories = ref([]);
 const activeIndex = ref("1");
 
 const getUserInfo = () => {
+  if (route.path.includes("set-token")) return;
+
   userStore.GetUserInfo();
 };
 
