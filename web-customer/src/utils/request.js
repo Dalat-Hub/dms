@@ -34,6 +34,7 @@ service.interceptors.response.use(
   (response) => {
     const userStore = useUserStore();
     if (response.headers["new-token"]) {
+      console.log("set token new-token");
       userStore.setToken(response.headers["new-token"]);
     }
     if (response.data.code === 0 || response.headers.success === "true") {
@@ -52,6 +53,7 @@ service.interceptors.response.use(
       }
 
       if (response.data.data && response.data.data.reload) {
+        console.log("set token data reload");
         userStore.token = "";
         localStorage.clear();
       }
@@ -91,6 +93,8 @@ service.interceptors.response.use(
             cancelButtonText: "Huỷ",
           }
         ).then(() => {
+          console.log("set token fatal error");
+
           const userStore = useUserStore();
           userStore.token = "";
           localStorage.clear();
