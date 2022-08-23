@@ -6,6 +6,12 @@
   </div>
 </template>
 
+<script>
+export default {
+  name: "SetToken",
+};
+</script>
+
 <script setup>
 import { useRoute } from "vue-router";
 import { useUserStore } from "@/pinia/modules/user";
