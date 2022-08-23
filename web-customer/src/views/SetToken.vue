@@ -35,6 +35,8 @@ const checkLoginToken = async () => {
 
   userStore.setToken(route.query.token);
   await userStore.GetUserInfo();
+
+  router.push({ name: "home" });
 };
 
 onMounted(() => {

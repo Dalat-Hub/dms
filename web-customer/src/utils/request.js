@@ -43,7 +43,7 @@ service.interceptors.response.use(
       return response.data;
     } else {
       // TODO: fix me later, do not display error when user does not log in
-      if (!response.data.msg === "That's not even a token") {
+      if (!response.data.msg === "empty token") {
         ElMessage({
           showClose: true,
           message: response.data.msg || decodeURI(response.headers.msg),
