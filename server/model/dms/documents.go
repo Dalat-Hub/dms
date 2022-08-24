@@ -9,10 +9,10 @@ import (
 
 type Documents struct {
 	global.GVA_MODEL
-	Title            string    `json:"title" form:"title" gorm:"column:title;"`
-	ShortTitle       string    `json:"shortTitle" form:"shortTitle" gorm:"column:short_title;"`
-	Expert           string    `json:"expert" form:"expert" gorm:"column:expert;"`
-	Content          string    `json:"content" form:"content" gorm:"column:content;"`
+	Title            string    `json:"title" form:"title" gorm:"column:title;type:text"`
+	ShortTitle       string    `json:"shortTitle" form:"shortTitle" gorm:"column:short_title;type:text"`
+	Expert           string    `json:"expert" form:"expert" gorm:"column:expert;type:text"`
+	Content          string    `json:"content" form:"content" gorm:"column:content;type:text"`
 	DateIssued       null.Time `json:"dateIssued" form:"dateIssued" gorm:"column:date_issued;"`
 	StillInEffect    bool      `json:"stillInEffect" form:"stillInEffect" gorm:"column:still_in_effect;"`
 	EffectDate       null.Time `json:"effectDate" form:"effectDate" gorm:"column:effect_date;"`
