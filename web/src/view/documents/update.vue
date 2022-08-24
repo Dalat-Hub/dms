@@ -285,6 +285,7 @@
                         clearable
                         placeholder="Mức độ ưu tiên của văn bản"
                       >
+                        <el-option label="Chưa xác định" :value="0" />
                         <el-option
                           v-for="item in priorityLevelOptions"
                           :key="item.value"
@@ -300,6 +301,7 @@
                         clearable
                         placeholder="Trạng thái của văn bản"
                       >
+                        <el-option label="Chưa xác định" :value="0" />
                         <el-option
                           v-for="(item, index) in statusOptions"
                           :key="index"
