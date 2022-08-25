@@ -17,8 +17,8 @@ type Documents struct {
 	StillInEffect    bool      `json:"stillInEffect" form:"stillInEffect" gorm:"column:still_in_effect;"`
 	EffectDate       null.Time `json:"effectDate" form:"effectDate" gorm:"column:effect_date;"`
 	ExpirationDate   null.Time `json:"expirationDate" form:"expirationDate" gorm:"column:expiration_date;"`
-	SignNumber       int       `json:"signNumber" form:"signNumber" gorm:"column:sign_number;size:10;"`
-	SignYear         int       `json:"signYear" form:"signYear" gorm:"column:sign_year;comment:;size:10;"`
+	SignNumber       uint      `json:"signNumber" form:"signNumber" gorm:"column:sign_number;size:10;"`
+	SignYear         uint      `json:"signYear" form:"signYear" gorm:"column:sign_year;comment:;size:10;"`
 	SignCategory     string    `json:"signCategory" form:"signCategory" gorm:"column:sign_category;size:255;"`
 	SignAgency       string    `json:"signAgency" form:"signAgency" gorm:"column:sign_agency;size:255;"`
 	SignText         string    `json:"signText" form:"signText" gorm:"column:sign_text;size:255;"`
