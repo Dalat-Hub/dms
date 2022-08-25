@@ -966,6 +966,7 @@ const handleOnIssuedDateChange = (date) => {
   const yy = dateObj.getFullYear()
 
   formData.value.date_effected = new Date(yy, mm, dd)
+  formData.value.signYear = yy
 }
 
 const openAgencyDialog = () => {
