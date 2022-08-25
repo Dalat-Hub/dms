@@ -14,8 +14,8 @@ type UpdateBasic struct {
 	DateIssued      null.Time `json:"dateIssued" form:"dateIssued"`
 	EffectDate      null.Time `json:"effectDate" form:"effectDate"`
 	ExpirationDate  null.Time `json:"expirationDate" form:"expirationDate"`
-	SignNumber      int       `json:"signNumber" form:"signNumber"`
-	SignYear        int       `json:"signYear" form:"signYear"`
+	SignNumber      uint      `json:"signNumber" form:"signNumber"`
+	SignYear        uint      `json:"signYear" form:"signYear"`
 	SignCategory    string    `json:"signCategory" form:"signCategory"`
 	SignAgency      string    `json:"signAgency" form:"signAgency"`
 	SignText        string    `json:"signText" form:"signText"`
