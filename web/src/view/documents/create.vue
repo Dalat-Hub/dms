@@ -572,7 +572,9 @@
                     </el-form-item>
 
                     <el-form-item size="large">
-                      <el-button v-show="enableSubmitButton" type="primary" @click="submitForm">Tạo văn bản mới</el-button>
+                      <el-button type="primary" :loading="!enableSubmitButton" @click="submitForm">
+                        {{ enableSubmitButton ? 'Tạo văn bản mới' : 'Đang tạo văn bản mới ...' }}
+                      </el-button>
                     </el-form-item>
 
                   </div>
