@@ -208,6 +208,7 @@ func (documentsService *DocumentsService) CreateFullDocument(full dmsReq.FullDoc
 			ParentId:        0,
 			CurrentId:       0,
 			Path:            "",
+			SignerText:      full.SignerText,
 		}
 
 		err = tx.Model(&dms.Documents{}).Create(&document).Error

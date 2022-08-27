@@ -38,6 +38,7 @@ type Documents struct {
 	Path             string    `json:"path" form:"path" gorm:"column:path;"`
 	PublicToView     bool      `json:"publicToView" form:"publicToView" gorm:"column:public_to_view;"`
 	PublicToDownload bool      `json:"publicToDownload" form:"publicToDownload" gorm:"column:public_to_download"`
+	SignerText       string    `json:"signerText" form:"signerText" gorm:"signer_text"`
 
 	Agency   *DocumentAgencies   `json:"agency" gorm:"foreignKey:AgencyId"`
 	Category *DocumentCategories `json:"category" gorm:"foreignKey:CategoryId"`
@@ -57,6 +58,8 @@ type Documents struct {
 
 	NeedLogin         bool `json:"needLogin" gorm:"-"`
 	NeedAuthorization bool `json:"needAuthorization" gorm:"-"`
+
+	SignerTexts []string `json:"signerTexts" gorm:"-"`
 }
 
 var (
