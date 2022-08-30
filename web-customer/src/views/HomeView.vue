@@ -5,12 +5,12 @@
     <el-row :gutter="16">
       <el-col :lg="6">
         <AgencyTree
-          title="Phòng ban & Thể loại"
+          title="Đơn vị & Thể loại"
           :tree="this.agencyTree"
           @onNodeClick="handleOnTreeNodeClick"
         />
         <AgencyTreeField
-          title="Phòng ban & Lĩnh vực"
+          title="Đơn vị & Lĩnh vực"
           @onNodeClick="handleOnAgencyFieldNodeClick"
         />
         <SideMenu
@@ -107,7 +107,7 @@ export default {
   data() {
     return {
       agency: {
-        title: "Cơ quan ban hành",
+        title: "Đơn vị ban hành",
         items: [],
       },
       category: {
