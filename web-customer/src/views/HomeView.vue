@@ -294,36 +294,49 @@ export default {
       const table = await getDocumentAgencyList({ page: 1, pageSize: 1000 });
 
       if (table.code === 0) {
-        this.agency.items = table.data.list.map((item) => {
+        const agencies = table.data.list.map((item) => {
           return {
             ...item,
             link: "/",
           };
         });
+
+        agencies.sort((a, b) => b.count - a.count);
+        console.log(agencies);
+
+        this.agency.items = agencies;
       }
     },
     async getCategories() {
       const table = await getDocumentCategoryList({ page: 1, pageSize: 1000 });
 
       if (table.code === 0) {
-        this.category.items = table.data.list.map((item) => {
+        const categories = table.data.list.map((item) => {
           return {
             ...item,
             link: "/",
           };
         });
+
+        categories.sort((a, b) => b.count - a.count);
+
+        this.category.items = categories;
       }
     },
     async getFields() {
       const table = await getDocumentFieldList({ page: 1, pageSize: 1000 });
 
       if (table.code === 0) {
-        this.field.items = table.data.list.map((item) => {
+        const fields = table.data.list.map((item) => {
           return {
             ...item,
             link: "/",
           };
         });
+
+        fields.sort((a, b) => b.count - a.count);
+
+        this.field.items = fields;
       }
     },
     async getDocuments(filter = {}) {
