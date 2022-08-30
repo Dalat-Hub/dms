@@ -302,7 +302,6 @@ export default {
         });
 
         agencies.sort((a, b) => b.count - a.count);
-        console.log(agencies);
 
         this.agency.items = agencies;
       }
