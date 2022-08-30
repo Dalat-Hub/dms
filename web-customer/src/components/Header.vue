@@ -47,9 +47,6 @@
           <span>Quản trị</span>
         </el-menu-item>
         <el-menu-item index="8-2">
-          <router-link to="/">Tài khoản</router-link>
-        </el-menu-item>
-        <el-menu-item index="8-3">
           <router-link to="/">Đăng xuất</router-link>
         </el-menu-item>
       </el-sub-menu>
