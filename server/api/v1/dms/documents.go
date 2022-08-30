@@ -35,6 +35,7 @@ func (documentsApi *DocumentsApi) CreateDocuments(c *gin.Context) {
 	if err != nil {
 		global.GVA_LOG.Error("provide valid document", zap.Error(err))
 		response.FailWithMessage("provide valid document", c)
+		return
 	}
 
 	if err = documentsService.CreateDocuments(documents); err != nil {
@@ -62,6 +63,7 @@ func (documentsApi *DocumentsApi) CreateDraftDocument(c *gin.Context) {
 	if err != nil {
 		global.GVA_LOG.Error("provide valid document", zap.Error(err))
 		response.FailWithMessage("provide valid document", c)
+		return
 	}
 
 	user := utils.GetUserInfo(c)
@@ -91,6 +93,7 @@ func (documentsApi *DocumentsApi) CreateFullDocument(c *gin.Context) {
 	if err != nil {
 		global.GVA_LOG.Error("provide valid document", zap.Error(err))
 		response.FailWithMessage("provide valid document", c)
+		return
 	}
 
 	if doc, err := documentsService.CreateFullDocument(full); err != nil {
@@ -118,6 +121,7 @@ func (documentsApi *DocumentsApi) DeleteDocuments(c *gin.Context) {
 	if err != nil {
 		global.GVA_LOG.Error("provide valid ID", zap.Error(err))
 		response.FailWithMessage("provide valid ID", c)
+		return
 	}
 
 	if err := documentsService.DeleteDocuments(documents); err != nil {
@@ -145,6 +149,7 @@ func (documentsApi *DocumentsApi) DeleteDocumentsByIds(c *gin.Context) {
 	if err != nil {
 		global.GVA_LOG.Error("provide valid document", zap.Error(err))
 		response.FailWithMessage("provide valid document", c)
+		return
 	}
 
 	if err = documentsService.DeleteDocumentsByIds(IDS); err != nil {
@@ -172,6 +177,7 @@ func (documentsApi *DocumentsApi) UpdateDocuments(c *gin.Context) {
 	if err != nil {
 		global.GVA_LOG.Error("provide valid updated document", zap.Error(err))
 		response.FailWithMessage("provide valid updated document", c)
+		return
 	}
 
 	if err = documentsService.UpdateDocuments(documents); err != nil {

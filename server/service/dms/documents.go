@@ -31,6 +31,11 @@ func (documentsService *DocumentsService) CreateDocuments(documents dms.Document
 // CreateDraftDocument create new draft document
 func (documentsService *DocumentsService) CreateDraftDocument(draft dmsReq.DraftDocument, loginUserId uint) (doc *dms.Documents, err error) {
 	var document dms.Documents
+	signText := uuid.NewV4().String()
+
+	if draft.SignText != "" {
+		signText = draft.SignText
+	}
 
 	err = global.GVA_DB.Transaction(func(tx *gorm.DB) error {
 		document = dms.Documents{
@@ -43,13 +48,13 @@ func (documentsService *DocumentsService) CreateDraftDocument(draft dmsReq.Draft
 			StillInEffect:    false,
 			EffectDate:       null.Time{},
 			ExpirationDate:   null.Time{},
-			SignNumber:       0,
-			SignYear:         0,
-			SignCategory:     "",
-			SignAgency:       "",
-			SignText:         uuid.NewV4().String(),
-			CategoryId:       0,
-			AgencyId:         0,
+			SignNumber:       draft.SignNumber,
+			SignYear:         draft.SignYear,
+			SignCategory:     draft.CategoryText,
+			SignAgency:       draft.AgencyText,
+			SignText:         signText,
+			CategoryId:       draft.Category,
+			AgencyId:         draft.Agency,
 			CreatedBy:        loginUserId,
 			UpdatedBy:        0,
 			BeResponsibleBy:  loginUserId,
