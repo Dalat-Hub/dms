@@ -184,36 +184,49 @@ func (documentsService *DocumentsService) CreateFullDocument(full dmsReq.FullDoc
 
 	shortTitle := category.Name + " " + full.SignText
 
+	publicToView := false
+	publicToDownload := false
+
+	if full.ReqRuleInfo.View == dms.RULE_VIEW_ALL {
+		publicToView = true
+	}
+
+	if full.ReqRuleInfo.Download == dms.RULE_DOWNLOAD_ALL {
+		publicToDownload = true
+	}
+
 	err = global.GVA_DB.Transaction(func(tx *gorm.DB) error {
 		// create new document
 		document = dms.Documents{
-			GVA_MODEL:       global.GVA_MODEL{},
-			Title:           full.Title,
-			ShortTitle:      shortTitle,
-			Expert:          full.Expert,
-			Content:         full.Content,
-			DateIssued:      full.DateIssued,
-			StillInEffect:   true,
-			EffectDate:      full.EffectDate,
-			ExpirationDate:  full.ExpirationDate,
-			SignNumber:      full.SignNumber,
-			SignYear:        full.SignYear,
-			SignCategory:    category.Code,
-			SignAgency:      agency.Code,
-			SignText:        full.SignText,
-			CategoryId:      full.CategoryId,
-			AgencyId:        full.AgencyId,
-			CreatedBy:       full.CreatedBy,
-			BeResponsibleBy: full.BeResponsibleBy,
-			ViewCount:       0,
-			DownloadCount:   0,
-			Status:          full.Status,
-			Type:            dms.TYPE_DOCUMENT,
-			Priority:        full.Priority,
-			ParentId:        0,
-			CurrentId:       0,
-			Path:            "",
-			SignerText:      full.SignerText,
+			GVA_MODEL:        global.GVA_MODEL{},
+			Title:            full.Title,
+			ShortTitle:       shortTitle,
+			Expert:           full.Expert,
+			Content:          full.Content,
+			DateIssued:       full.DateIssued,
+			StillInEffect:    true,
+			EffectDate:       full.EffectDate,
+			ExpirationDate:   full.ExpirationDate,
+			SignNumber:       full.SignNumber,
+			SignYear:         full.SignYear,
+			SignCategory:     category.Code,
+			SignAgency:       agency.Code,
+			SignText:         full.SignText,
+			CategoryId:       full.CategoryId,
+			AgencyId:         full.AgencyId,
+			CreatedBy:        full.CreatedBy,
+			BeResponsibleBy:  full.BeResponsibleBy,
+			ViewCount:        0,
+			DownloadCount:    0,
+			Status:           full.Status,
+			Type:             dms.TYPE_DOCUMENT,
+			Priority:         full.Priority,
+			ParentId:         0,
+			CurrentId:        0,
+			Path:             "",
+			SignerText:       full.SignerText,
+			PublicToView:     publicToView,
+			PublicToDownload: publicToDownload,
 		}
 
 		err = tx.Model(&dms.Documents{}).Create(&document).Error
