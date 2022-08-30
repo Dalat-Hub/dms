@@ -2,12 +2,38 @@
   <div>
     <el-form ref="elForm" :model="formData" label-position="top" label-width="150px">
       <el-row justify="center">
+        <el-col v-if="existingDocuments.length > 0" :span="22">
+          <el-card class="box-card">
+            <template #header>
+              <div class="card-header">
+                <span>Tìm thấy văn bản với số hiệu "{{ formData.signText }}" trên hệ thống</span>
+              </div>
+            </template>
+            <div
+              v-for="document in existingDocuments"
+              :key="document.ID"
+              class="text item"
+              style="cursor: pointer;"
+              @click="() => handleOnExistingDocumentClicked(document)"
+            >{{ document.title }}</div>
+          </el-card>
+        </el-col>
+
         <el-col :lg="22">
           <el-row :gutter="10">
             <el-col :lg="17" :sm="24">
               <div class="gva-card-box">
                 <div class="el-card is-always-shadow gva-card quick-entrance">
                   <div class="el-card__body">
+                    <el-form-item label="Số hiệu">
+                      <el-input
+                        v-model="formData.signText"
+                        :style="{ width: '100%' }"
+                        clearable
+                        placeholder="Số hiệu văn bản, theo dạng: <Số>/<Năm>/<Thể loại>-<Cơ quan>"
+                        @blur="handleOnSignTextChanged"
+                      />
+                    </el-form-item>
                     <el-form-item label="Tiêu đề văn bản">
                       <el-input
                         v-model="formData.title"
@@ -651,6 +677,10 @@
           <p>Ví dụ: Luật Giáo dục ngày 14 tháng 6 năm 2019</p>
           <p>Hoặc: Nghị định số 69/2017/NĐ-CP ngày 25 tháng 5 năm 2017</p>
         </el-form-item>
+        <el-form-item label="Số hiệu văn bản">
+          <el-input v-model="documentFormData.signText" clearable placeholder="Số hiệu văn bản (nếu có)" />
+          <p>Ví dụ: 69/2017/NĐ-CP</p>
+        </el-form-item>
         <el-form-item label="Gắn thẻ người dùng">
           <el-select
             v-model="documentFormData.relatedUsers"
@@ -755,6 +785,7 @@ const router = useRouter()
 const userStore = useUserStore()
 
 const formData = ref({
+  signText: '',
   title: '',
   agency: null,
   category: null,
@@ -801,6 +832,7 @@ const documentDialogFormVisible = ref(false)
 const documentFormType = ref('')
 const documentFormData = ref({
   title: '',
+  signText: '',
   relatedUsers: []
 })
 
@@ -844,6 +876,8 @@ const documentRule = ref({
   ownerUsers: [],
   ownerRoles: []
 })
+
+const existingDocuments = ref([])
 
 // ================= Init ref =============================
 
@@ -947,6 +981,74 @@ loadSignerTitleOptions()
 // ================= End of preparing data section =================
 
 // ================= Reactive section =================
+
+const handleOnExistingDocumentClicked = (document) => {
+  router.push({
+    name: 'documents-detail',
+    params: {
+      document_id: document.ID
+    }
+  })
+}
+
+const handleOnSignTextChanged = async() => {
+  if (!formData.value.signText) return
+
+  formData.value.signText = formData.value.signText.toUpperCase()
+
+  const text = formData.value.signText
+  const parts = text.split('/')
+
+  if (parts.length !== 3) {
+    alert('Số kí hiệu không đúng định dạng')
+    return
+  }
+
+  const [signNumber, signYear, another] = parts
+  const anotherParts = another.split('-')
+
+  if (anotherParts.length < 2) {
+    alert('Số kí hiệu không đúng định dạng')
+    return
+  }
+
+  const [categoryText, ...agenciesParts] = anotherParts
+  const agencyText = agenciesParts.join('-')
+
+  const categoryId = categoryOptions.value.find(s => s.code.toUpperCase() === categoryText)?.ID || null
+  const agencyId = agencyOptions.value.find(s => s.code.toUpperCase() === agencyText)?.ID || null
+
+  if (!categoryId) {
+    alert('Thể loại văn bản không tồn tại trên hệ thống')
+    return
+  }
+
+  if (!agencyId) {
+    alert('Cơ quan ban hành văn bản không tồn tại trên hệ thống')
+    return
+  }
+
+  formData.value.signNumber = signNumber
+  formData.value.signYear = signYear
+  formData.value.categoryReadonly = categoryText
+  formData.value.agencyReadonly = agencyText
+  formData.value.agency = agencyId
+  formData.value.category = categoryId
+
+  // check if the document with the same signText exists on the DB
+  const signNumberText = (signNumber * 1) > 9 ? `${signNumber}` : `0${signNumber}`
+  const res = await getDocumentsList({
+    keyword: `${signNumber}/${signYear}/${categoryText}-${agencyText}`,
+    page: 1,
+    pageSize: 10
+  })
+
+  if (res.code === 0) {
+    if (Array.isArray(res.data?.list) && res.data.list.length > 0) {
+      existingDocuments.value = res.data.list
+    }
+  }
+}
 
 const handleOnAgencyChange = (selected) => {
   if (selected) {
@@ -1091,7 +1193,57 @@ const enterFieldDialog = async() => {
 }
 
 const enterDocumentDialog = async() => {
-  const response = await createDraftDocument(documentFormData.value)
+  let response
+
+  if (documentFormData.value.signText) {
+    const text = documentFormData.value.signText.toUpperCase()
+    const parts = text.split('/')
+
+    if (parts.length !== 3) {
+      alert('Số kí hiệu không đúng định dạng')
+      return
+    }
+
+    const [signNumber, signYear, another] = parts
+    const anotherParts = another.split('-')
+
+    if (anotherParts.length < 2) {
+      alert('Số kí hiệu không đúng định dạng')
+      return
+    }
+
+    const [categoryText, ...agenciesParts] = anotherParts
+    const agencyText = agenciesParts.join('-')
+
+    const categoryId = categoryOptions.value.find(s => s.code.toUpperCase() === categoryText)?.ID || null
+    const agencyId = agencyOptions.value.find(s => s.code.toUpperCase() === agencyText)?.ID || null
+
+    if (!categoryId) {
+      alert('Thể loại văn bản không tồn tại trên hệ thống')
+      return
+    }
+
+    if (!agencyId) {
+      alert('Cơ quan ban hành văn bản không tồn tại trên hệ thống')
+      return
+    }
+
+    const signNumberAsText = (signNumber * 1) > 9 ? `${signNumber}` : `0${signNumber}`
+    const signText = `${signNumberAsText}/${signYear}/${categoryText}-${agencyText}`
+
+    response = await createDraftDocument({
+      ...documentFormData.value,
+      signText: signText,
+      category: categoryId,
+      agency: agencyId,
+      signNumber: parseInt(signNumber),
+      signYear: parseInt(signYear),
+      categoryText: categoryText,
+      agencyText: agencyText
+    })
+  } else {
+    response = await createDraftDocument({ ...documentFormData.value })
+  }
 
   if (response.code === 0) {
     ElMessage({
@@ -1179,6 +1331,10 @@ const submitForm = () => {
 
 const createNewDocument = async(fileInfo) => {
   const signNumber = formData.value.signNumber < 10 ? `0${formData.value.signNumber}` : formData.value.signNumber.toString()
+  const selectedSigners = signerOptions.value.filter(s => formData.value.signers.includes(s))
+  const signerText = selectedSigners.map(s => {
+    return `${signerTitleMap[s.title] || ''} ${s.fullname}`
+  }).join(',')
 
   const documentData = {
     title: formData.value.title,
@@ -1206,7 +1362,8 @@ const createNewDocument = async(fileInfo) => {
     documentUsersRelated: [],
     documentAgenciesRelated: [],
     fileInfo: null,
-    ruleInfo: documentRule.value
+    ruleInfo: documentRule.value,
+    signerText: signerText
   }
 
   documentData.fields = formData.value.fields
@@ -1229,6 +1386,7 @@ const createNewDocument = async(fileInfo) => {
   }
 
   const documentResponse = await createFullDocument(documentData)
+  enableSubmitButton.value = true
 
   if (documentResponse.code === 0) {
     ElMessage({
@@ -1240,7 +1398,7 @@ const createNewDocument = async(fileInfo) => {
       router.push({
         name: 'documents-all'
       })
-    }, 5000)
+    }, 3000)
   }
 }
 
