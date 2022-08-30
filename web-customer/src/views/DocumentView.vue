@@ -181,7 +181,7 @@
             </template>
             <div>
               <iframe
-                :src="this.getPdfSource(this.file.files[0])"
+                :src="this.file.src"
                 frameborder="0"
                 style="width: 100%; height: 700px"
               ></iframe>
@@ -245,6 +245,7 @@ export default {
         title: "Tập tin đính kèm",
         canDownload: false,
         files: [],
+        src: "",
       },
       agencyTree: [],
     };
@@ -253,8 +254,14 @@ export default {
     this.$watch(
       () => this.$route.params,
       () => {
-        this.getDocument();
-        this.getFiles();
+        const reloadData = async () => {
+          const flag = await this.getDocument();
+          if (flag) {
+            this.getFiles();
+          }
+        };
+
+        reloadData();
       }
     );
   },
@@ -415,7 +422,11 @@ export default {
           ...this.relatedDocuments,
           items: res.data.document?.relatedDocuments || [],
         };
+
+        return true;
       }
+
+      return false;
     },
     async getFiles() {
       const id = this.$route.params.id || 0;
@@ -429,10 +440,10 @@ export default {
       if (res.code === 0) {
         this.file.files = res.data.files;
         this.file.canDownload = res.data.canDownload;
+
+        if (res.data.files.length > 0)
+          this.file.src = `${path}/${res.data.files[0].url}#toolbar=0`;
       }
-    },
-    getPdfSource(file) {
-      return `${path}/${file.url}#toolbar=0`;
     },
     handleFileDownload() {
       const url = `${path}/${this.file.files[0].url}`;
