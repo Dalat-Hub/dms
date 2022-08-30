@@ -453,20 +453,20 @@ export default {
 };
 </script>
 
-<style scoped>
-.box-card {
+<style>
+.document-view .box-card {
   width: 100%;
 }
-.w-full {
+.document-view .w-full {
   width: 100%;
 }
-.margin-bottom-1-rem {
+.document-view .margin-bottom-1-rem {
   margin-bottom: 1rem;
 }
-.card-info {
+.document-view .card-info {
   text-align: left;
 }
-.card-title {
+.document-view .card-title {
   text-align: left;
   font-size: 1rem;
 }
