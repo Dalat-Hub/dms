@@ -359,6 +359,11 @@ func (documentsApi *DocumentsApi) FindDocumentsPublic(c *gin.Context) {
 		global.GVA_LOG.Error("fail to find document", zap.Error(err))
 		response.FailWithMessage(err.Error(), c)
 	} else {
+		if redocuments.Status != dms.STATUS_PUBLISHED {
+			response.FailWithMessage("văn bản này chưa được cập nhật trên hệ thống, thử lại sau!", c)
+			return
+		}
+
 		response.OkWithData(gin.H{"document": redocuments}, c)
 	}
 }
