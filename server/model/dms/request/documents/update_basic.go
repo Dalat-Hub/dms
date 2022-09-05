@@ -20,7 +20,7 @@ type UpdateBasic struct {
 	SignAgency      string    `json:"signAgency" form:"signAgency"`
 	SignText        string    `json:"signText" form:"signText"`
 	CategoryId      uint      `json:"categoryId" form:"categoryId"`
-	AgencyId        uint      `json:"agencyId" form:"agencyId"`
+	Agencies        []uint    `json:"agencies" form:"agencies"`
 	Fields          []uint    `json:"fields" form:"fields"`
 	Signers         []uint    `json:"signers" form:"signers"`
 	Priority        int       `json:"priority" form:"priority"`
