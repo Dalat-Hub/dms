@@ -180,16 +180,15 @@ func (documentAgenciesService *DocumentAgenciesService) GetAgencyTreeForField(pa
 }
 
 type agencyStats struct {
-	AgencyId uint `json:"agency_id"`
+	AgencyId uint `json:"agency_id" gorm:"agency_id"`
 	Count    uint `json:"count"`
 }
 
 func (documentAgenciesService *DocumentAgenciesService) attachDocumentCount(agencies []*dms.DocumentAgencies) (err error) {
 	results := make([]agencyStats, 0)
 
-	err = global.GVA_DB.Model(&dms.Documents{}).
+	err = global.GVA_DB.Model(&dms.DocumentAgencyReferences{}).
 		Select("agency_id, count(id) as count").
-		Where("type = ? AND status = ?", dms.TYPE_DOCUMENT, dms.STATUS_PUBLISHED).
 		Group("agency_id").
 		Find(&results).Error
 
