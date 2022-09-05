@@ -9,10 +9,6 @@
           :tree="this.agencyTree"
           @onNodeClick="handleOnTreeNodeClick"
         />
-        <AgencyTreeField
-          title="Đơn vị & Lĩnh vực"
-          @onNodeClick="handleOnAgencyFieldNodeClick"
-        />
         <SideMenu
           :title="this.agency.title"
           :items="this.agency.items"
@@ -94,7 +90,6 @@ import SideMenu from "@/components/SideMenu";
 import SideContent from "@/components/SideContent";
 import SearchStat from "@/components/SearchStat";
 import AgencyTree from "@/components/AgencyTree";
-import AgencyTreeField from "@/components/AgencyTreeField";
 import { ElMessage } from "element-plus";
 
 import { getDocumentCategoryList } from "@/api/category";
@@ -141,7 +136,6 @@ export default {
     SearchStat,
     SideContent,
     AgencyTree,
-    AgencyTreeField,
   },
   created() {
     this.$watch(

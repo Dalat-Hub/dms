@@ -9,10 +9,6 @@
           :tree="this.agencyTree"
           @onNodeClick="handleOnTreeNodeClick"
         />
-        <AgencyTreeField
-          title="Đơn vị & Lĩnh vực"
-          @onNodeClick="handleOnAgencyFieldNodeClick"
-        />
         <SideMenu
           :title="this.agency.title"
           :items="this.agency.items"
@@ -197,7 +193,6 @@
 import BreadCrumb from "@/components/BreadCrumb";
 import SideMenu from "@/components/SideMenu";
 import AgencyTree from "@/components/AgencyTree";
-import AgencyTreeField from "@/components/AgencyTreeField";
 
 import { getDateFormatted } from "@/utils/date";
 
@@ -216,7 +211,6 @@ export default {
     BreadCrumb,
     SideMenu,
     AgencyTree,
-    AgencyTreeField,
   },
   data() {
     return {
