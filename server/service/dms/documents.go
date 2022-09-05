@@ -10,6 +10,7 @@ import (
 	"github.com/flipped-aurora/gin-vue-admin/server/model/dms/response"
 	sysModel "github.com/flipped-aurora/gin-vue-admin/server/model/system"
 	request2 "github.com/flipped-aurora/gin-vue-admin/server/model/system/request"
+	"github.com/flipped-aurora/gin-vue-admin/server/utils"
 	uuid "github.com/satori/go.uuid"
 	"gopkg.in/guregu/null.v4"
 	"gorm.io/gorm"
@@ -54,7 +55,6 @@ func (documentsService *DocumentsService) CreateDraftDocument(draft dmsReq.Draft
 			SignAgency:       draft.AgencyText,
 			SignText:         signText,
 			CategoryId:       draft.Category,
-			AgencyId:         draft.Agency,
 			CreatedBy:        loginUserId,
 			UpdatedBy:        0,
 			BeResponsibleBy:  loginUserId,
@@ -177,10 +177,21 @@ func (documentsService *DocumentsService) CreateFullDocument(full dmsReq.FullDoc
 		return nil, catErr
 	}
 
-	agency, agencyErr := agencyService.GetDocumentAgencies(full.AgencyId)
-	if agencyErr != nil {
-		return nil, agencyErr
+	agencies := make([]dms.DocumentAgencies, 0)
+	signAgency := ""
+
+	for _, agencyId := range full.ReqAgencies {
+		agency, agencyErr := agencyService.GetDocumentAgencies(agencyId)
+		if agencyErr != nil {
+			return nil, agencyErr
+		}
+
+		agencies = append(agencies, agency)
+
+		signAgency = signAgency + agency.Code + "-"
 	}
+
+	signAgency = utils.TrimSuffix(signAgency, "-")
 
 	shortTitle := category.Name + " " + full.SignText
 
@@ -210,10 +221,9 @@ func (documentsService *DocumentsService) CreateFullDocument(full dmsReq.FullDoc
 			SignNumber:       full.SignNumber,
 			SignYear:         full.SignYear,
 			SignCategory:     category.Code,
-			SignAgency:       agency.Code,
+			SignAgency:       signAgency,
 			SignText:         full.SignText,
 			CategoryId:       full.CategoryId,
-			AgencyId:         full.AgencyId,
 			CreatedBy:        full.CreatedBy,
 			BeResponsibleBy:  full.BeResponsibleBy,
 			ViewCount:        0,
@@ -246,6 +256,23 @@ func (documentsService *DocumentsService) CreateFullDocument(full dmsReq.FullDoc
 			}
 
 			err = tx.Model(&dms.DocumentSignerReferences{}).Create(&signers).Error
+			if err != nil {
+				return err
+			}
+		}
+
+		// create agencies
+		if len(full.ReqAgencies) > 0 {
+			agencies := make([]dms.DocumentAgencyReferences, 0)
+			for _, agencyId := range full.ReqAgencies {
+				agencies = append(agencies, dms.DocumentAgencyReferences{
+					GVA_MODEL:  global.GVA_MODEL{},
+					AgencyId:   agencyId,
+					DocumentId: document.ID,
+				})
+			}
+
+			err = tx.Model(&dms.DocumentAgencyReferences{}).Create(&agencies).Error
 			if err != nil {
 				return err
 			}
@@ -543,16 +570,10 @@ func (documentsService *DocumentsService) UpdateBasicDocumentInformation(basic d
 	}
 
 	categoryService := new(DocumentCategoriesService)
-	agencyService := new(DocumentAgenciesService)
 
 	category, catErr := categoryService.GetDocumentCategories(basic.CategoryId)
 	if catErr != nil {
 		return catErr
-	}
-
-	_, agencyErr := agencyService.GetDocumentAgencies(basic.AgencyId)
-	if agencyErr != nil {
-		return agencyErr
 	}
 
 	shortTitle := category.Name + " " + basic.SignText
@@ -571,7 +592,6 @@ func (documentsService *DocumentsService) UpdateBasicDocumentInformation(basic d
 	oldDocument.SignAgency = basic.SignAgency
 	oldDocument.SignText = basic.SignText
 	oldDocument.CategoryId = basic.CategoryId
-	oldDocument.AgencyId = basic.AgencyId
 	oldDocument.Priority = basic.Priority
 	oldDocument.Status = basic.Status
 	oldDocument.UpdatedBy = basic.UpdatedBy
@@ -589,8 +609,17 @@ func (documentsService *DocumentsService) UpdateBasicDocumentInformation(basic d
 		oldDocument.BelongTo = revisionDocument.ID
 	}
 
+	newAgencyReferences := make([]dms.DocumentAgencyReferences, 0)
 	newFieldReferences := make([]dms.DocumentFieldReferences, 0)
 	newSignerReferences := make([]dms.DocumentSignerReferences, 0)
+
+	for _, agencyId := range basic.Agencies {
+		newAgencyReferences = append(newAgencyReferences, dms.DocumentAgencyReferences{
+			GVA_MODEL:  global.GVA_MODEL{},
+			AgencyId:   agencyId,
+			DocumentId: oldDocument.ID,
+		})
+	}
 
 	for _, fieldId := range basic.Fields {
 		newFieldReferences = append(newFieldReferences, dms.DocumentFieldReferences{
@@ -626,37 +655,55 @@ func (documentsService *DocumentsService) UpdateBasicDocumentInformation(basic d
 			return err
 		}
 
+		// clear old agencies
+		if len(newAgencyReferences) > 0 {
+			err = tx.Model(&dms.DocumentAgencyReferences{}).
+				Unscoped().
+				Where("document_id = ?", oldDocument.ID).
+				Delete(&dms.DocumentAgencyReferences{}).
+				Error
+
+			if err != nil {
+				return err
+			}
+
+			// create new agencies
+			err = tx.Model(&dms.DocumentAgencyReferences{}).Create(&newAgencyReferences).Error
+			if err != nil {
+				return err
+			}
+		}
+
 		// clear old fields
-		err = tx.Model(&dms.DocumentFieldReferences{}).
-			Unscoped().
-			Where("document_id = ?", oldDocument.ID).
-			Delete(&dms.DocumentFieldReferences{}).
-			Error
-		if err != nil {
-			return err
-		}
-
-		// clear old signers
-		err = tx.Model(&dms.DocumentSignerReferences{}).
-			Unscoped().
-			Where("document_id = ?", oldDocument.ID).
-			Delete(&dms.DocumentSignerReferences{}).
-			Error
-		if err != nil {
-			return err
-		}
-
-		// create new fields
-
 		if len(newFieldReferences) > 0 {
+			err = tx.Model(&dms.DocumentFieldReferences{}).
+				Unscoped().
+				Where("document_id = ?", oldDocument.ID).
+				Delete(&dms.DocumentFieldReferences{}).
+				Error
+			if err != nil {
+				return err
+			}
+
+			// create new field
 			err = tx.Model(&dms.DocumentFieldReferences{}).Create(&newFieldReferences).Error
 			if err != nil {
 				return err
 			}
 		}
 
-		// create new signers
+		// clear old signers
 		if len(newSignerReferences) > 0 {
+			err = tx.Model(&dms.DocumentSignerReferences{}).
+				Unscoped().
+				Where("document_id = ?", oldDocument.ID).
+				Delete(&dms.DocumentSignerReferences{}).
+				Error
+			if err != nil {
+				return err
+			}
+
+			// create new signers
 			err = tx.Model(&dms.DocumentSignerReferences{}).Create(&newSignerReferences).Error
 			if err != nil {
 				return err
@@ -1095,10 +1142,6 @@ func (documentsService *DocumentsService) GetDocumentsInfoList(info dmsReq.Docum
 		db = db.Where("`title` LIKE ? OR `sign_text` LIKE ? OR `expert` LIKE ?", searchTerm, searchTerm, searchTerm)
 	}
 
-	if info.AgencyId > 0 {
-		db = db.Where("`agency_id` = ?", info.AgencyId)
-	}
-
 	if info.CategoryId > 0 {
 		db = db.Where("`category_id` = ?", info.CategoryId)
 	}
@@ -1124,7 +1167,7 @@ func (documentsService *DocumentsService) GetDocumentsInfoList(info dmsReq.Docum
 	}
 
 	if info.PreloadAgency == 1 {
-		db = db.Preload("Agency")
+		db = db.Preload("Agencies")
 	}
 
 	if info.PreloadCategory == 1 {
@@ -1167,10 +1210,6 @@ func (documentsService *DocumentsService) GetDocumentsInfoListPublic(info docume
 		db = db.Where("`title` LIKE ? OR `sign_text` LIKE ? OR `expert` LIKE ?", searchTerm, searchTerm, searchTerm)
 	}
 
-	if info.Agency > 0 {
-		db = db.Where("`agency_id` = ?", info.Agency)
-	}
-
 	if info.Category > 0 {
 		db = db.Where("`category_id` = ?", info.Category)
 	}
@@ -1189,12 +1228,16 @@ func (documentsService *DocumentsService) GetDocumentsInfoListPublic(info docume
 		db = db.Where("`effect_date` >= ? AND `effect_date` <= ?", fromDate, toDate)
 	}
 
+	if info.Agency > 0 {
+		db = db.Joins("join document_agency_references on documents.id = document_agency_references.document_id AND document_agency_references.agency_id = ?", info.Agency)
+	}
+
 	if info.Field > 0 {
 		db = db.Joins("join document_field_references on documents.id = document_field_references.document_id AND document_field_references.field_id = ?", info.Field)
 	}
 
 	if info.PreloadAgency == 1 {
-		db = db.Preload("Agency")
+		db = db.Preload("Agencies")
 	}
 
 	if info.PreloadCategory == 1 {
@@ -1405,7 +1448,6 @@ func (documentsService *DocumentsService) Duplicate(documentId uint, loginUserId
 		SignAgency:       oldDocument.SignAgency,
 		SignText:         oldDocument.SignText + "@" + uuid.NewV4().String(),
 		CategoryId:       oldDocument.CategoryId,
-		AgencyId:         oldDocument.AgencyId,
 		CreatedBy:        newCreatedBy,
 		UpdatedBy:        newUpdatedBy,
 		BeResponsibleBy:  newResponsibleBy,
@@ -1426,6 +1468,14 @@ func (documentsService *DocumentsService) Duplicate(documentId uint, loginUserId
 	oldFieldReferences := make([]*dms.DocumentFieldReferences, 0)
 
 	err = global.GVA_DB.Model(&dms.DocumentFieldReferences{}).Where("document_id = ?", documentId).Find(&oldFieldReferences).Error
+	if err != nil {
+		return nil, err
+	}
+
+	// 2.1. get list of agencies references
+	oldAgencyReferences := make([]*dms.DocumentAgencyReferences, 0)
+
+	err = global.GVA_DB.Model(&dms.DocumentAgencyReferences{}).Where("document_id = ?", documentId).Find(&oldAgencyReferences).Error
 	if err != nil {
 		return nil, err
 	}
@@ -1488,6 +1538,21 @@ func (documentsService *DocumentsService) Duplicate(documentId uint, loginUserId
 			}
 
 			err = tx.Model(&dms.DocumentFieldReferences{}).Create(&oldFieldReferences).Error
+			if err != nil {
+				return err
+			}
+		}
+
+		// 2.1. duplicate list of agency references
+		if len(oldAgencyReferences) > 0 {
+			for _, v := range oldAgencyReferences {
+				v.DocumentId = newDocument.ID
+				v.ID = 0
+				v.CreatedAt = time.Now()
+				v.UpdatedAt = time.Now()
+			}
+
+			err = tx.Model(&dms.DocumentAgencyReferences{}).Create(&oldAgencyReferences).Error
 			if err != nil {
 				return err
 			}
