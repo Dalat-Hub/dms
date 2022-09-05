@@ -46,9 +46,10 @@
                       <el-col class="el-col-18 el-col-lg-20">
                         <el-form-item label="Cơ quan ban hành văn bản">
                           <el-select
-                            v-model="formData.agency"
+                            v-model="formData.agencies"
                             :style="{ width: '100%' }"
                             clearable
+                            multiple
                             filterable
                             placeholder="Chọn cơ quan ban hành văn bản"
                             @change="handleOnAgencyChange"
@@ -787,7 +788,6 @@ const userStore = useUserStore()
 const formData = ref({
   signText: '',
   title: '',
-  agency: null,
   category: null,
   date_issued: null,
   date_effected: null,
@@ -797,6 +797,7 @@ const formData = ref({
   categoryReadonly: '',
   agencyReadonly: '',
   fields: [],
+  agencies: [],
   createdBy: userStore.userInfo.ID || 0,
   beResponsibleBy: userStore.userInfo.ID || 0,
   expert: '',
@@ -1050,9 +1051,12 @@ const handleOnSignTextChanged = async() => {
   }
 }
 
-const handleOnAgencyChange = (selected) => {
-  if (selected) {
-    formData.value.agencyReadonly = agencyOptions.value.find(f => f.ID === selected)?.code
+const handleOnAgencyChange = (choices) => {
+  if (choices) {
+    const agencies = agencyOptions.value.filter(f => choices.includes(f.ID))
+    const agencyText = agencies.map(e => e.code).join('-')
+
+    formData.value.agencyReadonly = agencyText
   }
 }
 
@@ -1331,9 +1335,10 @@ const submitForm = () => {
 
 const createNewDocument = async(fileInfo) => {
   const signNumber = formData.value.signNumber < 10 ? `0${formData.value.signNumber}` : formData.value.signNumber.toString()
-  const selectedSigners = signerOptions.value.filter(s => formData.value.signers.includes(s))
+  const selectedSigners = signerOptions.value.filter(s => formData.value.signers.includes(s.ID))
+
   const signerText = selectedSigners.map(s => {
-    return `${signerTitleMap[s.title] || ''} ${s.fullname}`
+    return `${signerTitleMap.value[s.title] || ''} ${s.fullname}`
   }).join(',')
 
   const documentData = {
@@ -1350,7 +1355,7 @@ const createNewDocument = async(fileInfo) => {
     signAgency: formData.value.agencyReadonly,
     signText: `${signNumber}/${formData.value.signYear}/${formData.value.categoryReadonly}-${formData.value.agencyReadonly}`,
     categoryId: formData.value.category,
-    agencyId: formData.value.agency,
+    agencies: [],
     createdBy: userStore.userInfo.ID || formData.value.createdBy,
     beResponsibleBy: formData.value.beResponsibleBy,
     status: formData.value.status,
@@ -1366,6 +1371,7 @@ const createNewDocument = async(fileInfo) => {
     signerText: signerText
   }
 
+  documentData.agencies = formData.value.agencies
   documentData.fields = formData.value.fields
   documentData.signers = formData.value.signers
   documentData.documentBaseOns = formData.value.baseDocuments
