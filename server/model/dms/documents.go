@@ -23,7 +23,6 @@ type Documents struct {
 	SignAgency       string    `json:"signAgency" form:"signAgency" gorm:"column:sign_agency;size:255;"`
 	SignText         string    `json:"signText" form:"signText" gorm:"column:sign_text;size:255;"`
 	CategoryId       uint      `json:"categoryId" form:"categoryId" gorm:"column:category_id;size:19;"`
-	AgencyId         uint      `json:"agencyId" form:"agencyId" gorm:"column:agency_id;size:19;"`
 	CreatedBy        uint      `json:"createdBy" form:"createdBy" gorm:"column:created_by;size:19;"`
 	UpdatedBy        uint      `json:"updatedBy" form:"updatedBy" gorm:"column:updated_by"`
 	BeResponsibleBy  uint      `json:"beResponsibleBy" form:"beResponsibleBy" gorm:"column:be_responsible_by;size:19;"`
@@ -40,8 +39,8 @@ type Documents struct {
 	PublicToDownload bool      `json:"publicToDownload" form:"publicToDownload" gorm:"column:public_to_download"`
 	SignerText       string    `json:"signerText" form:"signerText" gorm:"signer_text"`
 
-	Agency   *DocumentAgencies   `json:"agency" gorm:"foreignKey:AgencyId"`
 	Category *DocumentCategories `json:"category" gorm:"foreignKey:CategoryId"`
+	Agencies []*DocumentAgencies `json:"agencies" gorm:"many2many:document_agency_references;foreignKey:ID;joinForeignKey:DocumentId;References:ID;joinReferences:AgencyId;"`
 	Fields   []*DocumentFields   `json:"fields" gorm:"many2many:document_field_references;foreignKey:ID;joinForeignKey:DocumentId;References:ID;joinReferences:FieldId;"`
 	Signers  []*DocumentSigners  `json:"signers" gorm:"many2many:document_signer_references;foreignKey:ID;joinForeignKey:DocumentId;References:ID;joinReferences:SignerId;"`
 
