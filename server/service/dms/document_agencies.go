@@ -135,7 +135,7 @@ type agencyFieldTreeNode struct {
 func (documentAgenciesService *DocumentAgenciesService) GetAgencyTreeForField(pageInfo request.GetById) (list interface{}, err error) {
 	var results []*agencyFieldTreeNode
 
-	err = global.GVA_DB.Model(&dms.Documents{}).Debug().
+	err = global.GVA_DB.Model(&dms.Documents{}).
 		Select("documents.agency_id as agency_id, document_field_references.field_id as field_id, count(documents.id) as count").
 		Where("documents.agency_id = ? AND type = ? AND status = ?", pageInfo.ID, dms.TYPE_DOCUMENT, dms.STATUS_PUBLISHED).
 		Joins("JOIN document_field_references ON documents.id = document_field_references.document_id").
