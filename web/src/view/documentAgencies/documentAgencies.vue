@@ -37,16 +37,20 @@
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" />
+        <el-table-column align="left" label="Thứ tự" prop="order" width="100" />
         <el-table-column align="left" label="Tên phòng ban" prop="name" width="300" />
         <el-table-column align="left" label="Mã phòng" prop="code" width="120" />
-        <el-table-column align="left" label="Cấp" width="250">
+        <el-table-column align="left" label="Cấp" width="200">
           <template #default="scope">{{ agencyLevels.find(f => f.value == scope.row.level)?.label }}</template>
+        </el-table-column>
+        <el-table-column align="left" label="Trạng thái" width="150">
+          <template #default="scope">{{ scope.row.hidden ? 'Ẩn' : 'Hiện' }}</template>
         </el-table-column>
         <el-table-column align="left" label="Số văn bản" prop="count" width="120" />
         <el-table-column align="left" label="Thời gian tạo" width="180">
           <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
         </el-table-column>
-        <el-table-column align="left" label="Hành động">
+        <el-table-column align="left" label="Hành động" width="200">
           <template #default="scope">
             <el-button
               type="primary"
@@ -83,6 +87,15 @@
         <el-form-item label="Cấp độ:" prop="level">
           <el-select v-model="formData.level" placeholder="Chọn cấp độ" :clearable="true">
             <el-option v-for="item in agencyLevels" :key="item.value" :label="item.label" :value="item.value" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="Thứ tự:" prop="order">
+          <el-input v-model.number="formData.order" :clearable="true" placeholder="Thứ tự hiển thị" />
+        </el-form-item>
+        <el-form-item label="Trạng thái:" prop="hidden">
+          <el-select v-model="formData.hidden" placeholder="Trạng thái" :clearable="true">
+            <el-option label="Hiển thị" :value="false" />
+            <el-option label="Ẩn" :value="true" />
           </el-select>
         </el-form-item>
       </el-form>
@@ -124,6 +137,8 @@ const formData = ref({
   code: '',
   count: 0,
   level: '',
+  order: 0,
+  hidden: false
 })
 
 // Validation rules
