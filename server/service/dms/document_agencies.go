@@ -56,6 +56,7 @@ func (documentAgenciesService *DocumentAgenciesService) GetDocumentAgenciesInfoL
 		return
 	}
 
+	db = db.Order("`order` desc")
 	err = db.Limit(limit).Offset(offset).Find(&documentAgenciess).Error
 	if err != nil {
 		return
