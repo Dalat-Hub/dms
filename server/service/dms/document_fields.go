@@ -54,6 +54,7 @@ func (documentFieldsService *DocumentFieldsService) GetDocumentFieldsInfoList(in
 		return
 	}
 
+	db = db.Order("`order` desc")
 	err = db.Limit(limit).Offset(offset).Find(&documentFieldss).Error
 	if err != nil {
 		return
