@@ -84,6 +84,24 @@ func (documentsService *DocumentsService) CreateDraftDocument(draft dmsReq.Draft
 			return err
 		}
 
+		// agencies
+		if len(draft.Agencies) > 0 {
+			agencies := make([]dms.DocumentAgencyReferences, 0)
+			for _, agencyId := range draft.Agencies {
+				agencies = append(agencies, dms.DocumentAgencyReferences{
+					GVA_MODEL:  global.GVA_MODEL{},
+					AgencyId:   agencyId,
+					DocumentId: document.ID,
+				})
+			}
+
+			err = tx.Model(dms.DocumentAgencyReferences{}).Create(&agencies).Error
+			if err != nil {
+				return err
+			}
+		}
+
+		// users
 		relatedUsers := make([]dms.DocumentUsers, 0)
 		hasUndefinedUser := false
 

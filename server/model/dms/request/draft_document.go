@@ -6,8 +6,8 @@ type DraftDocument struct {
 	global.GVA_MODEL
 	Title        string `json:"title" form:"title"`
 	RelatedUsers []uint `json:"relatedUsers" form:"relatedUsers"`
+	Agencies     []uint `json:"agencies" form:"agencies"`
 	Category     uint   `json:"category" form:"category"`
-	Agency       uint   `json:"agency" form:"agency"`
 	SignNumber   uint   `json:"signNumber" form:"signNumber"`
 	SignYear     uint   `json:"signYear" form:"signYear"`
 	SignText     string `json:"signText" form:"signText"`
