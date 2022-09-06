@@ -295,8 +295,6 @@ export default {
           };
         });
 
-        agencies.sort((a, b) => b.count - a.count);
-
         this.agency.items = agencies;
       }
     },
@@ -310,8 +308,6 @@ export default {
             link: "/",
           };
         });
-
-        categories.sort((a, b) => b.count - a.count);
 
         this.category.items = categories;
       }
