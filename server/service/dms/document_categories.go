@@ -74,7 +74,6 @@ func (documentCategoriesService *DocumentCategoriesService) GetDocumentCategorie
 
 	db := global.GVA_DB.Model(&dms.DocumentCategories{})
 	db = db.Where("`hidden` = ?", false)
-	db = db.Order("`order` desc")
 
 	var documentCategoriess []*dms.DocumentCategories
 
