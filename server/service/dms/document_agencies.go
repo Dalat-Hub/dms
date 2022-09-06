@@ -69,6 +69,38 @@ func (documentAgenciesService *DocumentAgenciesService) GetDocumentAgenciesInfoL
 	return documentAgenciess, total, err
 }
 
+// GetDocumentAgenciesInfoListPublic get list of agencies
+func (documentAgenciesService *DocumentAgenciesService) GetDocumentAgenciesInfoListPublic(info dmsReq.DocumentAgenciesSearch) (list interface{}, total int64, err error) {
+	limit := info.PageSize
+	offset := info.PageSize * (info.Page - 1)
+
+	// create db object
+	db := global.GVA_DB.Model(&dms.DocumentAgencies{})
+
+	db = db.Where("`hidden` = ?", false)
+	db = db.Order("`order` desc")
+
+	var documentAgenciess []*dms.DocumentAgencies
+
+	// If there is a conditional search, the search statement will be automatically created below
+	err = db.Count(&total).Error
+	if err != nil {
+		return
+	}
+
+	err = db.Limit(limit).Offset(offset).Find(&documentAgenciess).Error
+	if err != nil {
+		return
+	}
+
+	err = documentAgenciesService.attachDocumentCount(documentAgenciess)
+	if err != nil {
+		return
+	}
+
+	return documentAgenciess, total, err
+}
+
 type agencyTreeNode struct {
 	AgencyId   uint                    `json:"agencyId" gorm:"agency_id"`
 	CategoryId uint                    `json:"categoryId" gorm:"category_id"`

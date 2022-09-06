@@ -183,6 +183,37 @@ func (documentAgenciesApi *DocumentAgenciesApi) GetDocumentAgenciesList(c *gin.C
 	}
 }
 
+// GetDocumentAgenciesListPublic paginate to get list of agencies
+// @Tags DocumentAgencies
+// @Summary paginate to get list of agencies
+// @accept application/json
+// @Produce application/json
+// @Param data query dmsReq.DocumentAgenciesSearch true "paginate to get list of agencies"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"list of agencies"}"
+// @Router /api/v1/agencies [get]
+func (documentAgenciesApi *DocumentAgenciesApi) GetDocumentAgenciesListPublic(c *gin.Context) {
+	var pageInfo dmsReq.DocumentAgenciesSearch
+	var err error
+
+	_ = c.ShouldBindQuery(&pageInfo)
+	if err != nil {
+		global.GVA_LOG.Error("please provide valid data to get list of agencies", zap.Error(err))
+		response.FailWithMessage("please provide valid data to get list of agencies", c)
+	}
+
+	if list, total, err := documentAgenciesService.GetDocumentAgenciesInfoListPublic(pageInfo); err != nil {
+		global.GVA_LOG.Error("fail to get list of agencies", zap.Error(err))
+		response.FailWithMessage("fail to get list of agencies", c)
+	} else {
+		response.OkWithDetailed(response.PageResult{
+			List:     list,
+			Total:    total,
+			Page:     pageInfo.Page,
+			PageSize: pageInfo.PageSize,
+		}, "list of agencies", c)
+	}
+}
+
 // GetAgencyTree get agency tree
 // @Tags DocumentAgencies
 // @Summary get agency tree

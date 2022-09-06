@@ -13,7 +13,7 @@ func (s *DocumentAgenciesRouter) InitDocumentAgenciesPublicRouter(Router *gin.Ro
 	documentAgenciesRouterWithoutRecord := Router.Group("agencies")
 	var documentAgenciesApi = v1.ApiGroupApp.DmsApiGroup.DocumentAgenciesApi
 	{
-		documentAgenciesRouterWithoutRecord.GET("", documentAgenciesApi.GetDocumentAgenciesList)
+		documentAgenciesRouterWithoutRecord.GET("", documentAgenciesApi.GetDocumentAgenciesListPublic)
 		documentAgenciesRouterWithoutRecord.GET("tree", documentAgenciesApi.GetAgencyTree)
 		documentAgenciesRouterWithoutRecord.GET("tree/fields", documentAgenciesApi.GetAgencyTreeForField)
 	}
