@@ -114,7 +114,7 @@ func (documentAgenciesService *DocumentAgenciesService) GetAgencyTree() (list in
 
 	err = global.GVA_DB.Model(&dms.Documents{}).Debug().
 		Select("document_agency_references.agency_id as agency_id, documents.category_id as category_id, count(documents.ID) as count").
-		Where("type = ? AND status = ?", dms.TYPE_DOCUMENT, dms.STATUS_PUBLISHED).
+		Where("documents.type = ? AND documents.status = ?", dms.TYPE_DOCUMENT, dms.STATUS_PUBLISHED).
 		Joins("JOIN document_agency_references ON documents.id = document_agency_references.document_id").
 		Group("document_agency_references.agency_id, documents.category_id").
 		Find(&results).Error
