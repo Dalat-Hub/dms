@@ -50,6 +50,18 @@ func (documentAgenciesService *DocumentAgenciesService) GetDocumentAgenciesInfoL
 
 	var documentAgenciess []*dms.DocumentAgencies
 
+	if info.Name != "" {
+		db = db.Where("`name` LIKE ?", "%"+info.Name+"%")
+	}
+
+	if info.Code != "" {
+		db = db.Where("`code` LIKE ?", "%"+info.Code+"%")
+	}
+
+	if info.Hidden != nil {
+		db = db.Where("`hidden` = ?", info.Hidden)
+	}
+
 	// If there is a conditional search, the search statement will be automatically created below
 	err = db.Count(&total).Error
 	if err != nil {
