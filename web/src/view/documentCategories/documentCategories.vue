@@ -49,7 +49,7 @@
         <el-table-column align="left" label="Mã thể loại" prop="code" width="120" />
         <el-table-column align="left" label="Số văn bản" prop="count" width="120" />
         <el-table-column align="left" label="Trạng thái" width="100">
-          <template #default="scope">{{ scope.row.hidden ? 'Ẩn' : 'Hiện' }}</template>
+          <template #default="scope"><el-switch v-model="categoryStatus[scope.row.ID]" @change="(e) => hanleOnStatusChanged(e, scope.row.ID)" /></template>
         </el-table-column>
         <el-table-column align="left" label="Ngày tạo" width="250">
           <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
@@ -143,6 +143,7 @@ const total = ref(0)
 const pageSize = ref(10)
 const tableData = ref([])
 const searchInfo = ref({})
+const categoryStatus = ref({})
 
 // Reset
 const onReset = () => {
@@ -176,6 +177,13 @@ const getTableData = async() => {
     total.value = table.data.total
     page.value = table.data.page
     pageSize.value = table.data.pageSize
+
+    const map = {}
+    for (const e of table.data.list) {
+      map[e.ID] = !e.hidden
+    }
+
+    categoryStatus.value = { ...map }
   }
 }
 
@@ -311,6 +319,29 @@ const enterDialog = async() => {
          getTableData()
        }
      })
+}
+
+const hanleOnStatusChanged = async(newValue, categoryId) => {
+  const category = tableData.value.find(s => s.ID === categoryId)
+  if (!category) {
+    alert('Thể loại không hợp lệ')
+    return
+  }
+
+  const updatedData = {
+    ...category,
+    hidden: !newValue
+  }
+
+  const res = await updateDocumentCategories(updatedData)
+
+  if (res.code === 0) {
+    ElMessage({
+      type: 'success',
+      message: 'Thực hiện thao tác thành công'
+    })
+    getTableData()
+  }
 }
 </script>
 
