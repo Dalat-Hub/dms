@@ -49,6 +49,14 @@ func (documentFieldsService *DocumentFieldsService) GetDocumentFieldsInfoList(in
 
 	var documentFieldss []*dms.DocumentFields
 
+	if info.Name != "" {
+		db = db.Where("`name` LIKE ?", "%"+info.Name+"%")
+	}
+
+	if info.Hidden != nil {
+		db = db.Where("`hidden` = ?", info.Hidden)
+	}
+
 	err = db.Count(&total).Error
 	if err != nil {
 		return
