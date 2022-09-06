@@ -112,7 +112,7 @@ type agencyTreeNode struct {
 func (documentAgenciesService *DocumentAgenciesService) GetAgencyTree() (list interface{}, err error) {
 	var results []*agencyTreeNode
 
-	err = global.GVA_DB.Model(&dms.Documents{}).Debug().
+	err = global.GVA_DB.Model(&dms.Documents{}).
 		Select("document_agency_references.agency_id as agency_id, documents.category_id as category_id, count(documents.ID) as count").
 		Where("documents.type = ? AND documents.status = ?", dms.TYPE_DOCUMENT, dms.STATUS_PUBLISHED).
 		Joins("JOIN document_agency_references ON documents.id = document_agency_references.document_id").
@@ -130,12 +130,12 @@ func (documentAgenciesService *DocumentAgenciesService) GetAgencyTree() (list in
 	agenciesMap := map[uint]*dms.DocumentAgencies{}
 	categoriesMap := map[uint]*dms.DocumentCategories{}
 
-	err = global.GVA_DB.Model(&dms.DocumentAgencies{}).Find(&agencies).Error
+	err = global.GVA_DB.Model(&dms.DocumentAgencies{}).Where("`hidden` = ?", false).Find(&agencies).Error
 	if err != nil {
 		return nil, err
 	}
 
-	err = global.GVA_DB.Model(&dms.DocumentCategories{}).Find(&categories).Error
+	err = global.GVA_DB.Model(&dms.DocumentCategories{}).Where("`hidden` = ?", false).Find(&categories).Error
 	if err != nil {
 		return nil, err
 	}
