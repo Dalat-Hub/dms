@@ -67,6 +67,35 @@ func (documentCategoriesService *DocumentCategoriesService) GetDocumentCategorie
 	return documentCategoriess, total, err
 }
 
+// GetDocumentCategoriesInfoListPublic get list of categories
+func (documentCategoriesService *DocumentCategoriesService) GetDocumentCategoriesInfoListPublic(info dmsReq.DocumentCategoriesSearch) (list interface{}, total int64, err error) {
+	limit := info.PageSize
+	offset := info.PageSize * (info.Page - 1)
+
+	db := global.GVA_DB.Model(&dms.DocumentCategories{})
+	db = db.Where("`hidden` = ?", false)
+	db = db.Order("`order` desc")
+
+	var documentCategoriess []*dms.DocumentCategories
+
+	err = db.Count(&total).Error
+	if err != nil {
+		return
+	}
+
+	err = db.Limit(limit).Offset(offset).Find(&documentCategoriess).Error
+	if err != nil {
+		return
+	}
+
+	err = documentCategoriesService.attachDocumentCount(documentCategoriess)
+	if err != nil {
+		return
+	}
+
+	return documentCategoriess, total, err
+}
+
 type categoryStats struct {
 	CategoryId uint `json:"category_id"`
 	Count      uint `json:"count"`

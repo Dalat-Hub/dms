@@ -182,3 +182,35 @@ func (documentCategoriesApi *DocumentCategoriesApi) GetDocumentCategoriesList(c 
 		}, "success", c)
 	}
 }
+
+// GetDocumentCategoriesListPublic get categories list
+// @Tags DocumentCategories
+// @Summary get categories list
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data query dmsReq.DocumentCategoriesSearch true "get categories list"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
+// @Router /api/v1/categories [get]
+func (documentCategoriesApi *DocumentCategoriesApi) GetDocumentCategoriesListPublic(c *gin.Context) {
+	var pageInfo dmsReq.DocumentCategoriesSearch
+	var err error
+
+	err = c.ShouldBindQuery(&pageInfo)
+	if err != nil {
+		global.GVA_LOG.Error("provide valid search information", zap.Error(err))
+		response.FailWithMessage("provide valid search information", c)
+	}
+
+	if list, total, err := documentCategoriesService.GetDocumentCategoriesInfoListPublic(pageInfo); err != nil {
+		global.GVA_LOG.Error("fail to get list of categories", zap.Error(err))
+		response.FailWithMessage("fail to get list of categories", c)
+	} else {
+		response.OkWithDetailed(response.PageResult{
+			List:     list,
+			Total:    total,
+			Page:     pageInfo.Page,
+			PageSize: pageInfo.PageSize,
+		}, "success", c)
+	}
+}

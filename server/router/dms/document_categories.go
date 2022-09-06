@@ -14,7 +14,7 @@ func (s *DocumentCategoriesRouter) InitDocumentCategoriesPublicRouter(Router *gi
 	documentCategoriesRouterWithoutRecord := Router.Group("categories")
 	var documentCategoriesApi = v1.ApiGroupApp.DmsApiGroup.DocumentCategoriesApi
 	{
-		documentCategoriesRouterWithoutRecord.GET("", documentCategoriesApi.GetDocumentCategoriesList)
+		documentCategoriesRouterWithoutRecord.GET("", documentCategoriesApi.GetDocumentCategoriesListPublic)
 	}
 }
 
