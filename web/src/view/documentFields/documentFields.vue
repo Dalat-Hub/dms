@@ -2,6 +2,16 @@
   <div>
     <div class="gva-search-box">
       <el-form :inline="true" :model="searchInfo" class="demo-form-inline">
+        <el-form-item label="Tên">
+          <el-input v-model="searchInfo.name" placeholder="Tên lĩnh vực" />
+        </el-form-item>
+        <el-form-item label="Trạng thái" prop="hidden">
+          <el-select v-model="searchInfo.hidden" clear placeholder="Trạng thái">
+            <el-option key="false" label="Hiển thị" value="false" />
+            <el-option key="true" label="Ẩn" value="true" />
+          </el-select>
+        </el-form-item>
+
         <el-form-item>
           <el-button size="small" type="primary" icon="search" @click="onSubmit">Tìm kiếm</el-button>
           <el-button size="small" icon="refresh" @click="onReset">Đặt lại bộ lọc</el-button>
