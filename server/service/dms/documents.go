@@ -1035,7 +1035,7 @@ func (documentsService *DocumentsService) GetDocumentsPublic(doc dmsReq.Document
 	var document dms.Documents
 
 	if doc.PreloadAgency == 1 {
-		db = db.Preload("Agency")
+		db = db.Preload("Agencies")
 	}
 
 	if doc.PreloadCategory == 1 {
