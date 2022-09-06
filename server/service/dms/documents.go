@@ -32,9 +32,17 @@ func (documentsService *DocumentsService) CreateDocuments(documents dms.Document
 // CreateDraftDocument create new draft document
 func (documentsService *DocumentsService) CreateDraftDocument(draft dmsReq.DraftDocument, loginUserId uint) (doc *dms.Documents, err error) {
 	var document dms.Documents
-	signText := uuid.NewV4().String()
+	var signText = ""
 
 	if draft.SignText != "" {
+		// check existing sign text
+		var count int64
+		err = global.GVA_DB.Model(&dms.Documents{}).Where("sign_text LIKE ?", "%"+draft.SignText+"%").Count(&count).Error
+
+		if count > 0 {
+			return nil, errors.New("mã số hiệu đã tồn tại")
+		}
+
 		signText = draft.SignText
 	}
 
@@ -168,6 +176,13 @@ func (documentsService *DocumentsService) CreateDraftDocument(draft dmsReq.Draft
 // CreateFullDocument create new full document
 func (documentsService *DocumentsService) CreateFullDocument(full dmsReq.FullDocument) (doc *dms.Documents, err error) {
 	var document dms.Documents
+	var count int64
+
+	err = global.GVA_DB.Model(&dms.Documents{}).Where("sign_text LIKE ?", "%"+full.SignText+"%").Count(&count).Error
+
+	if count > 0 {
+		return nil, errors.New("mã số hiệu đã tồn tại")
+	}
 
 	categoryService := new(DocumentCategoriesService)
 	agencyService := new(DocumentAgenciesService)
