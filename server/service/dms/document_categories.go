@@ -54,6 +54,7 @@ func (documentCategoriesService *DocumentCategoriesService) GetDocumentCategorie
 		return
 	}
 
+	db = db.Order("`order` desc")
 	err = db.Limit(limit).Offset(offset).Find(&documentCategoriess).Error
 	if err != nil {
 		return
