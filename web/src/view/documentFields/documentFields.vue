@@ -31,7 +31,11 @@
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" />
+        <el-table-column align="left" label="Thứ tự" prop="order" width="100" />
         <el-table-column align="left" label="Tên lĩnh vực" prop="name" width="250" />
+        <el-table-column align="left" label="Trạng thái" width="100">
+          <template #default="scope">{{ scope.row.hidden ? 'Ẩn' : 'Hiện' }}</template>
+        </el-table-column>
         <el-table-column align="left" label="Số văn bản" prop="count" width="250" />
         <el-table-column align="left" label="Ngày tạo" width="250">
           <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
@@ -59,6 +63,15 @@
       <el-form ref="elFormRef" :model="formData" label-position="right" :rules="rule" label-width="120px">
         <el-form-item label="Tên lĩnh vực:" prop="name">
           <el-input v-model="formData.name" :clearable="true" placeholder="Nhập tên lĩnh vực" />
+        </el-form-item>
+        <el-form-item label="Thứ tự:" prop="name">
+          <el-input v-model.number="formData.order" :clearable="true" placeholder="Nhập số thứ tự" />
+        </el-form-item>
+        <el-form-item label="Trạng thái:" prop="hidden">
+          <el-select v-model="formData.hidden" placeholder="Trạng thái" :clearable="true">
+            <el-option label="Hiển thị" :value="false" />
+            <el-option label="Ẩn" :value="true" />
+          </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -96,6 +109,8 @@ import { ref, reactive } from 'vue'
 const formData = ref({
   name: '',
   count: 0,
+  order: 0,
+  hidden: false
 })
 
 // Validation rules
