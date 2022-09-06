@@ -681,6 +681,7 @@
         <el-form-item label="Số hiệu văn bản">
           <el-input v-model="documentFormData.signText" clearable placeholder="Số hiệu văn bản (nếu có)" />
           <p>Ví dụ: 69/2017/NĐ-CP</p>
+          <p>Nếu VB do nhiều đơn vị ban hành, phân cách mỗi đơn vị bởi dấu @, <span style="display: block">VD: 69/2017/TTLT-BGDĐT@BCA</span></p>
         </el-form-item>
         <el-form-item label="Gắn thẻ người dùng">
           <el-select
@@ -1217,34 +1218,56 @@ const enterDocumentDialog = async() => {
     }
 
     const [categoryText, ...agenciesParts] = anotherParts
-    const agencyText = agenciesParts.join('-')
+    let agencyText = agenciesParts.join('-')
+
+    const agencyIDs = []
+    if (agencyText.includes('@')) {
+      const parts = agencyText.split('@')
+
+      for (const p of parts) {
+        const agency = agencyOptions.value.find(s => s.code.toUpperCase() === p)?.ID || null
+
+        if (!agency) {
+          alert('Phòng ban ' + p + ' không tồn tại')
+          return
+        }
+
+        agencyIDs.push(agency)
+      }
+    } else {
+      const agencyId = agencyOptions.value.find(s => s.code.toUpperCase() === agencyText)?.ID || null
+      if (!agencyId) {
+        alert('Cơ quan ban hành văn bản không tồn tại trên hệ thống')
+        return
+      }
+
+      agencyIDs.push(agencyId)
+    }
 
     const categoryId = categoryOptions.value.find(s => s.code.toUpperCase() === categoryText)?.ID || null
-    const agencyId = agencyOptions.value.find(s => s.code.toUpperCase() === agencyText)?.ID || null
 
     if (!categoryId) {
       alert('Thể loại văn bản không tồn tại trên hệ thống')
       return
     }
 
-    if (!agencyId) {
-      alert('Cơ quan ban hành văn bản không tồn tại trên hệ thống')
-      return
-    }
-
     const signNumberAsText = (signNumber * 1) > 9 ? `${signNumber}` : `0${signNumber}`
+
+    agencyText = agencyText.replace(/@/g, '-')
     const signText = `${signNumberAsText}/${signYear}/${categoryText}-${agencyText}`
 
-    response = await createDraftDocument({
+    const draftData = {
       ...documentFormData.value,
       signText: signText,
       category: categoryId,
-      agency: agencyId,
+      agencies: agencyIDs,
       signNumber: parseInt(signNumber),
       signYear: parseInt(signYear),
       categoryText: categoryText,
       agencyText: agencyText
-    })
+    }
+
+    response = await createDraftDocument(draftData)
   } else {
     response = await createDraftDocument({ ...documentFormData.value })
   }
