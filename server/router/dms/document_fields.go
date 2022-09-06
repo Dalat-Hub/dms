@@ -13,7 +13,7 @@ func (s *DocumentFieldsRouter) InitDocumentFieldsPublicRouter(Router *gin.Router
 	documentFieldsRouterWithoutRecord := Router.Group("fields")
 	var documentFieldsApi = v1.ApiGroupApp.DmsApiGroup.DocumentFieldsApi
 	{
-		documentFieldsRouterWithoutRecord.GET("", documentFieldsApi.GetDocumentFieldsList)
+		documentFieldsRouterWithoutRecord.GET("", documentFieldsApi.GetDocumentFieldsListPublic)
 	}
 }
 

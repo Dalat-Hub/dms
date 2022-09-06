@@ -182,3 +182,35 @@ func (documentFieldsApi *DocumentFieldsApi) GetDocumentFieldsList(c *gin.Context
 		}, "success", c)
 	}
 }
+
+// GetDocumentFieldsListPublic get list of fields
+// @Tags DocumentFields
+// @Summary get list of fields
+// @Security ApiKeyAuth
+// @accept application/json
+// @Produce application/json
+// @Param data query dmsReq.DocumentFieldsSearch true "get list of fields"
+// @Success 200 {string} string "{"success":true,"data":{},"msg":"success"}"
+// @Router /api/v1/fields [get]
+func (documentFieldsApi *DocumentFieldsApi) GetDocumentFieldsListPublic(c *gin.Context) {
+	var pageInfo dmsReq.DocumentFieldsSearch
+	var err error
+
+	err = c.ShouldBindQuery(&pageInfo)
+	if err != nil {
+		global.GVA_LOG.Error("provide valid search information", zap.Error(err))
+		response.FailWithMessage("provide valid search information", c)
+	}
+
+	if list, total, err := documentFieldsService.GetDocumentFieldsInfoListPublic(pageInfo); err != nil {
+		global.GVA_LOG.Error("find to get list of fields", zap.Error(err))
+		response.FailWithMessage("find to get list of fields", c)
+	} else {
+		response.OkWithDetailed(response.PageResult{
+			List:     list,
+			Total:    total,
+			Page:     pageInfo.Page,
+			PageSize: pageInfo.PageSize,
+		}, "success", c)
+	}
+}

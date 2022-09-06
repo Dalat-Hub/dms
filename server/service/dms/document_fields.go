@@ -68,3 +68,38 @@ func (documentFieldsService *DocumentFieldsService) GetDocumentFieldsInfoList(in
 
 	return documentFieldss, total, err
 }
+
+// GetDocumentFieldsInfoListPublic get list of fields
+func (documentFieldsService *DocumentFieldsService) GetDocumentFieldsInfoListPublic(info dmsReq.DocumentFieldsSearch) (list interface{}, total int64, err error) {
+	limit := info.PageSize
+	offset := info.PageSize * (info.Page - 1)
+
+	db := global.GVA_DB.Model(&dms.DocumentFields{})
+	db = db.Where("`hidden` = ?", false)
+
+	var documentFieldss []*dms.DocumentFields
+
+	err = db.Count(&total).Error
+	if err != nil {
+		return
+	}
+
+	db = db.Order("`order` desc")
+
+	db = db.Limit(limit)
+	db = db.Offset(offset)
+
+	err = db.Find(&documentFieldss).Error
+	if err != nil {
+		return
+	}
+
+	service := new(DocumentFieldReferencesService)
+
+	err = service.AttachDocumentCount(documentFieldss)
+	if err != nil {
+		return
+	}
+
+	return documentFieldss, total, err
+}
