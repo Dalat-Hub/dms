@@ -57,7 +57,7 @@
           <template #default="scope">{{ agencyLevels.find(f => f.value == scope.row.level)?.label }}</template>
         </el-table-column>
         <el-table-column align="left" label="Trạng thái" width="150">
-          <template #default="scope">{{ scope.row.hidden ? 'Ẩn' : 'Hiện' }}</template>
+          <template #default="scope"><el-switch v-model="agencyStatus[scope.row.ID]" @change="(e) => hanleOnStatusChanged(e, scope.row.ID)" /></template>
         </el-table-column>
         <el-table-column align="left" label="Số văn bản" prop="count" width="120" />
         <el-table-column align="left" label="Thời gian tạo" width="180">
@@ -167,6 +167,7 @@ const pageSize = ref(10)
 const tableData = ref([])
 const searchInfo = ref({})
 const agencyLevels = ref([])
+const agencyStatus = ref({})
 
 // Reset
 const onReset = () => {
@@ -200,6 +201,13 @@ const getTableData = async() => {
     total.value = table.data.total
     page.value = table.data.page
     pageSize.value = table.data.pageSize
+
+    const map = {}
+    for (const e of table.data.list) {
+      map[e.ID] = !e.hidden
+    }
+
+    agencyStatus.value = { ...map }
   }
 }
 
@@ -343,6 +351,29 @@ const enterDialog = async() => {
          getTableData()
        }
      })
+}
+
+const hanleOnStatusChanged = async(newValue, agencyId) => {
+  const agency = tableData.value.find(s => s.ID === agencyId)
+  if (!agency) {
+    alert('Phòng ban không hợp lệ')
+    return
+  }
+
+  const updatedData = {
+    ...agency,
+    hidden: !newValue
+  }
+
+  const res = await updateDocumentAgencies(updatedData)
+
+  if (res.code === 0) {
+    ElMessage({
+      type: 'success',
+      message: 'Thực hiện thao tác thành công'
+    })
+    getTableData()
+  }
 }
 </script>
 
