@@ -1256,6 +1256,7 @@ const enterDocumentDialog = async() => {
     })
 
     documentFormData.value.title = ''
+    documentFormData.value.signText = ''
     documentFormData.value.relatedUsers = []
 
     documentsOptions.value = [...documentsOptions.value, response.data.document]
