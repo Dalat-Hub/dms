@@ -31,9 +31,13 @@
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="55" />
+        <el-table-column align="left" label="Thứ tự" prop="order" width="100" />
         <el-table-column align="left" label="Tên thể loại" prop="name" width="300" />
         <el-table-column align="left" label="Mã thể loại" prop="code" width="120" />
         <el-table-column align="left" label="Số văn bản" prop="count" width="120" />
+        <el-table-column align="left" label="Trạng thái" width="100">
+          <template #default="scope">{{ scope.row.hidden ? 'Ẩn' : 'Hiện' }}</template>
+        </el-table-column>
         <el-table-column align="left" label="Ngày tạo" width="250">
           <template #default="scope">{{ formatDate(scope.row.CreatedAt) }}</template>
         </el-table-column>
@@ -58,11 +62,20 @@
     </div>
     <el-dialog v-model="dialogFormVisible" :before-close="closeDialog" title="Cửa sổ thể loại">
       <el-form ref="elFormRef" :model="formData" label-position="right" :rules="rule" label-width="120px">
+        <el-form-item label="Thứ tự:" prop="order">
+          <el-input v-model.number="formData.order" :clearable="true" placeholder="Nhập thứ tự" />
+        </el-form-item>
         <el-form-item label="Tên thể loại:" prop="name">
           <el-input v-model="formData.name" :clearable="true" placeholder="Nhập tên thể loại" />
         </el-form-item>
         <el-form-item label="Mã thể loại:" prop="code">
           <el-input v-model="formData.code" :clearable="true" placeholder="Nhập mã thể loại" />
+        </el-form-item>
+        <el-form-item label="Trạng thái:" prop="hidden">
+          <el-select v-model="formData.hidden" placeholder="Trạng thái" :clearable="true">
+            <el-option label="Hiển thị" :value="false" />
+            <el-option label="Ẩn" :value="true" />
+          </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -101,6 +114,8 @@ const formData = ref({
   name: '',
   code: '',
   count: 0,
+  order: 0,
+  hidden: false
 })
 
 // Validation rules
