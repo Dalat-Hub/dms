@@ -49,6 +49,18 @@ func (documentCategoriesService *DocumentCategoriesService) GetDocumentCategorie
 
 	var documentCategoriess []*dms.DocumentCategories
 
+	if info.Name != "" {
+		db = db.Where("`name` LIKE ?", "%"+info.Name+"%")
+	}
+
+	if info.Code != "" {
+		db = db.Where("`code` LIKE ?", "%"+info.Code+"%")
+	}
+
+	if info.Hidden != nil {
+		db = db.Where("`hidden` = ?", info.Hidden)
+	}
+
 	err = db.Count(&total).Error
 	if err != nil {
 		return
