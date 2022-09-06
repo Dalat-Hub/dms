@@ -44,7 +44,7 @@
         <el-table-column align="left" label="Thứ tự" prop="order" width="100" />
         <el-table-column align="left" label="Tên lĩnh vực" prop="name" width="250" />
         <el-table-column align="left" label="Trạng thái" width="100">
-          <template #default="scope">{{ scope.row.hidden ? 'Ẩn' : 'Hiện' }}</template>
+          <template #default="scope"><el-switch v-model="fieldStatus[scope.row.ID]" @change="(e) => hanleOnStatusChanged(e, scope.row.ID)" /></template>
         </el-table-column>
         <el-table-column align="left" label="Số văn bản" prop="count" width="250" />
         <el-table-column align="left" label="Ngày tạo" width="250">
@@ -135,6 +135,7 @@ const total = ref(0)
 const pageSize = ref(10)
 const tableData = ref([])
 const searchInfo = ref({})
+const fieldStatus = ref({})
 
 // Reset
 const onReset = () => {
@@ -168,6 +169,13 @@ const getTableData = async() => {
     total.value = table.data.total
     page.value = table.data.page
     pageSize.value = table.data.pageSize
+
+    const map = {}
+    for (const e of table.data.list) {
+      map[e.ID] = !e.hidden
+    }
+
+    fieldStatus.value = { ...map }
   }
 }
 
@@ -301,6 +309,29 @@ const enterDialog = async() => {
          getTableData()
        }
      })
+}
+
+const hanleOnStatusChanged = async(newValue, fieldId) => {
+  const field = tableData.value.find(s => s.ID === fieldId)
+  if (!field) {
+    alert('Lĩnh vực không hợp lệ')
+    return
+  }
+
+  const updatedData = {
+    ...field,
+    hidden: !newValue
+  }
+
+  const res = await updateDocumentFields(updatedData)
+
+  if (res.code === 0) {
+    ElMessage({
+      type: 'success',
+      message: 'Thực hiện thao tác thành công'
+    })
+    getTableData()
+  }
 }
 </script>
 
