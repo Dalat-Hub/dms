@@ -70,7 +70,7 @@ func (documentsApi *DocumentsApi) CreateDraftDocument(c *gin.Context) {
 
 	if doc, err := documentsService.CreateDraftDocument(draft, user.ID); err != nil {
 		global.GVA_LOG.Error("fail to create new draft document", zap.Error(err))
-		response.FailWithMessage("fail to create new draft document", c)
+		response.FailWithMessage("xảy ra lỗi: "+err.Error(), c)
 	} else {
 		response.OkWithData(gin.H{"document": doc}, c)
 	}
@@ -98,7 +98,7 @@ func (documentsApi *DocumentsApi) CreateFullDocument(c *gin.Context) {
 
 	if doc, err := documentsService.CreateFullDocument(full); err != nil {
 		global.GVA_LOG.Error("fail to create new full document", zap.Error(err))
-		response.FailWithMessage("fail to create new full document", c)
+		response.FailWithMessage("xảy ra lỗi: "+err.Error(), c)
 	} else {
 		response.OkWithData(gin.H{"document": doc}, c)
 	}
