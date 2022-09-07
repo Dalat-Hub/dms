@@ -227,7 +227,7 @@
                             <el-option
                               v-for="item in documentsOptions"
                               :key="item.ID"
-                              :label="item.title"
+                              :label="item.shortTitle"
                               :value="item.ID"
                             />
                           </el-select>
@@ -260,7 +260,7 @@
                             <el-option
                               v-for="item in documentsOptions"
                               :key="item.ID"
-                              :label="item.title"
+                              :label="item.shortTitle"
                               :value="item.ID"
                             />
                           </el-select>
