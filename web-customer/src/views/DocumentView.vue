@@ -59,7 +59,7 @@
               </el-descriptions-item>
 
               <el-descriptions-item label="Cơ quan ban hành">{{
-                document?.agency?.name || "--"
+                document?.agencies?.map((e) => e.name).join(", ") || "--"
               }}</el-descriptions-item>
               <el-descriptions-item label="Người ký">
                 {{ document?.signerText.split(",").join(", ") }}
