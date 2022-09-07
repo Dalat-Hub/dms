@@ -1041,8 +1041,9 @@ const handleOnSignTextChanged = async() => {
 
   // check if the document with the same signText exists on the DB
   const signNumberText = (signNumber * 1) > 9 ? `${signNumber}` : `0${signNumber}`
+  const keyword = `${signNumber}/${signYear}/${categoryText}-${agencyText}`
   const res = await getDocumentsList({
-    keyword: `${signNumber}/${signYear}/${categoryText}-${agencyText}`,
+    keyword: keyword,
     page: 1,
     pageSize: 10
   })
