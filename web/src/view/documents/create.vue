@@ -6,7 +6,7 @@
           <el-card class="box-card">
             <template #header>
               <div class="card-header">
-                <span>Tìm thấy văn bản với số hiệu "{{ formData.signText }}" trên hệ thống</span>
+                <span>Tìm thấy văn bản với số hiệu "{{ formData.signText.replace(/@/g, '-') }}" trên hệ thống</span>
               </div>
             </template>
             <div
@@ -25,14 +25,27 @@
               <div class="gva-card-box">
                 <div class="el-card is-always-shadow gva-card quick-entrance">
                   <div class="el-card__body">
-                    <el-form-item label="Số hiệu">
-                      <el-input
-                        v-model="formData.signText"
-                        :style="{ width: '100%' }"
-                        clearable
-                        placeholder="Số hiệu văn bản, theo dạng: <Số>/<Năm>/<Thể loại>-<Cơ quan>"
-                        @blur="handleOnSignTextChanged"
-                      />
+                    <el-row align="bottom" justify="space-between" type="flex">
+                      <el-col class="el-col-18 el-col-lg-20">
+                        <el-form-item label="Số hiệu">
+                          <el-input
+                            v-model="formData.signText"
+                            :style="{ width: '100%' }"
+                            clearable
+                            placeholder="Số hiệu văn bản, theo dạng: <Số>/<Năm>/<Thể loại>-<Cơ quan>"
+                            @blur="handleOnSignTextChanged"
+                          />
+                        </el-form-item>
+                      </el-col>
+                      <el-col class="el-col-6 el-col-lg-4">
+                        <el-form-item label="">
+                          <el-button size="large" style="width: 100%" type="success" @click="handleOnAutofillClick">Nhập tự động</el-button>
+                        </el-form-item>
+                      </el-col>
+                    </el-row>
+
+                    <el-form-item label="Đây không phải văn bản hành chính">
+                      <el-switch v-model="formData.notSupported" />
                     </el-form-item>
                     <el-form-item label="Tiêu đề văn bản">
                       <el-input
@@ -788,6 +801,7 @@ const userStore = useUserStore()
 
 const formData = ref({
   signText: '',
+  notSupported: false,
   title: '',
   category: null,
   date_issued: null,
@@ -996,6 +1010,17 @@ const handleOnExistingDocumentClicked = (document) => {
 const handleOnSignTextChanged = async() => {
   if (!formData.value.signText) return
 
+  formData.value.signText = formData.value.signText.toUpperCase()
+}
+
+const handleOnAutofillClick = async() => {
+  if (formData.value.notSupported) {
+    alert('Chức năng này chỉ áp dụng với văn bản hành chính')
+    return
+  }
+
+  if (!formData.value.signText) return
+
   existingDocuments.value = []
 
   formData.value.signText = formData.value.signText.toUpperCase()
@@ -1017,28 +1042,56 @@ const handleOnSignTextChanged = async() => {
   }
 
   const [categoryText, ...agenciesParts] = anotherParts
-  const agencyText = agenciesParts.join('-')
+  let agencyText = agenciesParts.join('-')
+
+  const agencyIDs = []
+  if (agencyText.includes('@')) {
+    const parts = agencyText.split('@')
+
+    for (const p of parts) {
+      const agency = agencyOptions.value.find(s => s.code.toUpperCase() === p)?.ID || null
+
+      if (!agency) {
+        alert('Phòng ban ' + p + ' không tồn tại')
+        return
+      }
+
+      agencyIDs.push(agency)
+    }
+  } else {
+    const agencyId = agencyOptions.value.find(s => s.code.toUpperCase() === agencyText)?.ID || null
+    if (!agencyId) {
+      alert('Cơ quan ban hành văn bản không tồn tại trên hệ thống')
+      return
+    }
+
+    agencyIDs.push(agencyId)
+  }
 
   const categoryId = categoryOptions.value.find(s => s.code.toUpperCase() === categoryText)?.ID || null
-  const agencyId = agencyOptions.value.find(s => s.code.toUpperCase() === agencyText)?.ID || null
 
   if (!categoryId) {
     alert('Thể loại văn bản không tồn tại trên hệ thống')
     return
   }
 
-  if (!agencyId) {
-    alert('Cơ quan ban hành văn bản không tồn tại trên hệ thống')
-    return
-  }
+  agencyText = agencyText.replace(/@/g, '-')
 
   formData.value.signNumber = signNumber
   formData.value.signYear = signYear
   formData.value.categoryReadonly = categoryText
   formData.value.agencyReadonly = agencyText
 
-  if (!formData.value.agencies.includes(agencyId)) { formData.value.agencies = [...formData.value.agencies, agencyId] }
+  const agencyMap = {}
+  for (const i of formData.value.agencies) {
+    agencyMap[i] = 1
+  }
 
+  for (const i of agencyIDs) {
+    agencyMap[i] = 1
+  }
+
+  formData.value.agencies = [...Object.keys(agencyMap)].map(i => i * 1)
   formData.value.category = categoryId
 
   // check if the document with the same signText exists on the DB
