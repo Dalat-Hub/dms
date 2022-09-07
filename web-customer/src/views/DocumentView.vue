@@ -62,7 +62,7 @@
                 document?.agency?.name || "--"
               }}</el-descriptions-item>
               <el-descriptions-item label="Người ký">
-                {{ document?.signers.map((s) => s.fullname).join(", ") }}
+                {{ document?.signerText.split(",").join(", ") }}
               </el-descriptions-item>
 
               <el-descriptions-item label="Ngày có hiệu lực">{{
@@ -80,22 +80,6 @@
                   >Còn hiệu lực</el-tag
                 >
                 <el-tag v-else class="ml-2" type="danger">Hết hiệu lực</el-tag>
-              </el-descriptions-item>
-
-              <el-descriptions-item label="Tài liệu căn cứ" span="2">
-                {{
-                  baseDocuments.items
-                    .map((d) => (d.shortTitle ? d.shortTitle : d.title))
-                    .join(", ") || "--"
-                }}
-              </el-descriptions-item>
-
-              <el-descriptions-item label="Tài liệu liên quan" span="2">
-                {{
-                  relatedDocuments.items
-                    .map((d) => (d.shortTitle ? d.shortTitle : d.title))
-                    .join(", ") || "--"
-                }}
               </el-descriptions-item>
             </el-descriptions>
           </el-card>
