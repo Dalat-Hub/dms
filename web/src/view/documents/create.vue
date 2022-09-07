@@ -996,6 +996,8 @@ const handleOnExistingDocumentClicked = (document) => {
 const handleOnSignTextChanged = async() => {
   if (!formData.value.signText) return
 
+  existingDocuments.value = []
+
   formData.value.signText = formData.value.signText.toUpperCase()
 
   const text = formData.value.signText
@@ -1034,7 +1036,7 @@ const handleOnSignTextChanged = async() => {
   formData.value.signYear = signYear
   formData.value.categoryReadonly = categoryText
   formData.value.agencyReadonly = agencyText
-  formData.value.agency = agencyId
+  formData.value.agencies = [...formData.value.agencies, agencyId]
   formData.value.category = categoryId
 
   // check if the document with the same signText exists on the DB
@@ -1047,7 +1049,7 @@ const handleOnSignTextChanged = async() => {
 
   if (res.code === 0) {
     if (Array.isArray(res.data?.list) && res.data.list.length > 0) {
-      existingDocuments.value = res.data.list
+      existingDocuments.value = res.data.list.filter(s => s.signText === keyword)
     }
   }
 }
