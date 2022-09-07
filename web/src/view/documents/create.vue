@@ -1036,7 +1036,9 @@ const handleOnSignTextChanged = async() => {
   formData.value.signYear = signYear
   formData.value.categoryReadonly = categoryText
   formData.value.agencyReadonly = agencyText
-  formData.value.agencies = [...formData.value.agencies, agencyId]
+
+  if (!formData.value.agencies.includes(agencyId)) { formData.value.agencies = [...formData.value.agencies, agencyId] }
+
   formData.value.category = categoryId
 
   // check if the document with the same signText exists on the DB
