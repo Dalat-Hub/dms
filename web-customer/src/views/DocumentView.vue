@@ -128,14 +128,14 @@
               </div>
             </template>
             <div
-              v-for="doc in this.baseDocuments.items"
+              v-for="(doc, index) in this.baseDocuments.items"
               :key="doc.ID"
               class="text item"
             >
               <p>
-                <router-link :to="`/van-ban/${doc.ID}`">{{
-                  doc.title
-                }}</router-link>
+                <router-link :to="`/van-ban/${doc.ID}`"
+                  >{{ index + 1 }}. {{ doc.title }}</router-link
+                >
               </p>
             </div>
           </el-card>
