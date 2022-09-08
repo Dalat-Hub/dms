@@ -278,6 +278,9 @@ func (documentsService *DocumentsService) CreateFullDocument(full dmsReq.FullDoc
 	signAgency = utils.TrimSuffix(signAgency, "-")
 
 	shortTitle := category.Name + " " + signText
+	if signText == "" {
+		shortTitle = full.Title
+	}
 
 	publicToView := false
 	publicToDownload := false

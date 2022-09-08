@@ -1501,6 +1501,12 @@ const createNewDocument = async(fileInfo) => {
     return `${signerTitleMap.value[s.title] || ''} ${s.fullname}`
   }).join(',')
 
+  let signText = ''
+
+  if (formData.value.signNumber > 0 && formData.value.signYear > 0 && formData.value.categoryReadonly !== '' && formData.value.agencyReadonly !== '') {
+    signText = `${signNumber}/${formData.value.signYear}/${formData.value.categoryReadonly}-${formData.value.agencyReadonly}`
+  }
+
   const documentData = {
     title: formData.value.title,
     expert: formData.value.expert,
@@ -1513,7 +1519,7 @@ const createNewDocument = async(fileInfo) => {
     signYear: parseInt(formData.value.signYear),
     signCategory: formData.value.categoryReadonly,
     signAgency: formData.value.agencyReadonly,
-    signText: `${signNumber}/${formData.value.signYear}/${formData.value.categoryReadonly}-${formData.value.agencyReadonly}`,
+    signText: signText,
     categoryId: formData.value.category,
     agencies: [],
     createdBy: userStore.userInfo.ID || formData.value.createdBy,
