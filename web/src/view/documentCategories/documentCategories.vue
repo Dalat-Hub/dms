@@ -90,6 +90,13 @@
             <el-option label="Ẩn" :value="true" />
           </el-select>
         </el-form-item>
+        <el-form-item>
+          <el-radio-group v-model="formData.validDocument">
+            <el-radio :label="true" size="large">Thuộc thể loại văn bản hành chính</el-radio>
+            <el-radio :label="false" size="large">Không thuộc thể loại văn bản hành chính</el-radio>
+          </el-radio-group>
+        </el-form-item>
+
       </el-form>
       <template #footer>
         <div class="dialog-footer">
@@ -128,7 +135,8 @@ const formData = ref({
   code: '',
   count: 0,
   order: 0,
-  hidden: false
+  hidden: false,
+  validDocument: true
 })
 
 // Validation rules
