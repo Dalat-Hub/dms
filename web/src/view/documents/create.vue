@@ -1387,8 +1387,8 @@ const enterDocumentDialog = async() => {
           signText: result.signText,
           category: result.categoryId,
           agencies: result.agencies,
-          signNumber: result.signNumber,
-          signYear: result.signYear,
+          signNumber: result.signNumber * 1,
+          signYear: result.signYear * 1,
           categoryText: result.categoryText,
           agencyText: result.agencyText
         }
