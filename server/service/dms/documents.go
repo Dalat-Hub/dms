@@ -50,8 +50,13 @@ func (documentsService *DocumentsService) CreateDraftDocument(draft dmsReq.Draft
 
 	var category dms.DocumentCategories
 	err = global.GVA_DB.Model(&dms.DocumentCategories{}).Where("id = ?", draft.Category).First(&category).Error
-	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, errors.New("không tìm thấy thể loại có mã " + draft.CategoryText + " trên hệ thống")
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("không tìm thấy thể loại có mã " + draft.CategoryText + " trên hệ thống")
+		}
+
+		return nil, err
 	}
 
 	signText := ""
@@ -66,13 +71,13 @@ func (documentsService *DocumentsService) CreateDraftDocument(draft dmsReq.Draft
 		shortTitle = draft.Title
 	}
 
-	validDocument := true
+	validDocument := false
 
 	// không phải văn bản hành chính
 	// công văn
 	// biểu mẫu
-	if *category.ValidDocument != true {
-		validDocument = false
+	if category.ValidDocument != nil && *category.ValidDocument == true {
+		validDocument = true
 	}
 
 	err = global.GVA_DB.Transaction(func(tx *gorm.DB) error {
@@ -224,20 +229,32 @@ func (documentsService *DocumentsService) CreateDraftDocument(draft dmsReq.Draft
 // CreateFullDocument create new full document
 func (documentsService *DocumentsService) CreateFullDocument(full dmsReq.FullDocument) (doc *dms.Documents, err error) {
 	var document dms.Documents
-	var count int64
+	var validDocument = false
 
-	err = global.GVA_DB.Model(&dms.Documents{}).Where("sign_text LIKE ?", "%"+full.SignText+"%").Count(&count).Error
-
-	if count > 0 {
-		return nil, errors.New("mã số hiệu đã tồn tại")
+	signText := ""
+	if e := documentsService.checkIfSignTextAlreadyExists(full.SignText); e == nil {
+		signText = full.SignText
 	}
 
 	categoryService := new(DocumentCategoriesService)
 	agencyService := new(DocumentAgenciesService)
 
 	category, catErr := categoryService.GetDocumentCategories(full.CategoryId)
+
 	if catErr != nil {
+		if errors.Is(catErr, gorm.ErrRecordNotFound) {
+			return nil, errors.New("không tìm thấy thể loại có mã " + full.SignCategory + " trên hệ thống")
+		}
+
 		return nil, catErr
+	}
+
+	if category.ValidDocument != nil && *category.ValidDocument == true {
+		validDocument = true
+	}
+
+	if validDocument && signText == "" {
+		return nil, errors.New("văn bản hành chính phải có số hiệu văn bản")
 	}
 
 	agencies := make([]dms.DocumentAgencies, 0)
@@ -246,6 +263,10 @@ func (documentsService *DocumentsService) CreateFullDocument(full dmsReq.FullDoc
 	for _, agencyId := range full.ReqAgencies {
 		agency, agencyErr := agencyService.GetDocumentAgencies(agencyId)
 		if agencyErr != nil {
+			if errors.Is(agencyErr, gorm.ErrRecordNotFound) {
+				return nil, errors.New("không tìm thấy phòng ban có mã " + strconv.Itoa(int(agencyId)) + " trên hệ thống")
+			}
+
 			return nil, agencyErr
 		}
 
@@ -256,7 +277,7 @@ func (documentsService *DocumentsService) CreateFullDocument(full dmsReq.FullDoc
 
 	signAgency = utils.TrimSuffix(signAgency, "-")
 
-	shortTitle := category.Name + " " + full.SignText
+	shortTitle := category.Name + " " + signText
 
 	publicToView := false
 	publicToDownload := false
@@ -300,6 +321,7 @@ func (documentsService *DocumentsService) CreateFullDocument(full dmsReq.FullDoc
 			SignerText:       full.SignerText,
 			PublicToView:     publicToView,
 			PublicToDownload: publicToDownload,
+			ValidDocument:    &validDocument,
 		}
 
 		err = tx.Model(&dms.Documents{}).Create(&document).Error
