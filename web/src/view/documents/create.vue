@@ -694,13 +694,34 @@
       <el-form :model="documentFormData" label-position="right" label-width="150px">
         <el-form-item label="Tiêu đề">
           <el-input v-model="documentFormData.title" clearable placeholder="Tiêu đề văn bản" />
-          <p>Ví dụ: Luật Giáo dục ngày 14 tháng 6 năm 2019</p>
-          <p>Hoặc: Nghị định số 69/2017/NĐ-CP ngày 25 tháng 5 năm 2017</p>
+          <div>
+            <p>Ví dụ: Luật Giáo dục ngày 14 tháng 6 năm 2019</p>
+            <p>Hoặc: Nghị định số 69/2017/NĐ-CP ngày 25 tháng 5 năm 2017</p>
+          </div>
         </el-form-item>
         <el-form-item label="Số hiệu văn bản">
           <el-input v-model="documentFormData.signText" clearable placeholder="Số hiệu văn bản (nếu có)" />
-          <p>Ví dụ: 69/2017/NĐ-CP</p>
-          <p>Nếu VB do nhiều đơn vị ban hành, phân cách mỗi đơn vị bởi dấu @, <span style="display: block">VD: 69/2017/TTLT-BGDĐT@BCA</span></p>
+          <div>
+            <p>Ví dụ: 69/2017/NĐ-CP</p>
+            <p>Nếu VB do nhiều đơn vị ban hành, phân cách mỗi đơn vị bởi dấu @,</p>
+            <p>VD: 69/2017/TTLT-BGDĐT@BCA</p>
+          </div>
+        </el-form-item>
+        <el-form-item label="Thể loại văn bản">
+          <el-select
+            v-model="documentFormData.category"
+            :style="{ width: '100%' }"
+            clearable
+            filterable
+            placeholder="Chọn thể loại văn bản"
+          >
+            <el-option
+              v-for="item in categoryOptions"
+              :key="item.ID"
+              :label="item.name"
+              :value="item.ID"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="Gắn thẻ người dùng">
           <el-select
@@ -855,6 +876,7 @@ const documentFormType = ref('')
 const documentFormData = ref({
   title: '',
   signText: '',
+  category: '',
   relatedUsers: []
 })
 
@@ -1268,74 +1290,100 @@ const enterFieldDialog = async() => {
   }
 }
 
+const checkDocumentSignText = (text) => {
+  const parts = text.split('/')
+
+  if (parts.length !== 3) {
+    throw new Error('Số kí hiệu không đúng định dạng')
+  }
+
+  const [signNumber, signYear, another] = parts
+  const anotherParts = another.split('-')
+
+  if (anotherParts.length < 2) {
+    throw new Error('Số kí hiệu không đúng định dạng')
+  }
+
+  const [categoryText, ...agenciesParts] = anotherParts
+  let agencyText = agenciesParts.join('-')
+
+  const agencyIDs = []
+  if (agencyText.includes('@')) {
+    const parts = agencyText.split('@')
+
+    for (const p of parts) {
+      const agency = agencyOptions.value.find(s => s.code.toUpperCase() === p)?.ID || null
+
+      if (!agency) {
+        throw new Error(`Phòng ban ${p} không tồn tại`)
+      }
+
+      agencyIDs.push(agency)
+    }
+  } else {
+    const agencyId = agencyOptions.value.find(s => s.code.toUpperCase() === agencyText)?.ID || null
+    if (!agencyId) {
+      throw new Error(`Phòng ban ${agencyText} không tồn tại`)
+    }
+
+    agencyIDs.push(agencyId)
+  }
+
+  const categoryId = categoryOptions.value.find(s => s.code.toUpperCase() === categoryText)?.ID || null
+
+  if (!categoryId) {
+    throw new Error(`Thể loại ${categoryText} không tồn tại`)
+  }
+
+  const signNumberAsText = (signNumber * 1) > 9 ? `${signNumber}` : `0${parseInt(signNumber)}`
+
+  agencyText = agencyText.replace(/@/g, '-')
+  const signText = `${signNumberAsText}/${signYear}/${categoryText}-${agencyText}`
+
+  return {
+    signText: signText,
+    signNumber: parseInt(signNumber),
+    signYear: signYear,
+    categoryId: categoryId,
+    categoryText: categoryText,
+    agencies: agencyIDs,
+    agencyText: agencyText
+  }
+}
+
 const enterDocumentDialog = async() => {
   let response
 
   if (documentFormData.value.signText) {
-    const text = documentFormData.value.signText.toUpperCase()
-    const parts = text.split('/')
-
-    if (parts.length !== 3) {
-      alert('Số kí hiệu không đúng định dạng')
+    const category = categoryOptions.value.find(s => s.ID === documentFormData.value.category)
+    if (!category) {
+      alert('Thể loại văn bản không hợp lệ')
       return
     }
 
-    const [signNumber, signYear, another] = parts
-    const anotherParts = another.split('-')
+    let draftData = {}
 
-    if (anotherParts.length < 2) {
-      alert('Số kí hiệu không đúng định dạng')
-      return
-    }
+    if (category.validDocument) {
+      try {
+        const result = checkDocumentSignText(documentFormData.value.signText.toUpperCase())
 
-    const [categoryText, ...agenciesParts] = anotherParts
-    let agencyText = agenciesParts.join('-')
-
-    const agencyIDs = []
-    if (agencyText.includes('@')) {
-      const parts = agencyText.split('@')
-
-      for (const p of parts) {
-        const agency = agencyOptions.value.find(s => s.code.toUpperCase() === p)?.ID || null
-
-        if (!agency) {
-          alert('Phòng ban ' + p + ' không tồn tại')
-          return
+        draftData = {
+          ...documentFormData.value,
+          signText: result.signText,
+          category: result.categoryId,
+          agencies: result.agencies,
+          signNumber: result.signNumber,
+          signYear: result.signYear,
+          categoryText: result.categoryText,
+          agencyText: result.agencyText
         }
-
-        agencyIDs.push(agency)
-      }
-    } else {
-      const agencyId = agencyOptions.value.find(s => s.code.toUpperCase() === agencyText)?.ID || null
-      if (!agencyId) {
-        alert('Cơ quan ban hành văn bản không tồn tại trên hệ thống')
+      } catch (e) {
+        ElMessage({
+          type: 'success',
+          message: e.message
+        })
         return
       }
-
-      agencyIDs.push(agencyId)
-    }
-
-    const categoryId = categoryOptions.value.find(s => s.code.toUpperCase() === categoryText)?.ID || null
-
-    if (!categoryId) {
-      alert('Thể loại văn bản không tồn tại trên hệ thống')
-      return
-    }
-
-    const signNumberAsText = (signNumber * 1) > 9 ? `${signNumber}` : `0${signNumber}`
-
-    agencyText = agencyText.replace(/@/g, '-')
-    const signText = `${signNumberAsText}/${signYear}/${categoryText}-${agencyText}`
-
-    const draftData = {
-      ...documentFormData.value,
-      signText: signText,
-      category: categoryId,
-      agencies: agencyIDs,
-      signNumber: parseInt(signNumber),
-      signYear: parseInt(signYear),
-      categoryText: categoryText,
-      agencyText: agencyText
     }
 
     response = await createDraftDocument(draftData)
@@ -1351,6 +1399,7 @@ const enterDocumentDialog = async() => {
 
     documentFormData.value.title = ''
     documentFormData.value.signText = ''
+    documentFormData.value.category = ''
     documentFormData.value.relatedUsers = []
 
     documentsOptions.value = [...documentsOptions.value, response.data.document]
