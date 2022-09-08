@@ -21,18 +21,19 @@
 
         <el-col :lg="22">
           <el-row :gutter="10">
+
             <el-col :lg="17" :sm="24">
               <div class="gva-card-box">
                 <div class="el-card is-always-shadow gva-card quick-entrance">
                   <div class="el-card__body">
                     <el-row align="bottom" justify="space-between" type="flex">
                       <el-col class="el-col-18 el-col-lg-20">
-                        <el-form-item label="Số hiệu">
+                        <el-form-item label="Số hiệu (Nhập tự động chỉ hoạt động với văn bản hành chính)">
                           <el-input
                             v-model="formData.signText"
                             :style="{ width: '100%' }"
                             clearable
-                            placeholder="Số hiệu văn bản, theo dạng: <Số>/<Năm>/<Thể loại>-<Cơ quan>"
+                            placeholder="Số hiệu định danh văn bản (để trống nếu văn bản không có số hiệu)"
                             @blur="handleOnSignTextChanged"
                           />
                         </el-form-item>
@@ -43,10 +44,15 @@
                         </el-form-item>
                       </el-col>
                     </el-row>
+                  </div>
+                </div>
+              </div>
+            </el-col>
 
-                    <el-form-item label="Đây không phải văn bản hành chính">
-                      <el-switch v-model="formData.notSupported" />
-                    </el-form-item>
+            <el-col :lg="17" :sm="24" style="margin-top: 1rem;">
+              <div class="gva-card-box">
+                <div class="el-card is-always-shadow gva-card quick-entrance">
+                  <div class="el-card__body">
                     <el-form-item label="Tiêu đề văn bản">
                       <el-input
                         v-model="formData.title"
@@ -142,7 +148,7 @@
                     <el-row align="bottom" justify="space-between" type="flex">
                       <el-form-item class="el-col el-col-sm-12 el-col-lg-6" label="Số">
                         <el-input
-                          v-model="formData.signNumber"
+                          v-model.number="formData.signNumber"
                           :style="{ width: '100%' }"
                           clearable
                           placeholder="Số văn bản"
@@ -150,7 +156,7 @@
                       </el-form-item>
                       <el-form-item class="el-col el-col-sm-12 el-col-lg-6" label="Năm">
                         <el-input
-                          v-model="formData.signYear"
+                          v-model.number="formData.signYear"
                           :style="{ width: '100%' }"
                           clearable
                           placeholder="Năm phát hành"
@@ -1014,12 +1020,13 @@ const handleOnSignTextChanged = async() => {
 }
 
 const handleOnAutofillClick = async() => {
-  if (formData.value.notSupported) {
-    alert('Chức năng này chỉ áp dụng với văn bản hành chính')
+  if (!formData.value.signText) {
+    ElMessage({
+      type: 'error',
+      message: 'Vui lòng nhập số hiệu văn bản để tự động điền'
+    })
     return
   }
-
-  if (!formData.value.signText) return
 
   existingDocuments.value = []
 
@@ -1029,7 +1036,10 @@ const handleOnAutofillClick = async() => {
   const parts = text.split('/')
 
   if (parts.length !== 3) {
-    alert('Số kí hiệu không đúng định dạng')
+    ElMessage({
+      type: 'error',
+      message: 'Số kí hiệu không đúng định dạng (số/năm/thể loại - đơn vị)'
+    })
     return
   }
 
@@ -1037,7 +1047,10 @@ const handleOnAutofillClick = async() => {
   const anotherParts = another.split('-')
 
   if (anotherParts.length < 2) {
-    alert('Số kí hiệu không đúng định dạng')
+    ElMessage({
+      type: 'error',
+      message: 'Số kí hiệu không đúng định dạng (số/năm/thể loại - đơn vị)'
+    })
     return
   }
 
@@ -1052,7 +1065,7 @@ const handleOnAutofillClick = async() => {
       const agency = agencyOptions.value.find(s => s.code.toUpperCase() === p)?.ID || null
 
       if (!agency) {
-        alert('Phòng ban ' + p + ' không tồn tại')
+        alert(`Đơn vị ${p} không tồn tại trên hệ thống`)
         return
       }
 
@@ -1061,7 +1074,7 @@ const handleOnAutofillClick = async() => {
   } else {
     const agencyId = agencyOptions.value.find(s => s.code.toUpperCase() === agencyText)?.ID || null
     if (!agencyId) {
-      alert('Cơ quan ban hành văn bản không tồn tại trên hệ thống')
+      alert(`Đơn vị ${agencyText} không tồn tại trên hệ thống`)
       return
     }
 
@@ -1071,14 +1084,14 @@ const handleOnAutofillClick = async() => {
   const categoryId = categoryOptions.value.find(s => s.code.toUpperCase() === categoryText)?.ID || null
 
   if (!categoryId) {
-    alert('Thể loại văn bản không tồn tại trên hệ thống')
+    alert(`Thể loại văn bản ${categoryText} không tồn tại trên hệ thống`)
     return
   }
 
   agencyText = agencyText.replace(/@/g, '-')
 
-  formData.value.signNumber = signNumber
-  formData.value.signYear = signYear
+  formData.value.signNumber = parseInt(signNumber)
+  formData.value.signYear = parseInt(signYear)
   formData.value.categoryReadonly = categoryText
   formData.value.agencyReadonly = agencyText
 
@@ -1095,8 +1108,8 @@ const handleOnAutofillClick = async() => {
   formData.value.category = categoryId
 
   // check if the document with the same signText exists on the DB
-  const signNumberText = (signNumber * 1) > 9 ? `${signNumber}` : `0${signNumber}`
-  const keyword = `${signNumber}/${signYear}/${categoryText}-${agencyText}`
+  const signNumberText = (signNumber * 1) > 9 ? `${signNumber}` : `0${parseInt(signNumber)}`
+  const keyword = `${signNumberText}/${signYear}/${categoryText}-${agencyText}`
   const res = await getDocumentsList({
     keyword: keyword,
     page: 1,
