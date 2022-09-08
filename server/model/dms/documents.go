@@ -38,7 +38,7 @@ type Documents struct {
 	PublicToView     bool      `json:"publicToView" form:"publicToView" gorm:"column:public_to_view;"`
 	PublicToDownload bool      `json:"publicToDownload" form:"publicToDownload" gorm:"column:public_to_download"`
 	SignerText       string    `json:"signerText" form:"signerText" gorm:"signer_text"`
-	NotSupported     *bool     `json:"notSupported" form:"not_supported" gorm:"not_supported"`
+	ValidDocument    *bool     `json:"validDocument" form:"validDocument" gorm:"valid_document"`
 
 	Category *DocumentCategories `json:"category" gorm:"foreignKey:CategoryId"`
 	Agencies []*DocumentAgencies `json:"agencies" gorm:"many2many:document_agency_references;foreignKey:ID;joinForeignKey:DocumentId;References:ID;joinReferences:AgencyId;"`

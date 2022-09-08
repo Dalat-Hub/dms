@@ -29,28 +29,57 @@ func (documentsService *DocumentsService) CreateDocuments(documents dms.Document
 	return err
 }
 
+func (documentsService *DocumentsService) checkIfSignTextAlreadyExists(signText string) (err error) {
+	if signText == "" {
+		return nil
+	}
+
+	var count int64
+	err = global.GVA_DB.Model(&dms.Documents{}).Where("sign_text LIKE ?", "%"+signText+"%").Count(&count).Error
+
+	if count > 0 {
+		return errors.New("mã số hiệu " + signText + " đã tồn tại")
+	}
+
+	return nil
+}
+
 // CreateDraftDocument create new draft document
 func (documentsService *DocumentsService) CreateDraftDocument(draft dmsReq.DraftDocument, loginUserId uint) (doc *dms.Documents, err error) {
 	var document dms.Documents
-	var signText = ""
 
-	if draft.SignText != "" {
-		// check existing sign text
-		var count int64
-		err = global.GVA_DB.Model(&dms.Documents{}).Where("sign_text LIKE ?", "%"+draft.SignText+"%").Count(&count).Error
+	var category dms.DocumentCategories
+	err = global.GVA_DB.Model(&dms.DocumentCategories{}).Where("id = ?", draft.Category).First(&category).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, errors.New("không tìm thấy thể loại có mã " + draft.CategoryText + " trên hệ thống")
+	}
 
-		if count > 0 {
-			return nil, errors.New("mã số hiệu đã tồn tại")
-		}
-
+	signText := ""
+	if e := documentsService.checkIfSignTextAlreadyExists(draft.SignText); e == nil {
 		signText = draft.SignText
+	}
+
+	shortTitle := ""
+	if signText != "" {
+		shortTitle = category.Name + " " + signText
+	} else {
+		shortTitle = draft.Title
+	}
+
+	validDocument := true
+
+	// không phải văn bản hành chính
+	// công văn
+	// biểu mẫu
+	if *category.ValidDocument != true {
+		validDocument = false
 	}
 
 	err = global.GVA_DB.Transaction(func(tx *gorm.DB) error {
 		document = dms.Documents{
 			GVA_MODEL:        global.GVA_MODEL{},
 			Title:            draft.Title,
-			ShortTitle:       draft.Title,
+			ShortTitle:       shortTitle,
 			Expert:           draft.Title,
 			Content:          draft.Title,
 			DateIssued:       null.Time{},
@@ -77,6 +106,7 @@ func (documentsService *DocumentsService) CreateDraftDocument(draft dmsReq.Draft
 			Path:             "",
 			PublicToView:     false,
 			PublicToDownload: false,
+			ValidDocument:    &validDocument,
 		}
 
 		err = tx.Model(&dms.Documents{}).Create(&document).Error

@@ -707,6 +707,23 @@
             <p>VD: 69/2017/TTLT-BGDĐT@BCA</p>
           </div>
         </el-form-item>
+        <el-form-item label="Cơ quan ban hành văn bản">
+          <el-select
+            v-model="documentFormData.agencies"
+            :style="{ width: '100%' }"
+            clearable
+            multiple
+            filterable
+            placeholder="Chọn cơ quan ban hành văn bản"
+          >
+            <el-option
+              v-for="item in agencyOptions"
+              :key="item.ID"
+              :label="item.name"
+              :value="item.ID"
+            />
+          </el-select>
+        </el-form-item>
         <el-form-item label="Thể loại văn bản">
           <el-select
             v-model="documentFormData.category"
@@ -877,6 +894,7 @@ const documentFormData = ref({
   title: '',
   signText: '',
   category: '',
+  agencies: [],
   relatedUsers: []
 })
 
@@ -1352,17 +1370,14 @@ const checkDocumentSignText = (text) => {
 }
 
 const enterDocumentDialog = async() => {
-  let response
+  const category = categoryOptions.value.find(s => s.ID === documentFormData.value.category)
+  if (!category) {
+    alert('Thể loại văn bản không hợp lệ')
+    return
+  }
 
-  if (documentFormData.value.signText) {
-    const category = categoryOptions.value.find(s => s.ID === documentFormData.value.category)
-    if (!category) {
-      alert('Thể loại văn bản không hợp lệ')
-      return
-    }
-
-    let draftData = {}
-
+  let draftData = {}
+  if (category.validDocument) {
     if (category.validDocument) {
       try {
         const result = checkDocumentSignText(documentFormData.value.signText.toUpperCase())
@@ -1385,11 +1400,11 @@ const enterDocumentDialog = async() => {
         return
       }
     }
-
-    response = await createDraftDocument(draftData)
   } else {
-    response = await createDraftDocument({ ...documentFormData.value })
+    draftData = { ...documentFormData.value }
   }
+
+  const response = await createDraftDocument(draftData)
 
   if (response.code === 0) {
     ElMessage({
@@ -1401,6 +1416,7 @@ const enterDocumentDialog = async() => {
     documentFormData.value.signText = ''
     documentFormData.value.category = ''
     documentFormData.value.relatedUsers = []
+    documentFormData.value.agencies = []
 
     documentsOptions.value = [...documentsOptions.value, response.data.document]
     if (documentFormType.value === 'relation') {
