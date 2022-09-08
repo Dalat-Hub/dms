@@ -1004,8 +1004,12 @@ const getDocument = async() => {
 
 const loadAttachedFiles = async() => {
   const data = await getDocumentFiles({ id: searchInfo.value.ID })
+  let isValidPdf = true
 
   if (data.code === 0) {
+    const temp = data.data.files.filter(s => s.url.includes('.pdf'))
+    if (temp.length !== data.data.files.length) { isValidPdf = false }
+
     formFileData.value.files = [...data.data.files]
     formFileData.value.canDownload = data.data.canDownload
 
@@ -1013,17 +1017,20 @@ const loadAttachedFiles = async() => {
     if (formFileData.value.files.length > 0) {
       formFileData.value.title = 'Cập nhật tập tin đính kèm'
       formFileData.value.buttonTitle = 'Chọn tập tin cập nhật'
-      pdfSource = `${path}/${data.data.files[0].url}`
+
+      if (isValidPdf) {
+        pdfSource = `${path}/${data.data.files[0].url}`
+
+        if (!data.data.canDownload) {
+          pdfSource = pdfSource + '#toolbar=0'
+        }
+
+        formFileData.value.src = pdfSource
+      }
     } else {
       formFileData.value.title = 'Bổ sung tập tin đính kèm'
       formFileData.value.buttonTitle = 'Chọn tập tin bổ sung'
     }
-
-    if (!data.data.canDownload) {
-      pdfSource = pdfSource + '#toolbar=0'
-    }
-
-    formFileData.value.src = pdfSource
   }
 }
 
