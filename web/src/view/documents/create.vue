@@ -6,7 +6,7 @@
           <el-card class="box-card">
             <template #header>
               <div class="card-header">
-                <span>Tìm thấy văn bản với số hiệu "{{ formData.signText.replace(/@/g, '-') }}" trên hệ thống</span>
+                <span>Tìm thấy văn bản với số hiệu "{{ existingDocuments[0].signText }}" trên hệ thống</span>
               </div>
             </template>
             <div
@@ -1065,7 +1065,10 @@ const handleOnAutofillClick = async() => {
       const agency = agencyOptions.value.find(s => s.code.toUpperCase() === p)?.ID || null
 
       if (!agency) {
-        alert(`Đơn vị ${p} không tồn tại trên hệ thống`)
+        ElMessage({
+          type: 'error',
+          message: `Đơn vị ${p} không tồn tại trên hệ thống`
+        })
         return
       }
 
@@ -1074,7 +1077,10 @@ const handleOnAutofillClick = async() => {
   } else {
     const agencyId = agencyOptions.value.find(s => s.code.toUpperCase() === agencyText)?.ID || null
     if (!agencyId) {
-      alert(`Đơn vị ${agencyText} không tồn tại trên hệ thống`)
+      ElMessage({
+        type: 'error',
+        message: `Đơn vị ${agencyText} không tồn tại trên hệ thống`
+      })
       return
     }
 
@@ -1084,7 +1090,10 @@ const handleOnAutofillClick = async() => {
   const categoryId = categoryOptions.value.find(s => s.code.toUpperCase() === categoryText)?.ID || null
 
   if (!categoryId) {
-    alert(`Thể loại văn bản ${categoryText} không tồn tại trên hệ thống`)
+    ElMessage({
+      type: 'error',
+      message: `Thể loại văn bản ${categoryText} không tồn tại trên hệ thống`
+    })
     return
   }
 
@@ -1095,16 +1104,7 @@ const handleOnAutofillClick = async() => {
   formData.value.categoryReadonly = categoryText
   formData.value.agencyReadonly = agencyText
 
-  const agencyMap = {}
-  for (const i of formData.value.agencies) {
-    agencyMap[i] = 1
-  }
-
-  for (const i of agencyIDs) {
-    agencyMap[i] = 1
-  }
-
-  formData.value.agencies = [...Object.keys(agencyMap)].map(i => i * 1)
+  formData.value.agencies = [...agencyIDs]
   formData.value.category = categoryId
 
   // check if the document with the same signText exists on the DB
