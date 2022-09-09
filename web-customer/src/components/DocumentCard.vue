@@ -84,7 +84,7 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 
 const getDocumentTitle = (document) => {
-  return `${document?.category?.name || ""} ${document?.signText}`;
+  return `${document?.shortTitle || "N/A"}`;
 };
 
 const getIssuedDate = (date) => {
