@@ -419,8 +419,11 @@ export default {
         this.file.files = res.data.files;
         this.file.canDownload = res.data.canDownload;
 
-        if (res.data.files.length > 0)
-          this.file.src = `${path}/${res.data.files[0].url}#toolbar=0`;
+        if (res.data.files.length > 0) {
+          if (res.data.files[0].url.includes(".pdf")) {
+            this.file.src = `${path}/${res.data.files[0].url}#toolbar=0`;
+          }
+        }
       }
     },
     handleFileDownload() {
