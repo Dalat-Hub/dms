@@ -243,6 +243,16 @@ func (documentsService *DocumentsService) CreateFullDocument(full dmsReq.FullDoc
 		return nil, e
 	}
 
+	var count int64
+	err = global.GVA_DB.Model(&dms.Documents{}).Where("title LIKE ?", "%"+full.Title+"%").Count(&count).Error
+	if err != nil {
+		return nil, err
+	}
+
+	if count > 0 {
+		return nil, errors.New("văn bản có cùng tiêu đề đã tồn tại trên hệ thống")
+	}
+
 	categoryService := new(DocumentCategoriesService)
 	agencyService := new(DocumentAgenciesService)
 
