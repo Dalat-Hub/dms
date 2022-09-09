@@ -15,6 +15,7 @@ import (
 	"gopkg.in/guregu/null.v4"
 	"gorm.io/gorm"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -62,6 +63,8 @@ func (documentsService *DocumentsService) CreateDraftDocument(draft dmsReq.Draft
 	signText := ""
 	if e := documentsService.checkIfSignTextAlreadyExists(draft.SignText); e == nil {
 		signText = draft.SignText
+	} else {
+		return nil, e
 	}
 
 	shortTitle := ""
@@ -231,9 +234,13 @@ func (documentsService *DocumentsService) CreateFullDocument(full dmsReq.FullDoc
 	var document dms.Documents
 	var validDocument = false
 
+	full.SignText = strings.TrimSpace(full.SignText)
+
 	signText := ""
 	if e := documentsService.checkIfSignTextAlreadyExists(full.SignText); e == nil {
 		signText = full.SignText
+	} else {
+		return nil, e
 	}
 
 	categoryService := new(DocumentCategoriesService)
