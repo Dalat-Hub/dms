@@ -8,7 +8,7 @@
     <div
       v-for="item in items"
       :key="item.ID"
-      class="text item"
+      class="text item dms-document-item"
       style="margin-bottom: 0.5rem"
     >
       <router-link :to="this.linkTo(item)">
@@ -58,5 +58,10 @@ export default {
   font-size: 14px;
   color: gray;
   display: block;
+}
+.dms-document-item:not(:last-child) {
+  padding-bottom: 7px;
+  border-bottom: 1px solid #eee;
+  margin-bottom: 16px !important;
 }
 </style>

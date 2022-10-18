@@ -8,7 +8,7 @@
     <div
       v-for="item in items"
       :key="item.ID"
-      class="text item"
+      class="text item dms-sidemenu-item"
       style="margin-bottom: 0.5rem"
     >
       <router-link :to="this.linkTo(item)">
@@ -43,5 +43,10 @@ export default {
 }
 .ml-2 {
   margin-left: 0.3rem;
+}
+.dms-sidemenu-item:not(:last-child) {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 7px;
+  margin-bottom: 16px !important;
 }
 </style>
