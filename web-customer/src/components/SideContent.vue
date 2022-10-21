@@ -1,5 +1,5 @@
 <template>
-  <el-card class="box-card card-info" style="margin-bottom: 1rem">
+  <el-card :class="this.getCardClassNames()" style="margin-bottom: 1rem">
     <template #header>
       <div class="card-header">
         <h2 class="card-title">{{ title }}</h2>
@@ -31,13 +31,16 @@ import { getDateFormatted } from "@/utils/date";
 
 export default {
   name: "SideContent",
-  props: ["title", "items", "displayCounter", "displayCreatedAt"],
+  props: ["title", "items", "displayCounter", "displayCreatedAt", "className"],
   methods: {
     linkTo(item) {
       return `/van-ban/${item.ID}`;
     },
     getCreatedDate(item) {
       return getDateFormatted(item.CreatedAt, "dd-MM-yyyy hh:mm:ss");
+    },
+    getCardClassNames() {
+      return "box-card card-info side-content-card " + this.className;
     },
   },
 };

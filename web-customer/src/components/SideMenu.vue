@@ -9,7 +9,11 @@
       v-for="item in items"
       :key="item.ID"
       class="text item dms-sidemenu-item"
-      style="margin-bottom: 0.5rem"
+      style="
+        margin-bottom: 0.5rem;
+        display: flex;
+        justify-content: space-between;
+      "
     >
       <router-link :to="this.linkTo(item)">
         {{ item.name }}

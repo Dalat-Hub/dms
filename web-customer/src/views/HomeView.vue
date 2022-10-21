@@ -70,12 +70,14 @@
           title="Văn bản mới"
           :items="latestDocuments"
           :displayCreatedAt="true"
+          className="card-latest-documents"
         ></SideContent>
 
         <SideContent
           title="Văn bản xem nhiều"
           :items="this.mostViewDocuments"
           :displayCounter="true"
+          className="card-most-view-documents"
         ></SideContent>
       </el-col>
     </el-row>
