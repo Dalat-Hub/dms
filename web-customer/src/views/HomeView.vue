@@ -1,5 +1,6 @@
 <template>
   <div class="home-view">
+    <el-divider></el-divider>
     <BreadCrumb />
     <el-divider></el-divider>
     <el-row :gutter="16">

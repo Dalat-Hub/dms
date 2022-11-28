@@ -1,62 +1,46 @@
 <template>
+  <div class="heading-intro">
+    <div class="dlu-logo">
+    <el-image style="width: 100px; height: 100px" src="dlu-logo.webp"/>
+  </div>
+    <h2>TRƯỜNG ĐẠI HỌC ĐÀ LẠT</h2>
+    <h3>HỆ THỐNG QUẢN LÝ TÀI LIỆU</h3>
+  </div>
+
   <el-row justify="center" class="login-form">
     <el-col :sm="12" :lg="10">
-      <el-form :model="form" label-width="120px" @keyup.enter="onSubmit">
+      <el-form :model="form" label-width="150px" @keyup.enter="onSubmit" label-position="top">
         <el-form-item label="Tên đăng nhập">
-          <el-input
-            v-model="form.username"
-            placeholder="Vui lòng điền tên đăng nhập"
-            autocomplete="off"
-          />
+          <el-input v-model="form.username" placeholder="Vui lòng điền tên đăng nhập" autocomplete="off" />
         </el-form-item>
         <el-form-item label="Mật khẩu">
-          <el-input
-            v-model="form.password"
-            placeholder="Vui lòng điền mật khẩu"
-            autocomplete="off"
-            type="password"
-          />
+          <el-input v-model="form.password" placeholder="Vui lòng điền mật khẩu" autocomplete="off" type="password" />
         </el-form-item>
         <el-form-item label="Mã xác thực">
-          <el-input
-            v-model="form.captcha"
-            placeholder="Vui lòng điền mã xác thực"
-            style="width: 60%"
-          />
-          <img
-            v-if="picPath"
-            :src="picPath"
-            alt="Vui lòng nhập mã bảo mật"
-            @click="loginVerify()"
-            style="width: 40%"
-          />
+          <el-input v-model="form.captcha" placeholder="Vui lòng điền mã xác thực" style="width: 60%" />
+          <img v-if="picPath" :src="picPath" alt="Vui lòng nhập mã bảo mật" @click="loginVerify()" style="width: 40%" />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="onSubmit">Đăng nhập</el-button>
+          <el-col class="center">
+            <el-button lager type="success" @click="onSubmit">Đăng nhập</el-button>
+          </el-col>
         </el-form-item>
-      </el-form>
-
-      <hr />
-
-      <div>
-        <a
-          :href="getGoogleUrl('/')"
-          style="
+        <el-divider>Hoặc</el-divider>
+        <el-form-item>
+          <el-col class="center">
+            <a :href="getGoogleUrl('/')" style="
             display: flex;
             align-items: center;
             margin-top: 1rem;
             text-decoration: none;
-          "
-        >
-          <img
-            src="@/assets/google.png"
-            alt="Google"
-            class="link-icon"
-            style="width: 2rem; margin-right: 0.5rem"
-          />
-          <span style="color: #333">Đăng nhập với Google</span>
-        </a>
-      </div>
+          ">
+              <img src="@/assets/google.png" alt="Google" class="link-icon" style="width: 2rem; margin-right: 0.5rem" />
+              <span style="color: #333">Đăng nhập với Google</span>
+            </a>
+          </el-col>
+        </el-form-item>
+      </el-form>
+      <el-divider></el-divider>
     </el-col>
   </el-row>
 </template>
@@ -114,5 +98,21 @@ const onSubmit = async () => {
 .login-form {
   padding-top: 3rem;
   padding-bottom: 20rem;
+}
+
+.heading-intro {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-content: center;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+}
+.dlu-logo{
+  width: 100%;
+  margin: 12px;
 }
 </style>
