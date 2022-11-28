@@ -1,53 +1,44 @@
 <template>
-  <div style="margin-bottom: 2rem">
+  <div class="header-contailer">
     <el-image src="banner.png" fit="cover" />
-    <el-menu
-      :default-active="activeIndex"
-      class="el-menu-demo"
-      mode="horizontal"
-      @select="handleSelect"
-    >
+    <el-menu :default-active="activeIndex" class="el-menu-demo dlu-menu" background-color="#7AA227" text-color="#fff"
+      active-text-color="#FC7616" mode="horizontal" @select="handleSelect">
       <el-menu-item index="1">
-        <router-link to="/">Trang chủ</router-link>
+        <router-link class="router-title" to="/">Trang chủ</router-link>
       </el-menu-item>
       <el-menu-item index="2">
-        <router-link to="/van-ban">Văn bản</router-link>
+        <router-link class="router-title" to="/van-ban">Văn bản</router-link>
       </el-menu-item>
-      <el-sub-menu index="3">
-        <template #title>Cơ quan ban hành</template>
-        <el-menu-item
-          v-for="(agency, index) in agencies"
-          :index="'3-' + (index + 1)"
-          :key="agency.ID"
-          ><router-link :to="`/van-ban?co-quan-ban-hanh=${agency.ID}`">{{
-            agency.name
-          }}</router-link></el-menu-item
-        >
+      <el-sub-menu index="3" class="router-title">
+        <template  #title> Cơ quan ban hành </template>
+        <el-menu-item class="router-title" text-color="#fff" v-for="(agency, index) in agencies" :index="'3-' + (index + 1)" :key="agency.ID">
+          <router-link text-color="#fff"   :to="`/van-ban?co-quan-ban-hanh=${agency.ID}`">{{
+              agency.name
+          }}</router-link>
+        </el-menu-item>
       </el-sub-menu>
-      <el-sub-menu index="4">
-        <template #title>Thể loại</template>
-        <el-menu-item
-          v-for="(category, index) in categories"
-          :index="'4-' + (index + 1)"
-          :key="category.ID"
-          ><router-link :to="`/van-ban?the-loai=${category.ID}`">{{
-            category.name
-          }}</router-link></el-menu-item
-        >
+      <el-sub-menu index="4" class="router-title">
+        <template #title> Thể loại </template>
+        <el-menu-item class="router-title" v-for="(category, index) in categories" :index="'4-' + (index + 1)"
+          :key="category.ID">
+          <router-link class="router-title" :to="`/van-ban?the-loai=${category.ID}`">{{
+              category.name
+          }}
+          </router-link>
+        </el-menu-item>
       </el-sub-menu>
-      <el-menu-item index="5">Yêu cầu văn bản</el-menu-item>
-      <el-menu-item index="6">Giới thiệu</el-menu-item>
-      <el-menu-item index="7" v-if="!userStore.userInfo.nickName">
-        <router-link to="/dang-nhap"> Đăng nhập </router-link>
+      <!-- <el-menu-item index="5">Yêu cầu văn bản</el-menu-item>
+      <el-menu-item index="6">Giới thiệu</el-menu-item> -->
+      <el-menu-item class="menu-item" index="7" v-if="!userStore.userInfo.nickName">
+        <router-link class="router-title" to="/dang-nhap">Đăng nhập</router-link>
       </el-menu-item>
-
-      <el-sub-menu v-else index="8">
+      <el-sub-menu v-else index="8" class="router-title">
         <template #title>Xin chào {{ userStore.userInfo.nickName }}</template>
-        <el-menu-item index="8-1">
-          <span>Quản trị</span>
+        <el-menu-item class="router-title" index="8-1">
+          Quản trị
         </el-menu-item>
         <el-menu-item index="8-2">
-          <router-link to="/">Đăng xuất</router-link>
+          <router-link class="router-title" to="/">Đăng xuất </router-link>
         </el-menu-item>
       </el-sub-menu>
     </el-menu>
@@ -125,4 +116,29 @@ getCategories();
 getUserInfo();
 </script>
 
-<style scoped></style>
+<style scoped>
+.router-title {
+  text-transform: uppercase;
+  font-weight: 550;
+  color: #fff;
+}
+
+a[class^="router-link"], .text.item a {
+    text-decoration: none;
+    color: #fff !important;
+}
+
+/* .sub-menu{
+  background-color: #f1f1f3 !important;
+} */
+/* .header-contailer{
+  margin-bottom: 2rem;
+  
+} */
+/* .dlu-menu{
+background-color: #54880A;
+} */
+/* .el-sub-menu .is-opened{
+  background-color: #54880A;
+} */
+</style>

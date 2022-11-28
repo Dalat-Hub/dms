@@ -1,173 +1,117 @@
 <template>
   <div class="document-view">
     <BreadCrumb />
+    <el-divider>
+    </el-divider>
+    <el-row :gutter="30">
+      <el-col :sm="14" :lg="16">
+        <div class="document-container">
+          <h3 class="document-title">{{ this.document?.title || "--" }}</h3>
+        </div>
+        <el-card class="box-card margin-bottom-1-rem card-info" shadow="never">
+          <h2 class="card-title">Mô tả</h2>
+          <div class="document-expert">
+            <p>{{ this.document?.expert || "--" }}</p>
+          </div>
+        </el-card>
+        <el-tabs type="border-card" class="margin-bottom-1-rem">
+          <el-tab-pane label="Nội dung văn bản">
+            <div class="document-content">
+              <p>{{ document?.content || "--" }}</p>
+            </div>
+          </el-tab-pane>
+          <el-tab-pane label="Tập tin văn bản">
 
-    <el-row :gutter="10">
-      <el-col :sm="8" :lg="6">
-        <AgencyTree
-          title="Đơn vị & Thể loại"
-          :tree="this.agencyTree"
-          @onNodeClick="handleOnTreeNodeClick"
-        />
-        <SideMenu
-          :title="this.agency.title"
-          :items="this.agency.items"
-          param="co-quan-ban-hanh"
-        />
-        <SideMenu
-          :title="this.category.title"
-          :items="this.category.items"
-          param="the-loai"
-        />
-        <SideMenu
-          :title="this.field.title"
-          :items="this.field.items"
-          param="linh-vuc"
-        />
-      </el-col>
-      <el-col :sm="16" :lg="18">
-        <el-card class="box-card margin-bottom-1-rem card-info">
-          <h2 class="card-title">Tiêu đề văn bản</h2>
-          <br />
-          <p>{{ this.document?.title || "--" }}</p>
-        </el-card>
-        <el-card class="box-card margin-bottom-1-rem card-info">
-          <h2 class="card-title">Mô tả ngắn</h2>
-          <br />
-          <p>{{ this.document?.expert || "--" }}</p>
-        </el-card>
+            <el-card  shadow="never" class="margin-bottom-1-rem card-info" style="margin-bottom: 1rem"
+              v-if="this.file.files.length > 0">
+              <template #header>
+                <div class="card-header">
+                  <h2 class="card-title">{{ this.file.title }}</h2>
+                  <el-button type="success" @click="this.handleFileDownload">Tải tập tin</el-button>
+                </div>
+              </template>
+              <div>
+                <iframe :src="this.file.src" frameborder="0" style="width: 100%; height: 700px"></iframe>
+              </div>
+            </el-card>
+          </el-tab-pane>
+        </el-tabs>
         <div class="grid-content bg-purple margin-bottom-1-rem">
-          <el-card class="box-card margin-bottom-1-rem">
-            <el-descriptions
-              :column="2"
-              border
-              direction="horizontal"
-              title="Thuộc tính của văn bản"
-            >
-              <el-descriptions-item label="Số ký hiệu">{{
-                document?.signText || "--"
-              }}</el-descriptions-item>
-              <el-descriptions-item label="Ngày ban hành">{{
-                getDateFormat(document?.dateIssued)
-              }}</el-descriptions-item>
-
-              <el-descriptions-item label="Loại văn bản">{{
-                document?.category?.name || "--"
-              }}</el-descriptions-item>
-              <el-descriptions-item label="Lĩnh vực văn bản">
-                {{ document?.fields.map((f) => f.name).join(", ") }}
-              </el-descriptions-item>
-
-              <el-descriptions-item label="Cơ quan ban hành">{{
-                document?.agencies?.map((e) => e.name).join(", ") || "--"
-              }}</el-descriptions-item>
-              <el-descriptions-item label="Người ký">
-                {{ document?.signerText.split(",").join(", ") }}
-              </el-descriptions-item>
-
-              <el-descriptions-item label="Ngày có hiệu lực">{{
-                getDateFormat(document?.effectDate)
-              }}</el-descriptions-item>
-              <el-descriptions-item label="Ngày hết hiệu lực">{{
-                getDateFormat(document?.expirationDate)
-              }}</el-descriptions-item>
-
-              <el-descriptions-item label="Tình trạng hiệu lực" span="2">
-                <el-tag
-                  v-if="document?.stillInEffect"
-                  class="ml-2"
-                  type="success"
-                  >Còn hiệu lực</el-tag
-                >
-                <el-tag v-else class="ml-2" type="danger">Hết hiệu lực</el-tag>
-              </el-descriptions-item>
-            </el-descriptions>
-          </el-card>
-          <el-card class="box-card margin-bottom-1-rem card-info">
-            <h2 class="card-title">Nội dung</h2>
-            <br />
-            <p>{{ document?.content || "--" }}</p>
-          </el-card>
-
-          <el-card
-            v-if="document?.file?.url"
-            class="box-card margin-bottom-1-rem card-info"
-          >
+          <el-card  shadow="never" v-if="document?.file?.url" class="box-card margin-bottom-1-rem card-info">
             <h2 class="card-title">Tập tin đính kèm</h2>
             <br />
-            <iframe
-              :src="this.getFileURL()"
-              style="width: 100%; height: 700px"
-            />
+            <iframe :src="this.getFileURL()" style="width: 100%; height: 700px" />
           </el-card>
-
-          <el-card
-            class="box-card margin-bottom-1-rem card-info"
-            style="margin-bottom: 1rem"
-            v-if="this.baseDocuments.items.length > 0"
-          >
+          <el-card  shadow="never" class="box-card margin-bottom-1-rem card-info" style="margin-bottom: 1rem"
+            v-if="this.baseDocuments.items.length > 0">
             <template #header>
               <div class="card-header">
                 <h2 class="card-title">Văn bản căn cứ</h2>
               </div>
             </template>
-            <div
-              v-for="(doc, index) in this.baseDocuments.items"
-              :key="doc.ID"
-              class="text item"
-            >
+            <div v-for="(doc, index) in this.baseDocuments.items" :key="doc.ID" class="text item">
               <p>
-                <router-link :to="`/van-ban/${doc.ID}`"
-                  >{{ index + 1 }}. {{ doc.title }}</router-link
-                >
+                <router-link :to="`/van-ban/${doc.ID}`">{{ index + 1 }}. {{ doc.title }}</router-link>
               </p>
             </div>
           </el-card>
-          <el-card
-            class="box-card margin-bottom-1-rem card-info"
-            style="margin-bottom: 1rem"
-            v-if="this.relatedDocuments.items.length > 0"
-          >
+          <el-card  shadow="never" class="box-card margin-bottom-1-rem card-info" style="margin-bottom: 1rem"
+            v-if="this.relatedDocuments.items.length > 0">
             <template #header>
               <div class="card-header">
                 <h2 class="card-title">Văn bản liên quan</h2>
               </div>
             </template>
-            <div
-              v-for="doc in this.relatedDocuments.items"
-              :key="doc.ID"
-              class="text item"
-            >
+            <div v-for="doc in this.relatedDocuments.items" :key="doc.ID" class="text item">
               <p>
                 <router-link :to="`/van-ban/${doc.ID}`">{{
-                  doc.title
+                    doc.title
                 }}</router-link>
               </p>
             </div>
           </el-card>
-          <el-card
-            class="box-card margin-bottom-1-rem card-info"
-            style="margin-bottom: 1rem"
-            v-if="this.file.files.length > 0"
-          >
-            <template #header>
-              <div class="card-header">
-                <h2 class="card-title">{{ this.file.title }}</h2>
 
-                <el-button type="success" @click="this.handleFileDownload"
-                  >Tải tập tin</el-button
-                >
-              </div>
-            </template>
-            <div>
-              <iframe
-                :src="this.file.src"
-                frameborder="0"
-                style="width: 100%; height: 700px"
-              ></iframe>
-            </div>
-          </el-card>
         </div>
+      </el-col>
+      <el-col :sm="10" :lg="8">
+        <el-card  shadow="never" class="box-card margin-bottom-1-rem">
+          <el-descriptions :column="1" border direction="horizontal" title="Thuộc tính của văn bản">
+            <el-descriptions-item label="Tình trạng hiệu lực" span="2">
+              <el-tag v-if="document?.stillInEffect" class="ml-2" type="success">Còn hiệu lực</el-tag>
+              <el-tag v-else class="ml-2" type="danger">Hết hiệu lực</el-tag>
+            </el-descriptions-item>
+            <el-descriptions-item label="Số ký hiệu">{{ document?.signText || "--" }}</el-descriptions-item>
+            <el-descriptions-item label="Ngày ban hành">{{
+                getDateFormat(document?.dateIssued)
+            }}</el-descriptions-item>
+
+            <el-descriptions-item label="Loại văn bản">{{
+                document?.category?.name || "--"
+            }}</el-descriptions-item>
+            <el-descriptions-item label="Lĩnh vực văn bản">
+              {{ document?.fields.map((f) => f.name).join(", ") }}
+            </el-descriptions-item>
+
+            <el-descriptions-item label="Cơ quan ban hành">{{
+                document?.agencies?.map((e) => e.name).join(", ") || "--"
+            }}</el-descriptions-item>
+            <el-descriptions-item label="Người ký">
+              {{ document?.signerText.split(",").join(", ") }}
+            </el-descriptions-item>
+
+            <el-descriptions-item label="Ngày có hiệu lực">{{
+                getDateFormat(document?.effectDate)
+            }}</el-descriptions-item>
+            <el-descriptions-item label="Ngày hết hiệu lực">{{
+                getDateFormat(document?.expirationDate)
+            }}</el-descriptions-item>
+
+          </el-descriptions>
+        </el-card>
+        <AgencyTree title="Đơn vị & Thể loại" :tree="this.agencyTree" @onNodeClick="handleOnTreeNodeClick" />
+        <SideMenu :title="this.agency.title" :items="this.agency.items" param="co-quan-ban-hanh" />
+        <SideMenu :title="this.category.title" :items="this.category.items" param="the-loai" />
+        <SideMenu :title="this.field.title" :items="this.field.items" param="linh-vuc" />
       </el-col>
     </el-row>
   </div>
@@ -435,20 +379,46 @@ export default {
 </script>
 
 <style>
+.document-view {
+  margin-left: 5%;
+  margin-right: 5%;
+}
+
+
 .document-view .box-card {
   width: 100%;
 }
+
 .document-view .w-full {
-  width: 100%;
+  width: 80%;
 }
+
 .document-view .margin-bottom-1-rem {
   margin-bottom: 1rem;
 }
+
 .document-view .card-info {
   text-align: left;
 }
+
 .document-view .card-title {
   text-align: left;
   font-size: 1rem;
+}
+
+/* .document-container{
+
+} */
+
+.document-title {
+  text-align: left;
+  text-transform: uppercase;
+  line-height: 1.9em;
+}
+
+.document-content{
+  text-align: left;
+  font-size: 16px;
+  line-height: 1.6em;
 }
 </style>

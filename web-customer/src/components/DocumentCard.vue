@@ -1,5 +1,5 @@
 <template>
-  <el-card class="box-card" style="margin-bottom: 1rem">
+  <el-card  shadow="never" class="box-card" style="margin-bottom: 1rem">
     <template #header>
       <div class="card-header">
         <h3

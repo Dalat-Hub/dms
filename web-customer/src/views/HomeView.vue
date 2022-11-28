@@ -1,84 +1,43 @@
 <template>
   <div class="home-view">
     <BreadCrumb />
-
+    <el-divider></el-divider>
     <el-row :gutter="16">
       <el-col :lg="6">
-        <AgencyTree
-          title="Đơn vị & Thể loại"
-          :tree="this.agencyTree"
-          @onNodeClick="handleOnTreeNodeClick"
-        />
-        <SideMenu
-          :title="this.agency.title"
-          :items="this.agency.items"
-          param="co-quan-ban-hanh"
-        />
-        <SideMenu
-          :title="this.category.title"
-          :items="this.category.items"
-          param="the-loai"
-        />
-        <SideMenu
-          :title="this.field.title"
-          :items="this.field.items"
-          param="linh-vuc"
-        />
+        <AgencyTree title="Đơn vị & Thể loại" :tree="this.agencyTree" @onNodeClick="handleOnTreeNodeClick" />
+        <SideMenu :title="this.agency.title" :items="this.agency.items" param="co-quan-ban-hanh" />
+        <SideMenu :title="this.category.title" :items="this.category.items" param="the-loai" />
+        <SideMenu :title="this.field.title" :items="this.field.items" param="linh-vuc" />
       </el-col>
       <el-col :lg="12">
-        <SearchBox
-          :agencies="this.agency.items"
-          :categories="this.category.items"
-          :fields="this.field.items"
+        <SearchBox :agencies="this.agency.items" :categories="this.category.items" :fields="this.field.items"
           @onSimpleSearchSubmit="this.handleOnSimpleSearchSubmit"
-          @onAdvancedSearchSubmit="this.handleOnAdvancedSearchSubmit"
-        />
+          @onAdvancedSearchSubmit="this.handleOnAdvancedSearchSubmit" />
 
-        <SearchStat
-          :count="this.searchStats.count"
-          :searchBy="this.searchStats.searchBy"
-          :meta="{
-            agency: this.agency,
-            category: this.category,
-            field: this.field,
-            signText: this.searchStats.signText,
-          }"
-        />
+        <SearchStat :count="this.searchStats.count" :searchBy="this.searchStats.searchBy" :meta="{
+          agency: this.agency,
+          category: this.category,
+          field: this.field,
+          signText: this.searchStats.signText,
+        }" />
 
         <div id="main">
-          <DocumentCard
-            v-for="document in this.document.items"
-            :key="document.ID"
-            :document="document"
-            @onViewDetailClick="handleOnDocumentViewDetailClick"
-          />
+          <DocumentCard v-for="document in this.document.items" :key="document.ID" :document="document"
+            @onViewDetailClick="handleOnDocumentViewDetailClick" />
 
           <div style="display: flex; justify-content: center; margin-top: 2rem">
-            <el-pagination
-              v-if="parseInt(this.searchStats.count / this.pageSize) > 0"
-              background
-              layout="prev, pager, next"
-              :total="this.searchStats.count"
-              :page-size="this.pageSize"
-              @current-change="handlePageChanged"
-            />
+            <el-pagination v-if="parseInt(this.searchStats.count / this.pageSize) > 0" background
+              layout="prev, pager, next" :total="this.searchStats.count" :page-size="this.pageSize"
+              @current-change="handlePageChanged" />
           </div>
         </div>
       </el-col>
       <el-col :lg="6">
-        <SideContent
-          title="Văn bản mới"
-          :items="latestDocuments"
-          :displayCreatedAt="true"
-          className="card-latest-documents"
-        ></SideContent>
+        <SideContent title="Văn bản mới" :items="latestDocuments" :displayCreatedAt="true"
+          className="card-latest-documents"></SideContent>
 
-        <SideContent
-          title="Văn bản xem nhiều"
-          :items="this.mostViewDocuments"
-          :displayCounter="true"
-          className="card-most-view-documents"
-        ></SideContent>
+        <SideContent title="Văn bản xem nhiều" :items="this.mostViewDocuments" :displayCounter="true"
+          className="card-most-view-documents"></SideContent>
       </el-col>
     </el-row>
   </div>
@@ -245,7 +204,7 @@ export default {
     async getNewestDocuments() {
       const response = await getDocumentList({
         page: 1,
-        pageSize: 20,
+        pageSize: 10,
         preloadCategory: 1,
         preloadAgency: 1,
         preloadFields: 1,
@@ -259,7 +218,7 @@ export default {
     async getDocumentByDay() {
       const response = await getDocumentList({
         page: 1,
-        pageSize: 20,
+        pageSize: 10,
         preloadCategory: 1,
         preloadAgency: 1,
         preloadFields: 1,
@@ -404,10 +363,16 @@ export default {
 </script>
 
 <style scoped>
-.box-card {
-  width: 100%;
+
+.home-view{
+  margin-left: 5%;
+  margin-right: 5%;
 }
+.box-card {
+  width: 90%;
+}
+
 .w-full {
-  width: 100%;
+  width: 80%;
 }
 </style>
