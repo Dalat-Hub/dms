@@ -3,27 +3,33 @@
     <el-divider></el-divider>
     <BreadCrumb />
     <el-divider></el-divider>
-    <el-row :gutter="16">
-      <el-col :lg="6">
+    <el-row :gutter="16" class="main-col">
+      <el-col :lg="5" class="aside">
         <AgencyTree title="Đơn vị & Thể loại" :tree="this.agencyTree" @onNodeClick="handleOnTreeNodeClick" />
         <SideMenu :title="this.agency.title" :items="this.agency.items" param="co-quan-ban-hanh" />
         <SideMenu :title="this.category.title" :items="this.category.items" param="the-loai" />
         <SideMenu :title="this.field.title" :items="this.field.items" param="linh-vuc" />
+        <SideContent title="Văn bản mới" :items="latestDocuments" :displayCreatedAt="true"
+          className="card-latest-documents"></SideContent>
+
+        <SideContent title="Văn bản xem nhiều" :items="this.mostViewDocuments" :displayCounter="true"
+          className="card-most-view-documents"></SideContent>
       </el-col>
-      <el-col :lg="12">
-        <SearchBox :agencies="this.agency.items" :categories="this.category.items" :fields="this.field.items"
-          @onSimpleSearchSubmit="this.handleOnSimpleSearchSubmit"
-          @onAdvancedSearchSubmit="this.handleOnAdvancedSearchSubmit" />
+      <el-col :lg="19">
+        <div class="left-panel">
+          <SearchBox :agencies="this.agency.items" :categories="this.category.items" :fields="this.field.items"
+            @onSimpleSearchSubmit="this.handleOnSimpleSearchSubmit"
+            @onAdvancedSearchSubmit="this.handleOnAdvancedSearchSubmit" />
 
-        <SearchStat :count="this.searchStats.count" :searchBy="this.searchStats.searchBy" :meta="{
-          agency: this.agency,
-          category: this.category,
-          field: this.field,
-          signText: this.searchStats.signText,
-        }" />
-
+          <SearchStat :count="this.searchStats.count" :searchBy="this.searchStats.searchBy" :meta="{
+            agency: this.agency,
+            category: this.category,
+            field: this.field,
+            signText: this.searchStats.signText,
+          }" />
+        </div>
         <div id="main">
-          
+
           <!-- <DocumentCard v-for="document in this.document.items" :key="document.ID" :document="document"
             @onViewDetailClick="handleOnDocumentViewDetailClick" />
           <div style="display: flex; justify-content: center; margin-top: 2rem">
@@ -31,16 +37,40 @@
               layout="prev, pager, next" :total="this.searchStats.count" :page-size="this.pageSize"
               @current-change="handlePageChanged" />
           </div> -->
+          <div>
+            <el-auto-resizer>
 
-
+              <el-table @rowClick="handleOnDocumentViewDetailClick" :data="this.document.items" :default-sort="{ prop: 'date', order: 'descending' }"
+                style="width: 100%">
+                <el-table-column prop="title" label="Văn bản" sortable width="300" />
+                <el-table-column prop="signText" label="Số hiệu" sortable />
+                <el-table-column prop="stillInEffect" label="Tình trạng" sortable>
+                  <template #default="scope">
+                    <el-tag v-if="scope.row.stillInEffect" class="ml-2" type="success">Còn hiệu lực</el-tag>
+                    <el-tag v-else class="ml-2" type="danger">Hết hiệu lực</el-tag>
+                  </template>
+                </el-table-column>
+                <el-table-column prop="category.name" label="Loại văn bản" sortable />
+                <el-table-column prop="dateIssued" label="Ngày ban hành" sortable>
+                  <template #default="scope">
+                    {{ getDateFormat(scope.row.dateIssued) }}
+                  </template>
+                </el-table-column>
+                <el-table-column prop="effectDate" label="Ngày hiệu lực" sortable>
+                  <template #default="scope">
+                    {{ getDateFormat(scope.row.effectDate) }}
+                  </template>
+                </el-table-column>
+                <el-table-column prop="signers[0].fullname" label="Người ký" />
+              </el-table>
+              <div class="pagination-con">
+                <el-pagination v-if="parseInt(this.searchStats.count / this.pageSize) > 0" background
+                  layout="prev, pager, next" :total="this.searchStats.count" :page-size="this.pageSize"
+                  @current-change="handlePageChanged"></el-pagination>
+              </div>
+            </el-auto-resizer>
+          </div>
         </div>
-      </el-col>
-      <el-col :lg="6">
-        <SideContent title="Văn bản mới" :items="latestDocuments" :displayCreatedAt="true"
-          className="card-latest-documents"></SideContent>
-
-        <SideContent title="Văn bản xem nhiều" :items="this.mostViewDocuments" :displayCounter="true"
-          className="card-most-view-documents"></SideContent>
       </el-col>
     </el-row>
   </div>
@@ -60,6 +90,11 @@ import { getDocumentCategoryList } from "@/api/category";
 import { getDocumentFieldList } from "@/api/field";
 import { getAgenciesTree, getDocumentAgencyList } from "@/api/agency";
 import { getDocumentList } from "@/api/document";
+
+import { getDateFormatted } from "@/utils/date";
+
+import { TableV2FixedDir, TableV2SortOrder } from 'element-plus'
+
 
 export default {
   name: "HomeView",
@@ -83,7 +118,7 @@ export default {
       },
       latestDocuments: [],
       mostViewDocuments: [],
-      pageSize: 10,
+      pageSize: 15,
       searchStats: {
         count: 0,
         searchBy: {},
@@ -317,6 +352,7 @@ export default {
 
       if (table.code === 0) {
         this.document.items = table.data.list;
+        console.log(this.document)
         this.searchStats.count = table.data.total;
         this.searchStats.searchBy = filter;
         delete this.searchStats.searchBy.page;
@@ -328,6 +364,8 @@ export default {
       }
     },
     handleOnDocumentViewDetailClick(document) {
+      // console.log("handleOnDocumentViewDetailClick")
+      // console.log(document)
       this.$router.push("/van-ban/" + document.ID);
     },
     async handleOnSimpleSearchSubmit(keyword) {
@@ -361,21 +399,63 @@ export default {
         pageSize: this.pageSize,
       });
     },
+    getDateFormat(date) {
+      return getDateFormatted(date);
+    },
   },
 };
 </script>
 
 <style scoped>
-
-.home-view{
+.home-view {
   margin-left: 32px;
   margin-right: 32px;
 }
+
 .box-card {
   width: 100%;
 }
 
 .w-full {
   width: 95%;
+}
+
+.el-pagination {
+  margin-top: 32px;
+    width: 100%;
+    overflow: auto;
+    display: flex;
+    justify-content: center;
+  }
+
+@media screen and (max-width: 600px) {
+  .w-full {
+    width: 100%;
+  }
+
+  .el-pagination {
+    margin-top: 32px !important;
+  }
+
+  .home-view {
+    margin: 0
+  }
+
+  .el-pagination {
+    width: 100%;
+    overflow: auto;
+  }
+
+  .main-col {
+    display: flex;
+    flex-wrap: wrap-reverse;
+  }
+
+
+  .aside {
+    margin-top: 7em;
+  }
+
+
 }
 </style>

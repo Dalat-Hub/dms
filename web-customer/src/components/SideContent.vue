@@ -1,4 +1,6 @@
 <template>
+   <el-collapse  accordion>
+    <el-collapse-item :title="title" >
   <el-card shadow="never" :class="this.getCardClassNames()" style="margin-bottom: 1rem">
     <template #header>
       <div class="card-header">
@@ -24,6 +26,8 @@
       </router-link>
     </div>
   </el-card>
+</el-collapse-item>
+</el-collapse>
 </template>
 
 <script>

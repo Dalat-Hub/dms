@@ -1,5 +1,6 @@
 <template>
   <div class="document-view">
+    <el-divider></el-divider>
     <BreadCrumb />
     <el-divider>
     </el-divider>
@@ -8,7 +9,7 @@
         <div class="document-container">
           <h3 class="document-title">{{ this.document?.title || "--" }}</h3>
         </div>
-        <el-card class="box-card margin-bottom-1-rem card-info" shadow="never">
+        <el-card class="margin-bottom-1-rem card-info" shadow="never">
           <h2 class="card-title">Mô tả</h2>
           <div class="document-expert">
             <p>{{ this.document?.expert || "--" }}</p>
@@ -22,7 +23,7 @@
           </el-tab-pane>
           <el-tab-pane label="Tập tin văn bản">
 
-            <el-card  shadow="never" class="margin-bottom-1-rem card-info" style="margin-bottom: 1rem"
+            <el-card shadow="never" class="margin-bottom-1-rem card-info" style="margin-bottom: 1rem"
               v-if="this.file.files.length > 0">
               <template #header>
                 <div class="card-header">
@@ -37,12 +38,12 @@
           </el-tab-pane>
         </el-tabs>
         <div class="grid-content bg-purple margin-bottom-1-rem">
-          <el-card  shadow="never" v-if="document?.file?.url" class="box-card margin-bottom-1-rem card-info">
+          <el-card shadow="never" v-if="document?.file?.url" class="box-card margin-bottom-1-rem card-info">
             <h2 class="card-title">Tập tin đính kèm</h2>
             <br />
             <iframe :src="this.getFileURL()" style="width: 100%; height: 700px" />
           </el-card>
-          <el-card  shadow="never" class="box-card margin-bottom-1-rem card-info" style="margin-bottom: 1rem"
+          <el-card shadow="never" class="box-card margin-bottom-1-rem card-info" style="margin-bottom: 1rem"
             v-if="this.baseDocuments.items.length > 0">
             <template #header>
               <div class="card-header">
@@ -55,7 +56,7 @@
               </p>
             </div>
           </el-card>
-          <el-card  shadow="never" class="box-card margin-bottom-1-rem card-info" style="margin-bottom: 1rem"
+          <el-card shadow="never" class="box-card margin-bottom-1-rem card-info" style="margin-bottom: 1rem"
             v-if="this.relatedDocuments.items.length > 0">
             <template #header>
               <div class="card-header">
@@ -74,7 +75,7 @@
         </div>
       </el-col>
       <el-col :sm="10" :lg="8">
-        <el-card  shadow="never" class="box-card margin-bottom-1-rem">
+        <el-card shadow="never" class="box-card margin-bottom-1-rem">
           <el-descriptions :column="1" border direction="horizontal" title="Thuộc tính của văn bản">
             <el-descriptions-item label="Tình trạng hiệu lực" span="2">
               <el-tag v-if="document?.stillInEffect" class="ml-2" type="success">Còn hiệu lực</el-tag>
@@ -386,11 +387,11 @@ export default {
 
 
 .document-view .box-card {
-  width: 100%;
+  width: 95%;
 }
 
 .document-view .w-full {
-  width: 80%;
+  width: 100%;
 }
 
 .document-view .margin-bottom-1-rem {
@@ -416,7 +417,7 @@ export default {
   line-height: 1.9em;
 }
 
-.document-content{
+.document-content {
   text-align: left;
   font-size: 16px;
   line-height: 1.6em;

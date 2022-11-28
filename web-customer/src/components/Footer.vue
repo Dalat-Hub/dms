@@ -150,4 +150,24 @@ export default {
 .footer a:hover {
   color: #FC7616;
 }
+
+@media screen and (max-width: 600px) {
+  .el-row {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .el-col {
+    max-width: 100%;
+  }
+
+  .column-3,
+  .column-1 {
+    margin: 0%;
+  }
+
+  iframe{
+    width: 350px;
+  }
+}
 </style>
