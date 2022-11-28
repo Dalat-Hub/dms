@@ -38,12 +38,12 @@
           </el-tab-pane>
         </el-tabs>
         <div class="grid-content bg-purple margin-bottom-1-rem">
-          <el-card shadow="never" v-if="document?.file?.url" class="box-card margin-bottom-1-rem card-info">
+          <el-card shadow="never" v-if="document?.file?.url" class="margin-bottom-1-rem card-info">
             <h2 class="card-title">Tập tin đính kèm</h2>
             <br />
             <iframe :src="this.getFileURL()" style="width: 100%; height: 700px" />
           </el-card>
-          <el-card shadow="never" class="box-card margin-bottom-1-rem card-info" style="margin-bottom: 1rem"
+          <el-card shadow="never" class="margin-bottom-1-rem card-info" style="margin-bottom: 1rem"
             v-if="this.baseDocuments.items.length > 0">
             <template #header>
               <div class="card-header">
@@ -56,7 +56,7 @@
               </p>
             </div>
           </el-card>
-          <el-card shadow="never" class="box-card margin-bottom-1-rem card-info" style="margin-bottom: 1rem"
+          <el-card shadow="never" class="margin-bottom-1-rem card-info" style="margin-bottom: 1rem"
             v-if="this.relatedDocuments.items.length > 0">
             <template #header>
               <div class="card-header">
