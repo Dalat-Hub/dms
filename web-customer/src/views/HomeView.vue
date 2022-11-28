@@ -23,14 +23,16 @@
         }" />
 
         <div id="main">
-          <DocumentCard v-for="document in this.document.items" :key="document.ID" :document="document"
+          
+          <!-- <DocumentCard v-for="document in this.document.items" :key="document.ID" :document="document"
             @onViewDetailClick="handleOnDocumentViewDetailClick" />
-
           <div style="display: flex; justify-content: center; margin-top: 2rem">
             <el-pagination v-if="parseInt(this.searchStats.count / this.pageSize) > 0" background
               layout="prev, pager, next" :total="this.searchStats.count" :page-size="this.pageSize"
               @current-change="handlePageChanged" />
-          </div>
+          </div> -->
+
+
         </div>
       </el-col>
       <el-col :lg="6">
@@ -47,7 +49,7 @@
 <script>
 import BreadCrumb from "@/components/BreadCrumb";
 import SearchBox from "@/components/SearchBox";
-import DocumentCard from "@/components/DocumentCard";
+// import DocumentCard from "@/components/DocumentCard";
 import SideMenu from "@/components/SideMenu";
 import SideContent from "@/components/SideContent";
 import SearchStat from "@/components/SearchStat";
@@ -93,7 +95,7 @@ export default {
   components: {
     BreadCrumb,
     SearchBox,
-    DocumentCard,
+    // DocumentCard,
     SideMenu,
     SearchStat,
     SideContent,
@@ -366,14 +368,14 @@ export default {
 <style scoped>
 
 .home-view{
-  margin-left: 5%;
-  margin-right: 5%;
+  margin-left: 32px;
+  margin-right: 32px;
 }
 .box-card {
-  width: 90%;
+  width: 100%;
 }
 
 .w-full {
-  width: 80%;
+  width: 95%;
 }
 </style>
